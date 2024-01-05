@@ -102,8 +102,8 @@ switch-to-poetry: ## Switch to poetry package manager.
 	@echo "" >> pyproject.toml
 	@echo "[tool.poetry.scripts]" >> pyproject.toml
 	@echo "bengrn = 'bengrn.__main__:main'" >> pyproject.toml
-	@cat requirements.txt | while read in; do poetry add --no-interaction "$${in}"; done
-	@cat requirements-test.txt | while read in; do poetry add --no-interaction "$${in}" --dev; done
+	@cat requirements.txt | while read in; do poetry add --no-interaction "${in}"; done
+	@cat requirements-test.txt | while read in; do poetry add --no-interaction "${in}" --dev; done
 	@poetry install --no-interaction
 	@mkdir -p .github/backup
 	@mv requirements* .github/backup

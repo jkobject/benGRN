@@ -1,17 +1,40 @@
-# Welcome to MkDocs
+# BenGRN
 
-For full documentation visit [mkdocs.org](https://www.mkdocs.org).
+Awesome Benchmark of Gene Regulatory Networks created by @jkobject
 
-## Commands
+The package is supposed to work with [GRnnData](https://cantinilab.github.io/GRnnData/)
+It can run Genie3 & pyscenic on your data as a comparison
 
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
+It has 4 different types of key ground truth data to compare your GRN to:
+- sushmita roy's ChIP+Perturb ground truth
+- collectri's literature curated ground truth
+- dorothea's literature curated ground truth
+- tf2gene's chip curated ground truth
 
-## Project layout
+You can find the documentation [here](https://jkobject.com/benGRN/)
 
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+## Install it from PyPI
+
+```bash
+pip install bengrn
+```
+
+## Usage
+
+```py
+from bengrn import BenGRN
+from bengrn import some_test_function
+
+# a GRN in grnndata formart
+grndata
+
+BenGRN(grndata).do_tests()
+#or
+some_test_function(grndata)
+```
+
+see more in the notebooks in the docs folder or in the [documentation](https://jkobject.com/benGRN/)
+
+## Development
+
+Read the [CONTRIBUTING.md](CONTRIBUTING.md) file.

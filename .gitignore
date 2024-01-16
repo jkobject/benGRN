@@ -131,3 +131,7 @@ dmypy.json
 # templates
 .github/templates/*
 .DS_Store
+data/GroundTruth/adamson_raw/
+*.loom
+*.feather
+*.tbl

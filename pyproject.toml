@@ -7,7 +7,17 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-
+scikit-learn = "*"
+numpy = "*"
+arboreto = "*"
+pyscenic = "*"
+ctxcore = "*"
+seaborn = "*"
+decoupler = "*"
+scipy = "*"
+pandas = "*"
+grnndata = "*"
+anndata = "*"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.4"

@@ -1,0 +1,1084 @@
+---
+title: "1_DataPreprocessing"
+author: "Ina Maria Deutschmann"
+date: "2/7/2022"
+output: html_document
+---
+
+# Data Preprocessing
+## Downloading data
+### hESC_Chen
+- DOI of associated article: https://doi.org/10.1038/s41587-019-0290-0
+- scRNA: NCBI (GSE126074), GSE126074_CellLineMixture_SNAREseq_cDNA_counts.tsv.gz
+- scATAC: NCBI (GSE126074), GSE126074_CellLineMixture_SNAREseq_chromatin_counts.tsv.gz
+- additional data: cell labels for filtering, ftp://ftp.ebi.ac.uk/pub/databases/mofa/snare_seq/cell_metadata.txt
+- The dataset contains a BJ, GM12878, H1 and K562 cell mixture. Here, we only use H1 cells.
+
+### hESC_Liu
+- DOI of associated article: https://doi.org/10.1038/s41467-018-08205-7
+- scRNA: https://github.com/hdsu-bioquant/scCAT/blob/master/data/HumanEmbryo/rna/HumanEmbryo_RNAseqCounts.RDS
+- scATAC: https://github.com/hdsu-bioquant/scCAT/blob/master/data/HumanEmbryo/atac/HumanEmbryo_ATACseqCounts.RDS
+- additional data: cell pairs and annotation, https://github.com/hdsu-bioquant/scCAT/blob/master/data/HumanEmbryo/annotation/HumanEmbryo_metadata.RDS
+
+### mESC_Duren
+- DOI of associated article: https://www.pnas.org/doi/abs/10.1073/pnas.1805681115, https://doi.org/10.1038/s41467-019-12547-1
+- scRNA: NCBI (GSE115968), GSE115968_scRNA-seq_RA_D4.txt.gz (manually, add new line after header)
+- scATAC: NCBI (GSE115970), GSE115970_scATAC-seq_RA_D4.txt.gz
+
+### mESC_Semrau
+- DOI of associated article: https://doi.org/10.1038/s41467-017-01076-4
+- scRNA: NCBI (GSM2098553) part of (GSE79578), GSM2098553_scrbseq_96h.txt.gz
+- scATAC: no scATAC, we use the one from mESC_Duren, NCBI (GSE115970)
+
+## Dependencies and functions
+```{r}
+# Dependencies
+require(httr)
+require(jsonlite)
+library(Seurat)
+library(Signac)
+library(GenomicRanges)
+
+#' Preprocessing of scRNA data
+#'
+#' Preprocessing steps
+#' @param df The scRNA dataframe with cells in columns and features in rows
+#' @param cutoff_feature_prevalence Filter out features that are present in less than x% of cells (Default = 1%)
+#' @param cutoff_feature_abundance_sum Filter out features that below the cutoff abundance sum (Default = 0)
+#' @param bool_removeZeroCells Filter out cells with zero expression (Default = TRUE)
+#' @param bool_log2transform Log2 transform the data (Default = FALSE)
+#' @return Preprocessed scRNA dataframe
+#' @examples 
+#' df <- scRNA_preprocessing(df, sutoff_feature_prevalence=1);
+#' df <- scRNA_preprocessing(df, sutoff_feature_prevalence=1, cutoff_feature_abundance_sum=100);
+#' @export
+scRNA_preprocessing <- function(df,
+                                cutoff_feature_prevalence = 1,
+                                cutoff_feature_abundance_sum = 0,
+                                bool_removeZeroCells = TRUE,
+                                bool_log2transform = FALSE){
+  # filter df
+  v = dim(df)
+  df <- df[which((rowSums(df)>=cutoff_feature_abundance_sum) &
+                 (rowSums(1*(df>0))/dim(df)[2]*100>=cutoff_feature_prevalence)),]
+  print(paste(v[1]-dim(df)[1], "features have been removed."))
+  
+  # filter cells with zero expressed features
+  if(bool_removeZeroCells)
+  {
+    df <- df[,which(colSums(1*(df>0))>0)]
+  }
+  
+  # log-transformation
+  if(bool_removeZeroCells)
+  {
+    df <- log2(as.matrix(df)+1)
+    print(paste(v[2]-dim(df)[2], "cells have been removed."))
+  }
+  
+  # return preprocessed file
+  return(as.data.frame(df))
+}
+
+#' Preprocessing of scATAC data
+#'
+#' Preprocessing steps
+#' @param df The scATAC dataframe with cells in columns and features in rows
+#' @param cutoff_feature_prevalence Filter out features that are present in less than x% of cells (Default = 1%)
+#' @param cutoff_feature_abundance_sum Filter out features that below the cutoff abundance sum (Default = 0)
+#' @param bool_removeZeroCells Filter out cells with zero expression (Default = TRUE)
+#' @param bool_binarize Binarize the data (Default = TRUE)
+#' @return Preprocessed scATAC dataframe
+#' @examples 
+#' df <- scATAC_preprocessing(df, sutoff_feature_prevalence=1);
+#' df <- scATAC_preprocessing(df, sutoff_feature_prevalence=1, cutoff_feature_abundance_sum=100);
+#' @export
+scATAC_preprocessing <- function(df,
+                                cutoff_feature_prevalence = 1,
+                                cutoff_feature_abundance_sum = 0,
+                                bool_removeZeroCells = TRUE,
+                                bool_binarize = TRUE){
+  # filter df
+  v = dim(df)
+  df <- df[which((rowSums(df)>=cutoff_feature_abundance_sum) &
+                   (rowSums(1*(df>0))/dim(df)[2]*100>=cutoff_feature_prevalence)),]
+  print(paste(v[1]-dim(df)[1], "features have been removed."))
+  
+  # filter cells with zero expressed features
+  if(bool_removeZeroCells)
+  {
+    df <- df[,which(colSums(1*(df>0))>0)]
+    print(paste(v[2]-dim(df)[2], "cells have been removed."))
+  }
+  
+  # binarize
+  if(bool_binarize)
+  {
+    df <- 1*(df>0) 
+  }
+  
+  # return preprocessed file
+  return(df)
+}
+
+#' Convert ENSEMBL identifier to gene symbol
+#'
+#' @param ENSEMBL_IDs ENSEMBL identifiers
+#' @return Gene symbols that have been found for ENSEMBL identifier, i.e., NULL is removed and is not part of the output
+#' @examples
+#' df <- read.table(filename_scRNA)                 # features in cols and cells in rows
+#' gene_symbol <- ENSEMBL2geneSymbol(rownames(df)); # get gene_symbols
+#' @export
+ENSEMBL2geneSymbol <- function(ENSEMBL_IDs){
+  # Please see: https://www.biotools.fr/human/ensembl_symbol_converter
+  url = "https://biotools.fr/human/ensembl_symbol_converter/"
+
+  ids_json <- toJSON(ENSEMBL_IDs)
+  
+  body <- list(api=1, ids=ids_json)
+  r <- POST(url, body = body)
+  
+  output = fromJSON(content(r, "text"), flatten=TRUE)
+  return(t(as.data.frame(output[which(output!="NULL")]))[,1])
+}
+```
+
+## scRNA
+```{r}
+############################################################################################################################################################
+## hESC_Chen
+############################################################################################################################################################
+my_tab <- read.table("downloaded_files/GSE126074_CellLineMixture_SNAREseq_cDNA_counts.tsv", header = TRUE) # Read in scRNA-seq data
+my_metadata <- read.table("downloaded_files/cell_metadata.txt", header = TRUE)                             # Read in meta-data
+barcodes <- intersect(colnames(my_tab), my_metadata$cell[which(my_metadata$cell_line=='H1')])              # Identify cells of cell line H1
+print(paste(length(barcodes), " cells of cell line H1 in table of ", dim(my_tab)[2] ," cells.", sep =""))  # Number of cells
+my_tab = my_tab[,barcodes]                                                                                 # Filter on cell type
+my_tab <- scRNA_preprocessing(my_tab, cutoff_feature_prevalence = 1,
+                              bool_log2transform = FALSE, bool_removeZeroCells = TRUE)                     # Filter rare features
+print(paste("Final table contains ", dim(my_tab)[1], " features in ", dim(my_tab)[2] ," cells.", sep ="")) # Final number of cells and features
+write.table(my_tab, "01_data/hESC_Chen_scRNA_prevalencefiltered.tsv", 
+            col.names = TRUE, row.names = TRUE, sep = "\t", quote = FALSE)                                 # Store filtered scRNA-seq data
+my_tab <- scRNA_preprocessing(my_tab, bool_log2transform = TRUE)                                           # Log2-transform
+write.table(my_tab, "01_data/hESC_Chen_scRNA_prevalencefiltered_log2.tsv", 
+            col.names = TRUE, row.names = TRUE, sep = "\t", quote = FALSE)                                 # Store filtered+transformed data
+
+# Output
+# 385 cells of cell line H1 in table of 1047 cells.
+# 10071 features have been removed.
+# 0 cells have been removed.
+# Final table contains 8595 features in 385 cells.
+
+############################################################################################################################################################
+## hESC_Liu
+############################################################################################################################################################
+my_tab <- as.data.frame(readRDS("downloaded_files/HumanEmbryo_RNAseqCounts.RDS"), stringsAsFactors = FALSE)       # Read in scRNA-seq data
+print(paste("Table contains ", dim(my_tab)[1], " features in ", dim(my_tab)[2] ," cells.", sep =""))              # Number of cells and features
+gene_IDs <- ENSEMBL2geneSymbol(ENSEMBL_IDs=rownames(my_tab))                                                      # Convert ENSEMBL to gene symbols
+print(paste(length(unique(gene_IDs)), " unique gene symbols among ", length(gene_IDs), " gene symbols.", sep="")) # number of (unique) gene symbols
+my_tab$geneSymbol <- NA                                                                                           # map gene symbols
+my_IDs <- intersect(names(gene_IDs), rownames(my_tab))
+my_tab[my_IDs,'geneSymbol'] <- gene_IDs[my_IDs]
+my_tab <- my_tab[which(!is.na(my_tab$geneSymbol)),]                                                               # remove features with NA gene symbol
+print("These gene symbols appear more than once:")
+print(names(which(table(my_tab$geneSymbol)>1)))
+my_IDs <- data.frame(geneSymbol=names(which(table(my_tab$geneSymbol)>1)), above1=1)
+my_tab <- merge(my_tab, my_IDs, by="geneSymbol", all=TRUE)
+my_tab_1 <- my_tab[which(is.na(my_tab$above1)), ]
+my_tab_1$above1 <- NULL
+rownames(my_tab_1) <- my_tab_1$geneSymbol
+my_tab_1$geneSymbol <- NULL
+print(paste("unique: ", dim(my_tab_1)[1], sep=""))
+my_tab_over1 <- my_tab[which(!is.na(my_tab$above1)), ]
+my_tab_over1$above1 <- NULL
+print(paste("not unique: ", dim(my_tab_over1)[1], sep=""))
+for(id in as.character(my_IDs$geneSymbol))                                                                        # group rows with same gene symbol (sum)
+{
+  print(id)
+  tab_temp <- my_tab_over1[which(my_tab_over1$geneSymbol==id),which(colnames(my_tab_over1)!="geneSymbol")]
+  tab_temp <- as.data.frame(t(as.numeric(apply(tab_temp,2,sum))))
+  colnames(tab_temp) <- colnames(my_tab_over1)[which(colnames(my_tab_over1)!="geneSymbol")]
+  tab_temp <- scRNA_preprocessing(tab_temp, cutoff_feature_prevalence = 1,
+                                  bool_log2transform = FALSE, bool_removeZeroCells = FALSE)
+  rownames(tab_temp) <- id
+  my_tab_1 <- rbind.data.frame(my_tab_1, tab_temp, stringsAsFactors = FALSE)
+  print(dim(my_tab_1))
+}
+my_tab_1 <- scRNA_preprocessing(my_tab_1, cutoff_feature_prevalence = 1,
+                                bool_log2transform = FALSE, bool_removeZeroCells = TRUE)                   # Filter rare features
+print(paste("Table contains ", dim(my_tab_1)[1], " features in ", dim(my_tab_1)[2] ," cells.", sep =""))   # Number of cells and features
+write.table(my_tab_1, "01_data/hESC_Liu_scRNA_prevalencefiltered.tsv", 
+            col.names = TRUE, row.names = TRUE, sep = "\t", quote = FALSE)                                 # Store filtered scRNA-seq data
+my_tab_1 <- scRNA_preprocessing(my_tab_1, bool_log2transform = TRUE)                                       # Log2-transform
+write.table(my_tab_1, "01_data/hESC_Liu_scRNA_prevalencefiltered_log2.tsv", 
+            col.names = TRUE, row.names = TRUE, sep = "\t", quote = FALSE)                                 # Store filtered+transformed data
+
+# Output
+# Table contains 25155 features in 72 cells.
+# 24066 unique gene symbols among 24077 gene symbols.
+# These gene symbols appear more than once: COG8, GOLGA8M, LINC00484, LINC01115, LINC01422, LINC01481, LINC01505, RAET1E-AS1, RF00017
+# unique: 24057
+# not unique: 20
+# [1] "COG8"
+# [1] "0 features have been removed."
+# [1] 24058    72
+# [1] "GOLGA8M"
+# [1] "0 features have been removed."
+# [1] 24059    72
+# [1] "LINC00484"
+# [1] "0 features have been removed."
+# [1] 24060    72
+# [1] "LINC01115"
+# [1] "0 features have been removed."
+# [1] 24061    72
+# [1] "LINC01422"
+# [1] "0 features have been removed."
+# [1] 24062    72
+# [1] "LINC01481"
+# [1] "0 features have been removed."
+# [1] 24063    72
+# [1] "LINC01505"
+# [1] "0 features have been removed."
+# [1] 24064   72
+# [1] "RAET1E-AS1"
+# [1] "0 features have been removed."
+# [1] 24065    72
+# [1] "RF00017"
+# [1] "0 features have been removed."
+# [1] 24066    72
+# 913 features have been removed.
+# 0 cells have been removed.
+# Table contains 23153 features in 72 cells.
+
+############################################################################################################################################################
+## mESC_Duren
+############################################################################################################################################################
+my_tab <- read.table("downloaded_files/GSE115968_scRNA-seq_RA_D4.txt", header = TRUE)                      # Read in scRNA-seq data
+rownames(my_tab) <- my_tab$Symbol
+my_tab$Symbol <- NULL
+my_tab <- scRNA_preprocessing(my_tab, cutoff_feature_prevalence = 1,
+                              bool_log2transform = FALSE, bool_removeZeroCells = TRUE)                     # Filter rare features
+print(paste("Final table contains ", dim(my_tab)[1], " features in ", dim(my_tab)[2] ," cells.", sep ="")) # Final number of cells and features
+write.table(my_tab, "01_data/mESC_Duren_scRNA_prevalencefiltered.tsv", 
+            col.names = TRUE, row.names = TRUE, sep = "\t", quote = FALSE)                                 # Store filtered scRNA-seq data
+my_tab <- scRNA_preprocessing(my_tab, bool_log2transform = TRUE)                                           # Log2-transform
+write.table(my_tab, "01_data/mESC_Duren_scRNA_prevalencefiltered_log2.tsv", 
+            col.names = TRUE, row.names = TRUE, sep = "\t", quote = FALSE)                                 # Store filtered+transformed data
+
+# Output
+# 6674 features have been removed.
+# 0 cells have been removed.
+# Final table contains 15299 features in 464 cells.
+
+############################################################################################################################################################
+## mESC_Semrau
+############################################################################################################################################################
+my_tab <- read.table("downloaded_files/GSM2098553_scrbseq_96h.txt", header = TRUE)                         # Read in scRNA-seq data
+my_tab <- scRNA_preprocessing(my_tab, cutoff_feature_prevalence = 1,
+                              bool_log2transform = FALSE, bool_removeZeroCells = TRUE)                     # Filter rare features
+print(paste("Final table contains ", dim(my_tab)[1], " features in ", dim(my_tab)[2] ," cells.", sep ="")) # Final number of cells and features
+write.table(my_tab, "01_data/mESC_Semrau_scRNA_prevalencefiltered.tsv", 
+            col.names = TRUE, row.names = TRUE, sep = "\t", quote = FALSE)                                 # Store filtered scRNA-seq data
+my_tab <- scRNA_preprocessing(my_tab, bool_log2transform = TRUE)                                           # Log2-transform
+write.table(my_tab, "01_data/mESC_Semrau_scRNA_prevalencefiltered_log2.tsv", 
+            col.names = TRUE, row.names = TRUE, sep = "\t", quote = FALSE)                                 # Store filtered+transformed data
+
+# Output
+# 13238 features have been removed.
+# 0 cells have been removed.
+# Final table contains 10243 features in 384 cells.
+```
+
+## scATAC
+```{r}
+############################################################################################################################################################
+## hESC_Chen
+############################################################################################################################################################
+my_tab <- read.table("downloaded_files/GSE126074_CellLineMixture_SNAREseq_chromatin_counts.tsv", header = TRUE)  # Read in scATAC-seq data
+my_metadata <- read.table("downloaded_files/cell_metadata.txt", header = TRUE)                                   # Read in meta-data
+barcodes <- intersect(colnames(my_tab), my_metadata$cell[my_metadata$cell_line=='H1'])                           # Identify cells of cell line H1
+print(paste(length(barcodes), " cells of cell line H1 in table of ", dim(my_tab)[2] ," cells.", sep =""))        # Number of cells
+my_tab = my_tab[,barcodes]                                                                                       # Filter on cell type
+rna <- read.table("01_data/hESC_Chen_scRNA_prevalencefiltered_log2.tsv", header = TRUE)                             # Read in scRNA-seq data
+sum(colnames(rna)==colnames(my_tab))==length(colnames(my_tab))                                                   # Check if scRNA+scATAC have same cells
+my_tab <- scATAC_preprocessing(my_tab, cutoff_feature_prevalence = 1,                                            # Filter rare features
+                               bool_binarize = TRUE, bool_removeZeroCells = TRUE)                                # Binarize table
+print(paste("Final table contains ", dim(my_tab)[1], " features in ", dim(my_tab)[2] ," cells.", sep =""))       # Final number of cells and features
+write.table(my_tab, "01_data/hESC_Chen_scATAC_binarized.tsv",                                                       # Store filtered+transformed data
+            col.names = TRUE, row.names = TRUE, sep = "\t", quote = FALSE)
+
+# Output
+# 385 cells of cell line H1 in table of 1047 cells.
+# TRUE (=two tables have same cell names in same order)
+# 99817 features have been removed.
+# 0 cells have been removed.
+# Final table contains 36954 features in 385 cells.
+
+############################################################################################################################################################
+## hESC_Liu
+############################################################################################################################################################
+my_tab <- readRDS("downloaded_files/HumanEmbryo_ATACseqCounts.RDS")                                              # Read in scATAC-seq data
+annotation <- readRDS("downloaded_files/HumanEmbryo_metadata.RDS")                                               # Read in meta data
+rna <- read.table("01_data/hESC_Liu_scRNA_prevalencefiltered_log2.tsv", header = TRUE)                              # Read in scRNA-seq data
+sum(annotation[colnames(rna),"sample.atac"]==colnames(my_tab))==length(colnames(my_tab))                         # Check if scRNA+scATAC are aligned
+colnames(my_tab) <- colnames(rna)                                                                                # Give scATAC same cell names as scRNA
+rownames(my_tab) <- sub("_","-", sub("_",":", rownames(my_tab)))                                                 # Format rownames to 'chr:num1-num2'
+my_tab <- scATAC_preprocessing(my_tab, cutoff_feature_prevalence = 1,                                            # Filter rare features
+                               bool_binarize = TRUE, bool_removeZeroCells = TRUE)                                # Binarize table
+print(paste("Final table contains ", dim(my_tab)[1], " features in ", dim(my_tab)[2] ," cells.", sep =""))       # Final number of cells and features
+write.table(my_tab, "01_data/hESC_Liu_scATAC_binarized.tsv",                                                        # Store filtered+transformed data
+            col.names = TRUE, row.names = TRUE, sep = "\t", quote = FALSE)
+
+# Output
+# TRUE (=two tables have same cell order, but different names - we use scRNA-seq data cell names for both)
+# 0 features have been removed.
+# 0 cells have been removed.
+# Final table contains 69035 features in 72 cells.
+
+############################################################################################################################################################
+## mESC_Duren
+############################################################################################################################################################
+my_tab <- read.table("downloaded_files/GSE115970_scATAC-seq_RA_D4.txt", header = TRUE)                           # Read in scATAC-seq data
+rownames(my_tab) <- my_tab$Region
+my_tab$Region <- NULL
+rownames(my_tab) <- sub("_","-", sub("_",":", rownames(my_tab)))                                                 # Format rownames to 'chr:num1-num2'
+my_tab <- scATAC_preprocessing(my_tab, cutoff_feature_prevalence = 1,                                            # Filter rare features
+                               bool_binarize = TRUE, bool_removeZeroCells = TRUE)                                # Binarize table
+print(paste("Final table contains ", dim(my_tab)[1], " features in ", dim(my_tab)[2] ," cells.", sep =""))       # Final number of cells and features
+write.table(my_tab, "01_data/mESC_Duren_scATAC_binarized.tsv",                                                      # Store filtered+transformed data
+            col.names = TRUE, row.names = TRUE, sep = "\t", quote = FALSE)
+
+# Output
+# for mESC, scRNA-seq and scATAC-seq are not paired
+# 0 features have been removed.
+# 0 cells have been removed.
+# Final table contains 23180 features in 415 cells.
+
+############################################################################################################################################################
+## mESC_Semrau: use scATAC from mESC_Duren
+############################################################################################################################################################
+```
+
+## scATAC-seq data conversion
+- use hg38 and mm10
+- for hESC_Chen scATAC-seq data, no need for conversion because it is already hg38
+- for hESC_Liu scATAC-seq data, convert hg19 to hg38
+- for mESC_Duren scATAC-seq data, convert mm9 to mm10
+
+### hESC_Liu: convert hg19 to hg38
+- We read in the file and convert the peak names in the desired format. Then, we convert hg19 to hg38 peaks using the Lift Genome Annotations tool (https://genome.ucsc.edu/cgi-bin/hgLiftOver), which converts genome coordinates and genome annotation files between assemblies. We use the default parameters:
+ * Minimum ratio of bases that must remap: 0.95
+ * Min ratio of alignment blocks or exons that must map: 1
+ * Original Genome: Human, Original Assembly: Feb 2009 (GRCh37/hg19)
+ * New Genome: Human, Original Assembly: Dec 2013 (GRCh38/hg38)
+We successfully converted 68983 records. The conversion for 52 records failed:
+ * chr14:5617761-5618954    (Split in new)
+ * chr14:5659232-5660294    (Split in new)
+ * chr4:130185029-130185585 (Partially deleted in new)
+ * chr9:100977752-100979032 (Partially deleted in new)
+Finally, we binarize the data, setting all values >0 to 1.
+```{r}
+my_tab <- read.table("01_data/hESC_Liu_scATAC_binarized.tsv")                                        # read in file
+write.table(rownames(my_tab), file = "downloaded_files/PeaksIDs_hg19.txt",                        # store hg19 peaks for conversion
+            quote = FALSE, col.names = FALSE, row.names = FALSE)
+# convert peaks using online tool https://genome.ucsc.edu/cgi-bin/hgLiftOver
+PeakIDs_hg38 <- read.table("downloaded_files/hglft_genome_22304_3d2180.bed", header = FALSE)      # read in converted peaks
+failedPeakIDs <- read.table("downloaded_files/hglft_genome_22304_3d2180.err.txt", header = FALSE) # read in converted peaks
+print(paste("Of ", dim(my_tab)[1], " peaks: ", dim(PeakIDs_hg38)[1], " successfull and ",
+            dim(failedPeakIDs)[1], " not.", sep=""))
+my_tab$keep <- 1                                                                                  # helper column to remove peaks w/o successfull conversion
+my_tab[as.character(failedPeakIDs$V1),"keep"] <- 0                                                # not successfull peaks will be indicated with zero
+table(my_tab$keep)                                                                                # number of peaks that we keep (=1) vs. remove (=0)
+my_tab <- my_tab[which(my_tab$keep==1),]                                                          # remove peaks
+my_tab$keep <- NULL                                                                               # remove helper column
+rownames(my_tab) <- as.character(PeakIDs_hg38$V1)                                                 # update peak to hg38
+dim(my_tab)                                                                                       # 68983 peaks and 72 cells
+my_tab <- my_tab[which(substr(rownames(my_tab),1,4)!="chrU"),]
+my_tab <- my_tab[!grepl("random",rownames(my_tab)),]
+my_tab <- my_tab[!grepl("alt",rownames(my_tab)),]
+dim(my_tab)                                                                                       # 68960 peaks and 72 cells
+my_ChrAssay <- CreateChromatinAssay(my_tab, sep=c(":","-"))                                       # Obtain Chromatin Assay object
+# Overlapping ranges supplied. Ranges should be non-overlapping.
+my_overlap <- IRanges::findOverlapPairs(my_ChrAssay@ranges, my_ChrAssay@ranges)                   # Determine overlaps
+First <- as.data.frame(my_overlap@first[which(my_overlap@first!=my_overlap@second)])
+Second <- as.data.frame(my_overlap@second[which(my_overlap@first!=my_overlap@second)])
+To_merge <- data.frame(first=paste(First$seqnames,":", First$start,"-", First$end, sep=""),
+                       second=paste(Second$seqnames, ":", Second$start, "-", Second$end, sep=""))
+To_merge[which(To_merge$first>To_merge$second),]<-To_merge[which(To_merge$first>To_merge$second),c("second","first")]
+To_merge <- To_merge[order(To_merge$first),]                                                      # 8 pairs are identical
+To_merge <- unique(To_merge)                                                                      # Remove identical pairs
+rownames(To_merge) <- c(1:dim(To_merge)[1])
+for(i in c(1:dim(To_merge)[1])){
+  v_first <- my_tab[which(rownames(my_tab)==To_merge$first[i]),]
+  v_second <- my_tab[which(rownames(my_tab)==To_merge$second[i]),]
+  v_new <- unlist(BinarizeCounts(v_first + v_second))
+  v1 <- strsplit(To_merge$first[i], c(":|-"))[[1]]
+  v2 <- strsplit(To_merge$second[i], c(":|-"))[[1]]
+  new_ID <- paste(v1[1],":",
+                  min(as.numeric(v1[2]), as.numeric(v2[2])),"-",
+                  max(as.numeric(v1[3]), as.numeric(v2[3])),sep="")
+  my_tab <- my_tab[which(rownames(my_tab)!=To_merge$first[i]),]
+  my_tab <- my_tab[which(rownames(my_tab)!=To_merge$second[i]),]
+  my_tab[new_ID,] <- v_new
+  print(dim(my_tab))
+}
+dim(my_tab)                                                                                       # 68952 peaks and 72 cells
+write.table(my_tab, "01_data/hESC_Liu_scATAC_binarized.tsv",                                         # store atac-matrix
+            sep = "\t", quote = FALSE, col.names = TRUE, row.names = TRUE)
+
+# Output
+# Of 69035 peaks: 68983 successfull and 52 not.
+# double checking: number of peaks we keep(=1) and remove (=0)
+#    0     1 
+#   52 68983
+# 68983    72 (52 peaks were removed for which were not successfully converted)
+# removed one peak with "chrU", 6 peaks with "random", and 16 peaks with "alt"
+# 8 pairs (2*8=16) of peaks were merged (+sum + binarized)
+# 68952 peaks and 72 cells
+```
+
+### mESC_Duren: convert mm9 to mm10
+- We read in the file and convert the peak names in the desired format. Then, we convert mm9 to mm10 peaks using the Lift Genome Annotations tool (https://genome.ucsc.edu/cgi-bin/hgLiftOver), which converts genome coordinates and genome annotation files between assemblies. We use the default parameters:
+ * Minimum ratio of bases that must remap: 0.95
+ * Min ratio of alignment blocks or exons that must map: 1
+ * Original Genome: Mouse, Original Assembly: July 2007 (NCBI37/mm9)
+ * New Genome: Mouse, Original Assembly: Dec 2011 (GRCm38/mm10)
+We successfully converted 23176 records. The conversion for 4 records failed:
+ * chr14:5617761-5618954    (Split in new)
+ * chr14:5659232-5660294    (Split in new)
+ * chr4:130185029-130185585 (Partially deleted in new)
+ * chr9:100977752-100979032 (Partially deleted in new)
+Finally, we binarize the data, setting all values >0 to 1.
+```{r}
+my_tab <- read.table("01_data/mESC_Duren_scATAC_binarized.tsv")                                # read in file
+write.table(rownames(my_tab), file = "downloaded_files/PeaksIDs_mm9.txt",                   # store mm9 peaks for conversion
+            quote = FALSE, col.names = FALSE, row.names = FALSE)
+# convert peaks using online tool https://genome.ucsc.edu/cgi-bin/hgLiftOver
+PeakIDs_mm10 <- read.table("downloaded_files/hglft_genome_e7fb_3cc0b0.bed", header = FALSE) # read in converted peaks
+dim(my_tab)
+my_tab <- my_tab[which(rownames(my_tab)!="chr14:5617761-5618954" &                           # remove peaks with failed conversion manually
+                       rownames(my_tab)!="chr14:5659232-5660294" &
+                       rownames(my_tab)!="chr4:130185029-130185585" &
+                       rownames(my_tab)!="chr9:100977752-100979032"),]
+rownames(my_tab) <- as.character(PeakIDs_mm10$V1)                                           # update peak to mm10
+dim(my_tab)                                                                                 # 23176 peaks and 415 cells
+write.table(my_tab, "01_data/mESC_Duren_scATAC_binarized.tsv",                          # store atac-matrix
+            sep = "\t", quote = FALSE, col.names = TRUE, row.names = TRUE)
+
+# Output
+# 23180   415
+# 23176   415 - 4 peaks were removed for which were not successfully converted
+```
+
+## Session info
+```{r}
+sessionInfo()                                                                                # print session info
+#writeLines(capture.output(sessionInfo()), "Session_info_DataPreprocessing_R_2022Feb09.txt") # store session info
+```
+R version 4.1.2 (2021-11-01)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Ubuntu 20.04.3 LTS
+
+Matrix products: default
+BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3
+LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/liblapack.so.3
+
+locale:
+ [1] LC_CTYPE=C                 LC_NUMERIC=C              
+ [3] LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8    
+ [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=fr_FR.UTF-8   
+ [7] LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] jsonlite_1.7.3 httr_1.4.2    
+
+loaded via a namespace (and not attached):
+[1] compiler_4.1.2 R6_2.5.1       tools_4.1.2    curl_4.3.2 
+
+## Cite packages
+- https://pakillo.github.io/grateful/
+```{r}
+remotes::install_github("Pakillo/grateful")
+library(grateful)
+scan_packages()
+cite_packages()                     # not working
+cite_packages(output = "paragraph") # not working
+#cite_packages(dependencies = TRUE)
+#cite_packages(cite.tidyverse = TRUE)
+
+# alternative:
+tab_temp <- scan_packages()
+for(i in tab_temp$pkg)
+{
+  print(i)
+  print(citation(i))
+}
+```
+        pkg version citation
+1      base   4.1.2 [1]
+2  devtools   2.4.3 [2]
+3  grateful   0.1.9 [3]
+4      httr   1.4.2 [4]
+5  jsonlite   1.7.3 [5]
+6 rmarkdown    2.11 [6-8]
+7  roxygen2   7.1.2 [9]
+
+[1] R Core Team (2021). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. URL https://www.R-project.org/.
+[2] Hadley Wickham, Jim Hester, Winston Chang and Jennifer Bryan (2021). devtools: Tools to Make Developing R Packages Easier. R package version 2.4.3. https://CRAN.R-project.org/package=devtools
+[3] Francisco Rodr<U+00ED>guez-S<U+00E1>nchez, Connor P. Jackson, Shaurita D. Hutchins (2022). grateful: Facilitate citation of R packages. R package version 0.1.5. Available at https://github.com/Pakillo/grateful.
+[4] Hadley Wickham (2020). httr: Tools for Working with URLs and HTTP. R package version 1.4.2. https://CRAN.R-project.org/package=httr
+[5] Jeroen Ooms (2014). The jsonlite Package: A Practical and Consistent Mapping Between JSON Data and R Objects. arXiv:1403.2805 [stat.CO] URL https://arxiv.org/abs/1403.2805.
+[6] JJ Allaire and Yihui Xie and Jonathan McPherson and Javier Luraschi and Kevin Ushey and Aron Atkins and Hadley Wickham and Joe Cheng and Winston Chang and Richard Iannone (2021). rmarkdown: Dynamic Documents for R. R package version 2.11. URL https://rmarkdown.rstudio.com.
+[7] Yihui Xie and J.J. Allaire and Garrett Grolemund (2018). R Markdown: The Definitive Guide. Chapman and Hall/CRC. ISBN 9781138359338. URL https://bookdown.org/yihui/rmarkdown.
+[8] Yihui Xie and Christophe Dervieux and Emily Riederer (2020). R Markdown Cookbook. Chapman and Hall/CRC. ISBN 9780367563837. URL https://bookdown.org/yihui/rmarkdown-cookbook.
+[9] Hadley Wickham, Peter Danenberg, G{\'a}bor Cs{\'a}rdi, and Manuel Eugster (2021). roxygen2: In-Line Documentation for R. R package version 7.1.2. https://CRAN.R-project.org/package=roxygen2
+
+# mESC cell alignment and maximum-weighted matching
+- We want to compare different approaches to infer gene regulatory relationships including the pando tool
+- pando requires paired data
+- hESC are paired
+- mESC data are not paired
+- We use i) SCOT2 and ii) maximum-weighted matching implemented in networkx to align scRNA-seq and scATAC-seq data for mESC_Duren and mESC_Semrau
+- SCOT2 and networkx are python packages, which is why we change here to python
+
+## cell alignment and maximum matching
+Cell alignment via SCOT2
+- https://rsinghlab.github.io/SCOT/tutorial/
+- https://github.com/rsinghlab/SCOT
+- SCOT2: https://www.biorxiv.org/content/10.1101/2021.11.09.467903v1
+- SCOT is developed using Python 3. It depends on a few Python packages, namely: numpy, cython, scipy, sklearn, matlab, and POT 
+
+Maximum-weighted matching implemented in networkx
+- https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.matching.max_weight_matching.html
+- Compute a maximum-weighted matching for graph G.
+- A matching is a subset of edges in which no node occurs more than once. The weight of a matching is the sum of the weights of its edges. A maximal matching cannot add more edges and still be a matching. The cardinality of a matching is the number of matched edges.
+- maxcardinality: bool, optional (default=False) If maxcardinality is True, compute the maximum-cardinality matching with maximum weight among all maximum-cardinality matchings.
+- weight: string, optional (default=???weight???) Edge data key corresponding to the edge weight. If key not found, uses 1 as weight.
+- Returns matchingset, A maximal matching of the graph.
+- Reference: Efficient Algorithms for Finding Maximum Matching in Graphs???, Zvi Galil, ACM Computing Surveys, 1986.
+
+```{bash}
+setconda
+conda create -n conda_env_scot anaconda python=3.8.10
+conda activate conda_env_scot
+conda install --file ../../SCOT/requirements.txt
+#PackagesNotFoundError: The following packages are not available from current channels:
+#  - pot
+#  - matlab
+#  - sklearn
+conda install -c conda-forge pot
+conda install -c conda-forge matlab #PackagesNotFoundError: The following packages are not available from current channels:BUT: "pip install matlab" worked
+conda install -c conda-forge sklearn #PackagesNotFoundError: The following packages are not available from current channels:BUT: "pip install sklearn" worked
+pip install session_info
+```
+
+```{python}
+import sys
+sys.path.insert(1, '../SCOT/src/')
+import utils as ut
+import evals as evals
+import scot2 as sc
+import numpy as np
+import pandas as pd
+import networkx as nx
+import time
+import session_info
+
+############################################################################################################################################################
+## mESC_Duren
+############################################################################################################################################################
+# SCOT2
+path = "01_data/"
+filename_rna = "mESC_Duren_scRNA_prevalencefiltered_log2.tsv"
+filename_atac = "mESC_Duren_scATAC_binarized.tsv"
+data_rna = pd.read_csv(path+filename_rna, sep = "\t", header = 0, index_col = 0)
+domain1 = data_rna.to_numpy()
+domain1 = np.transpose(domain1) # transpose because rows should contain samples and cols features
+data_atac = pd.read_csv(path+filename_atac, sep = "\t", header = 0, index_col = 0)
+domain2 = data_atac.to_numpy()
+domain2 = np.transpose(domain2) # transpose because rows should contain samples and cols features
+
+# parameters
+# k = 50 # a hyperparameter of the model, determines the number of neighbors to be used in the kNN graph constructed for cells based on sequencing data correlations
+# e = 1e-3 # another hyperparameter of the model, determines the coefficient of the entropic regularization term
+# normalize=True
+# parameters are at default except that balanced is as suggested but in tutorial the default is false and description says to leave it at True)
+
+# SCOT alignment
+my_time_start = time.perf_counter()
+scot=sc.SCOT(domain1, domain2)
+X_aligned, y_aligned = scot.align(k=50, e=1e-3, balanced=True, rho=5e-2, verbose=True, normalize=True, norm="l2")  # cell alignment via SCOT2
+my_time_end = time.perf_counter()
+print(f"Running SCOT in {(my_time_end - my_time_start)/60:0.4f} minutes")
+print(scot.gwdist)
+#print(scot.coupling)
+np.save("01_data/mESC_Duren_scot_coupling_matix.npy", scot.coupling[0])
+mydf = pd.DataFrame(data=scot.coupling[0], index=data_rna.columns, columns=data_atac.columns)
+mydf.to_csv("01_data/mESC_Duren_scot_coupling_matix.txt", sep=';', index=True, header=True)
+
+# Maximum-weightes matching
+myedgelist = mydf.rename_axis('Source')\
+                 .reset_index()\
+                 .melt('Source', value_name='Weight', var_name='Target')\
+                 .query('Source != Target')\
+                 .reset_index(drop=True)
+myedgelist.to_csv("01_data/mESC_Duren_edgelist.txt", sep='\t', index=False, header=False)
+myedgelist.isin([0]).sum(axis=0)    
+G = nx.readwrite.edgelist.read_weighted_edgelist("01_data/mESC_Duren_edgelist.txt", delimiter = "\t")
+my_time_start = time.perf_counter()
+mymatching = nx.algorithms.matching.max_weight_matching(G, maxcardinality=True, weight='weight')  # max weight matching
+my_time_end = time.perf_counter()
+print(f"Running maximum-weight matching in {(my_time_end - my_time_start)/60:0.4f} minutes")
+mymatchingdf = pd.DataFrame.from_dict(mymatching)
+mymatchingdf.to_csv("01_data/mESC_Duren_matching.txt", sep='\t', index=False, header=False)
+
+# Output: mESC_Duren (scRNA-seq and scATAC-seq data)
+# Running SCOT in 2.4342 minutes
+# [0.032734465418731935]
+# Running maximum-weight matching in 4.0279 minutes
+
+############################################################################################################################################################
+## mESC_Semrau: use scATAC from mESC_Duren
+############################################################################################################################################################
+# SCOT2
+path = "01_data/"
+filename_rna = "mESC_Semrau_scRNA_prevalencefiltered_log2.tsv"
+filename_atac = "mESC_Duren_scATAC_binarized.tsv"
+data_rna = pd.read_csv(path+filename_rna, sep = "\t", header = 0, index_col = 0)
+domain1 = data_rna.to_numpy()
+domain1 = np.transpose(domain1) # transpose because rows should contain samples and cols features
+data_atac = pd.read_csv(path+filename_atac, sep = "\t", header = 0, index_col = 0)
+domain2 = data_atac.to_numpy()
+domain2 = np.transpose(domain2) # transpose because rows should contain samples and cols features
+
+# parameters
+# k = 50 # a hyperparameter of the model, determines the number of neighbors to be used in the kNN graph constructed for cells based on sequencing data correlations
+# e = 1e-3 # another hyperparameter of the model, determines the coefficient of the entropic regularization term
+# normalize=True
+# parameters are at default except that balanced is as suggested but in tutorial the default is false and description says to leave it at True)
+
+# SCOT alignment
+my_time_start = time.perf_counter()
+scot=sc.SCOT(domain1, domain2)
+X_aligned, y_aligned = scot.align(k=50, e=1e-3, balanced=True, rho=5e-2, verbose=True, normalize=True, norm="l2")  # cell alignment via SCOT2
+my_time_end = time.perf_counter()
+print(f"Running SCOT in {(my_time_end - my_time_start)/60:0.4f} minutes")
+print(scot.gwdist)
+#print(scot.coupling)
+np.save("01_data/mESC_Semrau_scot_coupling_matix.npy", scot.coupling[0])
+mydf = pd.DataFrame(data=scot.coupling[0], index=data_rna.columns, columns=data_atac.columns)
+mydf.to_csv("01_data/mESC_Semrau_scot_coupling_matix.txt", sep=';', index=True, header=True)
+
+# Maximum-weightes matching
+myedgelist = mydf.rename_axis('Source')\
+                 .reset_index()\
+                 .melt('Source', value_name='Weight', var_name='Target')\
+                 .query('Source != Target')\
+                 .reset_index(drop=True)
+myedgelist.to_csv("01_data/mESC_Semrau_edgelist.txt", sep='\t', index=False, header=False)
+myedgelist.isin([0]).sum(axis=0)    
+G = nx.readwrite.edgelist.read_weighted_edgelist("01_data/mESC_Semrau_edgelist.txt", delimiter = "\t")
+my_time_start = time.perf_counter()
+mymatching = nx.algorithms.matching.max_weight_matching(G, maxcardinality=True, weight='weight')  # max weight matching
+my_time_end = time.perf_counter()
+print(f"Running maximum-weight matching in {(my_time_end - my_time_start)/60:0.4f} minutes")
+mymatchingdf = pd.DataFrame.from_dict(mymatching)
+mymatchingdf.to_csv("01_data/mESC_Semrau_matching.txt", sep='\t', index=False, header=False)
+
+# Output: mESC_Semrau (scRNA-seq from mESC_Semrau and scATAC-seq data from mESC_Duren)
+# Running SCOT in 0.8349 minutes
+# [0.021422091088991065]
+# Running maximum-weight matching in 2.7403 minutes
+
+############################################################################################################################################################
+## Session Info
+############################################################################################################################################################
+session_info.show()
+```
+-----
+evals               NA
+networkx            2.6.3
+numpy               1.20.3
+pandas              1.3.5
+scot2               NA
+session_info        1.0.0
+utils               NA
+-----
+Python 3.8.10 (default, Jun  4 2021, 15:09:15) [GCC 7.5.0]
+Linux-5.4.0-91-generic-x86_64-with-glibc2.17
+-----
+Session information updated at 2022-02-10 18:20
+
+- back in R: use the matched cells to generated paired scRNA-seq and scATAC-seq data tables
+```{r}
+############################################################################################################################################################
+## mESC_Duren
+############################################################################################################################################################
+# matching information
+match <- read.table("01_data/mESC_Duren_matching.txt", header = FALSE)
+match[grep("WW",match$V1),] <- match[grep("WW",match$V1),c("V2","V1")] # make sure that all cells from scRNA-seq data are in one and cells from scATAC-seq data in the other column
+
+coupling <- read.table("01_data/mESC_Duren_scot_coupling_matix.txt", header = TRUE, sep = ";")
+rownames(coupling) <- coupling$X
+coupling$X <- NULL
+
+match$weight <- NA
+for(i in c(1:dim(match)[1]))
+{
+  match$weight[i] <- coupling[match$V2[i], match$V1[i]]
+}
+length(unique(match$V1)) # 415
+length(unique(match$V2)) # 415
+write.table(match, "01_data/mESC_Duren_matching_with_weights.txt", col.names = FALSE, row.names = FALSE, sep = "\t", quote = FALSE)
+
+max_matching <- read.table("01_data/mESC_Duren_matching_with_weights.txt", header = FALSE)
+head(max_matching)
+
+# scRNA-seq data (log2)
+scRNA <- read.table("01_data/mESC_Duren_scRNA_prevalencefiltered_log2.tsv", header = TRUE)
+scRNA[1:5,1:5]
+scRNA <- scRNA[,max_matching$V2]
+dim(scRNA)
+scRNA[1:5,1:5]
+scRNA <- scRNA_preprocessing(scRNA, cutoff_feature_prevalence = 1,
+                              bool_log2transform = FALSE, bool_removeZeroCells = TRUE)                     # Filter rare features
+print(paste("Final table contains ", dim(scRNA)[1], " features in ", dim(scRNA)[2] ," cells.", sep =""))   # Final number of cells and features
+colnames(scRNA) <- paste("MatchCell",c(1:dim(scRNA)[2]),sep="_")
+write.table(scRNA,"01_data/mESC_Duren_scRNA_prevalencefiltered_log2_aligned_cells.tsv",                       # Store scRNA-seq data
+            col.names = TRUE, row.names = TRUE, sep = "\t", quote = FALSE)
+
+# scRNA-seq data (no log2 for CellOracle)
+scRNA <- read.table("01_data/mESC_Duren_scRNA_prevalencefiltered.tsv", header = TRUE)
+scRNA[1:5,1:5]
+scRNA <- scRNA[,max_matching$V2]
+dim(scRNA)
+scRNA[1:5,1:5]
+scRNA <- scRNA_preprocessing(scRNA, cutoff_feature_prevalence = 1,
+                             bool_log2transform = FALSE, bool_removeZeroCells = TRUE)                      # Filter rare features
+print(paste("Final table contains ", dim(scRNA)[1], " features in ", dim(scRNA)[2] ," cells.", sep =""))   # Final number of cells and features
+colnames(scRNA) <- paste("MatchCell",c(1:dim(scRNA)[2]),sep="_")
+write.table(scRNA,"01_data/mESC_Duren_scRNA_prevalencefiltered_aligned_cells.tsv",                            # Store scRNA-seq data
+            col.names = TRUE, row.names = TRUE, sep = "\t", quote = FALSE)
+
+# scATAC-seq data
+scATAC <- read.table("01_data/mESC_Duren_scATAC_binarized.tsv", header = TRUE)
+dim(scATAC)
+scATAC[1:5,1:5]
+scATAC <- scATAC[,max_matching$V1]
+dim(scATAC)
+scATAC[1:5,1:5]
+# no filtering needed because all 415 are kept - they have been simply reordered to align with scRNA cells
+print(paste("Final table contains ", dim(scATAC)[1], " features in ", dim(scATAC)[2] ," cells.", sep ="")) 
+colnames(scATAC) <- paste("MatchCell",c(1:dim(scATAC)[2]),sep="_")
+write.table(scATAC, "01_data/mESC_Duren_scATAC_binarized_aligned_cells.tsv",
+            col.names = TRUE, row.names = TRUE, sep = "\t", quote = FALSE)
+
+# Output
+# scRNA (log2)
+# 15299   464
+# 163 features have been removed.
+# 0 cells have been removed.
+# Final table contains 15136 features in 415 cells.
+
+# scRNA (no log2)
+# 15299   464
+# 163 features have been removed.
+# 0 cells have been removed.
+# Final table contains 15136 features in 415 cells.
+
+# scATAC
+# 23176   415
+# Final table contains 23176 features in 415 cells.
+
+############################################################################################################################################################
+## mESC_Semrau: use scATAC from mESC_Duren
+############################################################################################################################################################
+# matching information
+match <- read.table("01_data/mESC_Semrau_matching.txt", header = FALSE)
+match[grep("scATAC",match$V2),] <- match[grep("scATAC",match$V2),c("V2","V1")] # make sure that all cells from scRNA-seq data are in one and cells from scATAC-seq data in the other column
+
+coupling <- read.table("01_data/mESC_Semrau_scot_coupling_matix.txt", header = TRUE, sep = ";")
+rownames(coupling) <- coupling$X
+coupling$X <- NULL
+
+match$weight <- NA
+for(i in c(1:dim(match)[1]))
+{
+  match$weight[i] <- coupling[match$V2[i], match$V1[i]]
+}
+length(unique(match$V1)) # 384
+length(unique(match$V2)) # 384
+write.table(match, "01_data/mESC_Semrau_matching_with_weights.txt", col.names = FALSE, row.names = FALSE, sep = "\t", quote = FALSE)
+
+max_matching <- read.table("01_data/mESC_Semrau_matching_with_weights.txt", header = FALSE)
+head(max_matching)
+
+# scRNA-seq data (log2)
+scRNA <- read.table("01_data/mESC_Semrau_scRNA_prevalencefiltered_log2.tsv", header = TRUE)
+scRNA[1:5,1:5]
+scRNA <- scRNA[,max_matching$V2]
+dim(scRNA)
+scRNA[1:5,1:5]
+# no filtering needed because all 384 are kept - they have been simply reordered to align with scATAC cells
+print(paste("Final table contains ", dim(scRNA)[1], " features in ", dim(scRNA)[2] ," cells.", sep =""))         # Final number of cells and features
+colnames(scRNA) <- paste("MatchCell",c(1:dim(scRNA)[2]),sep="_")
+write.table(scRNA,"01_data/mESC_Semrau_scRNA_prevalencefiltered_log2_aligned_cells.tsv",                            # Store scRNA-seq data
+            col.names = TRUE, row.names = TRUE, sep = "\t", quote = FALSE)
+
+# scRNA-seq data (no log2 for CellOracle)
+scRNA <- read.table("01_data/mESC_Semrau_scRNA_prevalencefiltered.tsv", header = TRUE)
+scRNA[1:5,1:5]
+scRNA <- scRNA[,max_matching$V2]
+dim(scRNA)
+scRNA[1:5,1:5]
+# no filtering needed because all 384 are kept - they have been simply reordered to align with scATAC cells
+print(paste("Final table contains ", dim(scRNA)[1], " features in ", dim(scRNA)[2] ," cells.", sep =""))         # Final number of cells and features
+colnames(scRNA) <- paste("MatchCell",c(1:dim(scRNA)[2]),sep="_")
+write.table(scRNA,"01_data/mESC_Semrau_scRNA_prevalencefiltered_aligned_cells.tsv",                                 # Store scRNA-seq data
+            col.names = TRUE, row.names = TRUE, sep = "\t", quote = FALSE)
+
+# scATAC-seq data
+scATAC <- read.table("01_data/mESC_Duren_scATAC_binarized.tsv", header = TRUE)
+dim(scATAC)
+scATAC[1:5,1:5]
+scATAC <- scATAC[,max_matching$V1]
+dim(scATAC)
+scATAC[1:5,1:5]
+# no filtering needed because all 415 are kept - they have been simply reordered to align with scRNA cells
+scATAC <- scATAC_preprocessing(scATAC, cutoff_feature_prevalence = 1,                                            # Filter rare features
+                               bool_binarize = TRUE, bool_removeZeroCells = TRUE)                                # Binarize table
+print(paste("Final table contains ", dim(scATAC)[1], " features in ", dim(scATAC)[2] ," cells.", sep =""))       # Final number of cells and features
+colnames(scATAC) <- paste("MatchCell",c(1:dim(scATAC)[2]),sep="_")
+write.table(scATAC, "01_data/mESC_Semrau_scATAC_binarized_aligned_cells.tsv",
+            col.names = TRUE, row.names = TRUE, sep = "\t", quote = FALSE)
+
+# Output
+# scRNA (no log2)
+# 10243   384
+# Final table contains 10243 features in 384 cells.
+
+# scRNA (log2)
+# 10243   384
+# Final table contains 10243 features in 384 cells.
+
+# scATAC
+# 23176   415
+# 23176   384
+# 0 features have been removed.
+# 0 cells have been removed.
+# Final table contains 23176 features in 384 cells.
+
+############################################################################################################################################################
+## Session Info
+############################################################################################################################################################
+sessionInfo()
+```
+R version 4.1.2 (2021-11-01)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Ubuntu 20.04.3 LTS
+
+Matrix products: default
+BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3
+LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/liblapack.so.3
+
+locale:
+ [1] LC_CTYPE=C                 LC_NUMERIC=C              
+ [3] LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8    
+ [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=fr_FR.UTF-8   
+ [7] LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+loaded via a namespace (and not attached):
+[1] compiler_4.1.2
+
+# Overview of table sizes
+```{r}
+IDs <- c("hESC_Chen_scRNA_prevalencefiltered.tsv", "hESC_Chen_scRNA_prevalencefiltered_log2.tsv", "hESC_Chen_scATAC_binarized.tsv",
+         "hESC_Liu_scRNA_prevalencefiltered.tsv", "hESC_Liu_scRNA_prevalencefiltered_log2.tsv", "hESC_Liu_scATAC_binarized.tsv",
+         "mESC_Duren_scRNA_prevalencefiltered.tsv", "mESC_Duren_scRNA_prevalencefiltered_log2.tsv", "mESC_Duren_scATAC_binarized.tsv",
+         "mESC_Semrau_scRNA_prevalencefiltered.tsv", "mESC_Semrau_scRNA_prevalencefiltered_log2.tsv",
+         "mESC_Duren_scRNA_prevalencefiltered_aligned_cells.tsv", "mESC_Duren_scRNA_prevalencefiltered_log2_aligned_cells.tsv", "mESC_Duren_scATAC_binarized_aligned_cells.tsv",
+         "mESC_Semrau_scRNA_prevalencefiltered_aligned_cells.tsv", "mESC_Semrau_scRNA_prevalencefiltered_log2_aligned_cells.tsv", "mESC_Semrau_scATAC_binarized_aligned_cells.tsv")
+for(i in IDs)
+{
+  tab_temp <- read.table(paste("data",i,sep="/"), header = TRUE)
+  print(paste(i, ": ", dim(tab_temp)[1], " features and ", dim(tab_temp)[2], " cells.", sep=""))
+}
+
+# Output
+# [1] "hESC_Chen_scRNA_prevalencefiltered.tsv:         8595 features and 385 cells."
+# [1] "hESC_Chen_scRNA_prevalencefiltered_log2.tsv:    8595 features and 385 cells."
+# [1] "hESC_Chen_scATAC_binarized.tsv:                36954 features and 385 cells."
+
+# [1] "hESC_Liu_scRNA_prevalencefiltered.tsv:         23153 features and  72 cells."
+# [1] "hESC_Liu_scRNA_prevalencefiltered_log2.tsv:    23153 features and  72 cells."
+# [1] "hESC_Liu_scATAC_binarized.tsv:                 68952 features and  72 cells."
+
+# [1] "mESC_Duren_scRNA_prevalencefiltered.tsv:       15299 features and 464 cells."
+# [1] "mESC_Duren_scRNA_prevalencefiltered_log2.tsv:  15299 features and 464 cells."
+# [1] "mESC_Duren_scATAC_binarized.tsv:               23176 features and 415 cells."
+
+# [1] "mESC_Semrau_scRNA_prevalencefiltered.tsv:      10243 features and 384 cells."
+# [1] "mESC_Semrau_scRNA_prevalencefiltered_log2.tsv: 10243 features and 384 cells."
+
+# [1] "mESC_Duren_scRNA_filtered_aligned_cells.tsv:      15136 features and 415 cells."
+# [1] "mESC_Duren_scRNA_filtered_log2_aligned_cells.tsv: 15136 features and 415 cells."
+# [1] "mESC_Duren_scATAC_binarized_aligned_cells.tsv:    23176 features and 415 cells."
+
+# [1] "mESC_Semrau_scRNA_filtered_aligned_cells.tsv:      10243 features and 384 cells."
+# [1] "mESC_Semrau_scRNA_filtered_log2_aligned_cells.tsv: 10243 features and 384 cells."
+# [1] "mESC_Semrau_scATAC_binarized_aligned_cells.tsv:    23176 features and 384 cells."
+```
+
+## How long are the peaks?
+```{r}
+for(i in c("hESC_Chen", "hESC_Liu")){
+  mytab <- read.table(paste("01_data/",i,"_scATAC_binarized.tsv",sep=""),sep="\t",header=TRUE)[,NULL]
+  mytab$start <- NA
+  mytab$end <- NA
+  for(j in c(1:dim(mytab))){
+    v <- as.numeric(strsplit(strsplit(rownames(mytab)[j], split = ":")[[1]], split="-")[[2]])
+    mytab$start[j] <- v[1]
+    mytab$end[j] <- v[2]
+  }
+  mytab$length <- mytab$end - mytab$start + 1
+  print(hist(mytab$length, breaks=100))
+}
+```
+
+```{r}
+for(i in c("mESC_Duren")){
+  mytab <- read.table(paste("01_data/",i,"_scATAC_binarized.tsv",sep=""),sep="\t",header=TRUE)[,NULL]
+  mytab$start <- NA
+  mytab$end <- NA
+  for(j in c(1:dim(mytab))){
+    v <- as.numeric(strsplit(strsplit(rownames(mytab)[j], split = ":")[[1]], split="-")[[2]])
+    mytab$start[j] <- v[1]
+    mytab$end[j] <- v[2]
+  }
+  mytab$length <- mytab$end - mytab$start + 1
+  print(hist(mytab$length, breaks=100))
+}
+```
+
+# Ground Truth table for evaluation of transcription factor target gene predictions
+- DOI of associated article (preprint): https://doi.org/10.1101/2021.06.01.446671
+- Database: https://zenodo.org/record/5909090/files/gold_standard_datasets.zip?download=1
+- Table used (hESC_chipunion_KDUnion_intersect.txt, mESC_chipunion_KDUnion_intersect.txt)
+- Downloaded: 6th April 2022
+
+## human
+```{r}
+GTtab <- read.table("downloaded_files/groundTruth/Preprint_2022Feb/hESC/hESC_chipunion_KDUnion_intersect.txt", header = FALSE)
+head(GTtab)
+dim(GTtab)
+length(unique(GTtab$V1))
+length(unique(GTtab$V2))
+colnames(GTtab) <- c("TF","gene")
+write.table(GTtab, "01_data/hESC_groundTruth.tsv",
+            col.names = TRUE, row.names = FALSE, quote = FALSE, sep = "\t")
+```
+    V1      V2
+1 ATF3   ABHD3
+2 ATF3   AP3M2
+3 ATF3   APBB3
+4 ATF3 ARHGAP8
+5 ATF3 ARHGEF3
+6 ATF3   ARMC9
+[1] 12986     2
+[1] 35
+[1] 6529
+
+## mouse
+```{r}
+GTtab <- read.table("downloaded_files/groundTruth/Preprint_2022Feb/mESC/mESC_chipunion_KDUnion_intersect.txt", header = FALSE)
+head(GTtab)
+dim(GTtab)
+length(unique(GTtab$V1))
+length(unique(GTtab$V2))
+colnames(GTtab) <- c("TF","gene")
+write.table(GTtab, "01_data/mESC_groundTruth.tsv",
+            col.names = TRUE, row.names = FALSE, quote = FALSE, sep = "\t")
+```
+    V1            V2
+1 Cdx2 1700123K08Rik
+2 Cdx2 1810065E05Rik
+3 Cdx2 2700086A05Rik
+4 Cdx2 2810011L19Rik
+5 Cdx2 3110007F17Rik
+6 Cdx2 4732465J04Rik
+[1] 11634     2
+[1] 47
+[1] 6109
+
+
+# SCREEN: Search Candidate cis-Regulatory Elements by ENCODE
+- DOI of associated article: https://doi.org/10.1101/2021.06.01.446671
+- http://screen.encodeproject.org/
+- downloaded on 10th Feb. 20222
+- Human (hg38): 1,063,878 cCREs - 1,518 cell types
+- Mouse (mm10): 313,838 cCREs - 169 cell types
+- Identifiers: PLS (promoter-like), pELS (proximal enhancer-like), dELS (distal enhancer-like), CTCF-only, DNase-H3K4me3
+```{r}
+############################################################################################################################################################
+## Human (hg38)
+############################################################################################################################################################
+cCRE <- read.table("downloaded_files/GRCh38-ccREs.txt", header = FALSE)       # Load downloaded file
+colnames(cCRE) <- c("chromosome","start","end","ID1","ID2","type")            # rename colnames
+table(cCRE$type)                                                              # overview
+dim(cCRE)[1]                                                                  # 926535 regulatory elements
+length(which(cCRE$type=="PLS"))                                               #   7582 promoters
+length(which(cCRE$type=="dELS"))                                              # 448981 distal enhancers
+write.table(cCRE, "01_data/hESC_regulatoryElements.txt",                         # save list of all regulatory elements
+            sep = "\t", col.names = TRUE, row.names = FALSE, quote = FALSE)
+write.table(cCRE[grep("PLS",cCRE$type),], "01_data/hESC_candidatePromoters.txt", # list of promoters
+            sep = "\t", col.names = TRUE, row.names = FALSE, quote = FALSE)
+write.table(cCRE[grep("dELS",cCRE$type),], "01_data/hESC_distalEnhancers.txt",   # list of distal enhancers
+            sep = "\t", col.names = TRUE, row.names = FALSE, quote = FALSE)
+
+# Output
+#    CTCF-only,CTCF-bound                     dELS          dELS,CTCF-bound 
+#                   56766                   448981                   218618 
+#           DNase-H3K4me3 DNase-H3K4me3,CTCF-bound                     pELS 
+#                   16737                     8800                    64421 
+#         pELS,CTCF-bound                      PLS           PLS,CTCF-bound 
+#                   77409                     7582                    27221
+# 926535 regulatory elements
+#   7582 promoters
+# 448981 distal enhancers
+
+############################################################################################################################################################
+## Mouse (mm10)
+############################################################################################################################################################
+cCRE <- read.table("downloaded_files/mm10-ccREs.txt", header = FALSE)         # Load downloaded file
+colnames(cCRE) <- c("chromosome","start","end","ID1","ID2","type")            # rename colnames
+table(cCRE$type)                                                              # overview
+dim(cCRE)[1]                                                                  # 339815 regulatory elements
+length(which(cCRE$type=="PLS"))                                               #  13855 promoters
+length(which(cCRE$type=="dELS"))                                              # 181173 distal enhancers
+write.table(cCRE, "01_data/mESC_regulatoryElements.txt",                         # save list of all regulatory elements
+            sep = "\t", col.names = TRUE, row.names = FALSE, quote = FALSE)
+write.table(cCRE[grep("PLS",cCRE$type),], "01_data/mESC_candidatePromoters.txt", # list of promoters
+            sep = "\t", col.names = TRUE, row.names = FALSE, quote = FALSE)
+write.table(cCRE[grep("dELS",cCRE$type),], "01_data/mESC_distalEnhancers.txt",   # list of promoters
+            sep = "\t", col.names = TRUE, row.names = FALSE, quote = FALSE)
+
+# Output
+#    CTCF-only,CTCF-bound                     dELS          dELS,CTCF-bound 
+#                   23836                   181173                    27867 
+#           DNase-H3K4me3 DNase-H3K4me3,CTCF-bound                     pELS 
+#                    6982                     3401                    56411 
+#         pELS,CTCF-bound                      PLS           PLS,CTCF-bound 
+#                   16383                    13855                     9907
+# 339815 regulatory elements
+#  13855 promoters
+# 181173 distal enhancers
+```

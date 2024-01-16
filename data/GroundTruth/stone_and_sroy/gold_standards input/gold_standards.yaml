@@ -1,0 +1,67 @@
+# TODO: add citations
+# TODO: choose citation or doi?
+# TODO: need to add assay details?
+# TODO: add scATAC networks
+yeast:
+    hu:
+        citation: ""
+        assay_type: "Perturbation"
+        description: "Interactions from Hu et al."
+    mac2:
+        citation: ""
+        assay_type: "ChIP"
+        description: "Interactions from MacIsaac et al."
+    yeastract_c3:
+        citation: ""
+        assay_type: "ChIP,Perturbation"
+        description: "Interactions from the YEASTRACT database that appear in at least three studies"
+    yeastract_t2:
+        citation: ""
+        assay_type: "ChIP,Perturbation"
+        description: "Interactions from the YEASTRACT database that appear in at least two types of study"
+    yeast_chipunion:
+        citation: ""
+        assay_type: "ChIP"
+        description: "Interactions that appear in MacIsaac or a ChIP-based study in YEASTRACT"
+    yeast_KDUnion:
+        citation: ""
+        assay_type: "Perturbation"
+        description: "Interactions that appear in Hu or a perturbation-based study in YEASTRACT"
+    yeast_chipunion_KDUnion_intersect:
+        citation: ""
+        assay_type: "ChIP,Perturbation"
+        description: "Interactions that appear in chipunion AND KDUnion networks"
+
+mESC:
+    mESC_escapechip:
+    mESC_encodechip:
+    mESC_chipunion:
+        citation: ""
+        assay_type: "ChIP"
+        description: "Interactions that appear in ESCAPE or ENCODE databases"
+    mESC_logof:
+    mESC_nishiyama:
+    mESC_KDUnion:
+        citation: ""
+        assay_type: "Perturbation"
+        description: "Interactions that appear in Hu or a perturbation-based study in YEASTRACT"
+    mESC_chipunion_KDUnion_intersect:
+        citation: ""
+        assay_type: "ChIP,Perturbation"
+        description: "Interactions that appear in chipunion AND KDUnion networks"
+    mESC_ATAC_Day4Day6Union:
+    mESC_lit:
+    mESC_scATAC_q10:
+mDC:
+    mDC_chipunion:
+    mDC_KDUnion:
+    mDC_chipunion_KDUnion_intersect:
+hESC:
+    hESC_encodechip:
+    hESC_escapechip:
+    hESC_chipunion:
+    hESC_logof:
+    hESC_nishiyama:
+    hESC_KDUnion:
+    hESC_chipunion_KDUnion_intersect:
+    hESC_lit:

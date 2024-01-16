@@ -7,7 +7,7 @@ import urllib.request
 import os.path
 
 from grnndata import GRNAnnData, from_adata_and_longform, from_scope_loomfile, utils
-from anndata import AnnData
+from anndata import AnnData, concat
 from typing import Optional
 from .tools import GENIE3
 import numpy as np
@@ -34,10 +34,28 @@ FILEDIR = os.path.dirname(os.path.realpath(__file__))
 
 class BenGRN:
     def __init__(self, grn: GRNAnnData, full_dataset: Optional[AnnData] = None):
+        """
+        Initializes the BenGRN class.
+
+        Parameters:
+            grn (GRNAnnData): The Gene Regulatory Network data.
+            full_dataset (Optional[AnnData]): The full dataset, defaults to None.
+        """
         self.grn = grn
         self.full_dataset = full_dataset
 
     def do_tests(self, to: str = "collectri", organism="human"):
+        """
+        This method performs tests on the Gene Regulatory Network (GRN) and the full dataset.
+        It compares the GRN network structure with the ground truth (GT) database and computes various metrics.
+
+        Parameters:
+            to (str, optional): The name of the GT database to use. Defaults to "collectri".
+            organism (str, optional): The organism to consider for the GT database. Defaults to "human".
+
+        Returns:
+            dict: A dictionary containing the computed metrics.
+        """
         self.gt = get_GT_db(name=to, organism=organism)
         # similarity in network structure
         # Get the GRN network from both grn objects
@@ -92,6 +110,7 @@ class BenGRN:
 
     def get_self_metrics(self):
         print("I'm getting my own metrics")
+        pass
 
         # recap N protein complexes
 
@@ -103,15 +122,47 @@ class BenGRN:
 
     def compare_to(self, other: GRNAnnData):
         print("I'm comparing myself to another dataset")
+        pass
 
 
 def get_scenicplus(
     filepath=FILEDIR + "/../data/10xPBMC_homo_scenicplus_genebased_scope.loom",
 ):
+    """
+    This function retrieves a loomx scenicplus data from a given file path and loads it as a GrnnData
+
+    Parameters:
+        filepath : str, optional
+            The path to the scenicplus data file.
+            Default is FILEDIR + "/../data/10xPBMC_homo_scenicplus_genebased_scope.loom".
+
+    Raises:
+        FileNotFoundError: If the file at the given path does not exist.
+
+    Returns:
+        GrnAnnData: The scenicplus data from the given file as a grnndata object
+    """
+    if not os.path.exists(filepath):
+        raise FileNotFoundError(
+            f"The file {filepath} does not exist. You likely need to download \
+                this or another loomxfile from the scope website"
+        )
+
     return from_scope_loomfile(filepath)
 
 
 def get_sroy_gt(join="outer"):
+    """
+    This function retrieves the ground truth data from Stone and Sroy's study.
+
+    Parameters:
+        join : str, optional
+            The type of join to be performed when concatenating the data.
+            Default is "outer".
+
+    Returns:
+        GrnAnnData: The ground truth data as a grnndata object
+    """
     adata_liu = AnnData(
         (
             2
@@ -146,6 +197,16 @@ def get_sroy_gt(join="outer"):
 
 
 def compute_scenic(adata, data_dir=FILEDIR + "/../data"):
+    """
+    This function computes the SCENIC algorithm on the given data.
+
+    Parameters:
+        adata (AnnData): The annotated data matrix of shape n_obs x n_vars. Rows correspond to cells and columns to genes.
+        data_dir (str, optional): The directory where the data files will be stored. Defaults to FILEDIR + "/../data".
+
+    Returns:
+        GRNAnnData: The Gene Regulatory Network data.
+    """
     os.makedirs(data_dir, exist_ok=True)
 
     url1 = "https://resources.aertslab.org/cistarget/motif2tf/motifs-v10nr_clust-nr.hgnc-m0.001-o0.0.tbl"
@@ -190,6 +251,18 @@ def compute_scenic(adata, data_dir=FILEDIR + "/../data"):
 
 
 def compute_genie3(adata, nthreads=30, ntrees=100, **kwargs):
+    """
+    This function computes the GENIE3 algorithm on the given data.
+
+    Parameters:
+        adata (AnnData): The annotated data matrix of shape n_obs x n_vars. Rows correspond to cells and columns to genes.
+        nthreads (int, optional): The number of threads to use for computation. Defaults to 30.
+        ntrees (int, optional): The number of trees to use for the Random Forests. Defaults to 100.
+        **kwargs: Additional arguments to pass to the GENIE3 function.
+
+    Returns:
+        GRNAnnData: The Gene Regulatory Network data computed using the GENIE3 algorithm.
+    """
     mat = np.asarray(adata.X.todense())
     names = adata.var_names[mat.sum(0) > 0].tolist()
     var = adata.var[mat.sum(0) > 0]

@@ -2,6 +2,7 @@
 
 [![codecov](https://codecov.io/gh/jkobject/benGRN/branch/main/graph/badge.svg?token=benGRN_token_here)](https://codecov.io/gh/jkobject/benGRN)
 [![CI](https://github.com/jkobject/benGRN/actions/workflows/main.yml/badge.svg)](https://github.com/jkobject/benGRN/actions/workflows/main.yml)
+[![DOI](https://zenodo.org/badge/731249338.svg)](https://zenodo.org/doi/10.5281/zenodo.10573209)
 
 Awesome Benchmark of Gene Regulatory Networks created by @jkobject
 

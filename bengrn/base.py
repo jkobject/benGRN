@@ -105,7 +105,6 @@ class BenGRN:
         disp = PrecisionRecallDisplay(pr, re, prevalence_pos_label=preval)
         disp.plot(plot_chance_level=True)
         disp.ax_.set_ylim([0, min(pr[:-1].max() * 3, 1)])
-
         return res
 
     def get_self_metrics(self):
@@ -168,7 +167,7 @@ def get_sroy_gt(join="outer"):
             2
             ** pd.read_csv(
                 FILEDIR
-                + "/../data/GroundTruth/stone_and_sroy/scRNA/liu_rna_filtered_log2.tsv",
+                + "/../data/GroundTruth/stone_and_sroy/scRNA/liu_rna_filtered_log2.tsv.gz",
                 sep="\t",
             )
         )
@@ -179,7 +178,7 @@ def get_sroy_gt(join="outer"):
             2
             ** pd.read_csv(
                 FILEDIR
-                + "../data/GroundTruth/stone_and_sroy/scRNA/chen_rna_filtered_log2.tsv",
+                + "/../data/GroundTruth/stone_and_sroy/scRNA/chen_rna_filtered_log2.tsv.gz",
                 sep="\t",
             )
         )

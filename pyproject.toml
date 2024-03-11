@@ -18,6 +18,8 @@ scipy = "*"
 pandas = "*"
 grnndata = "*"
 anndata = "*"
+omnipath = "*"
+dask-expr = "*"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.4"
@@ -29,6 +31,12 @@ pytest-cov = "^4.1.0"
 mypy = "^1.8.0"
 gitchangelog = "^3.0.4"
 mkdocs = "^1.5.3"
+mkdocs-git-revision-date-localized-plugin = "*"
+mkdocstrings = "*"
+mkdocs-git-authors-plugin = "*"
+mkdocs-jupyter = "*"
+mkdocstrings-python = "*"
+
 
 [build-system]
 requires = ["poetry-core"]

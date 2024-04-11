@@ -20,11 +20,20 @@ from pyscenic.aucell import aucell
 
 from ctxcore.rnkdb import FeatherRankingDatabase as RankingDatabase
 
-import seaborn as sns
 import decoupler as dc
 import scipy.stats
 from sklearn.metrics import precision_recall_curve, auc, PrecisionRecallDisplay
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
 
+from omnipath.interactions import AllInteractions
+from omnipath.requests import Annotations
+
+import gseapy as gp
+
+import tqdm
+
+import matplotlib.pyplot as plt
 
 # example constant variable
 NAME = "bengrn"
@@ -32,8 +41,22 @@ NAME = "bengrn"
 FILEDIR = os.path.dirname(os.path.realpath(__file__))
 
 
+# Define a function to calculate precision and recall
+def precision_recall(true_con, grn_con):
+    tp = len(true_con & grn_con)
+    fp = len(grn_con - true_con)
+    fn = len(true_con - grn_con)
+
+    precision = tp / (tp + fp)
+    recall = tp / (tp + fn)
+
+    return precision, recall
+
+
 class BenGRN:
-    def __init__(self, grn: GRNAnnData, full_dataset: Optional[AnnData] = None):
+    def __init__(
+        self, grn: GRNAnnData, full_dataset: Optional[AnnData] = None, doplot=True
+    ):
         """
         Initializes the BenGRN class.
 
@@ -43,8 +66,11 @@ class BenGRN:
         """
         self.grn = grn
         self.full_dataset = full_dataset
+        self.doplot = doplot
 
-    def do_tests(self, to: str = "collectri", organism="human"):
+    def do_tests(
+        self,
+    ):
         """
         This method performs tests on the Gene Regulatory Network (GRN) and the full dataset.
         It compares the GRN network structure with the ground truth (GT) database and computes various metrics.
@@ -119,9 +145,182 @@ class BenGRN:
 
         #
 
-    def compare_to(self, other: GRNAnnData):
-        print("I'm comparing myself to another dataset")
+    def compare_to(
+        self,
+        other: Optional[GRNAnnData] = None,
+        to: str = "collectri",
+        organism="human",
+        base_pr_threshold=0,
+    ):
+        if other is None:
+            print("loading GT, ", to)
+            gt = get_GT_db(name=to, organism=organism)
+        else:
+            other = other.grn[(other.grn.sum(0) != 0)]
+            other = other.loc[:, other.sum() > 0]
+            gt = []
+            for k, v in zip(*np.where(other != 0)):
+                gt.append([other.index[k], other.columns[v], 1])
+            gt = pd.DataFrame(gt, columns=["source", "target", "weight"])
+
+        varnames = list(set(gt.iloc[:, :2].values.flatten()))
+        intersection = self.grn.grn.index.intersection(varnames)
+
+        gt = gt[gt.source.isin(intersection) & gt.target.isin(intersection)]
+        true_con = set([frozenset([i, j]) for i, j in gt.iloc[:, :2].values])
+
+        varnames = list(set(gt.iloc[:, :2].values.flatten()))
+        if self.doplot:
+            print("intersection of {} genes".format(intersection.size))
+            print("intersection pct:", intersection.size / self.grn.grn.index.size)
+        grn = self.grn.grn.loc[varnames, varnames]
+        return compute_auprc(
+            grn, true_con, base_pr_threshold=base_pr_threshold, doplot=self.doplot
+        )
+
+    def scprint_benchmark(self, base_pr_threshold=0):
+        print("base enrichment")
+        metrics = {}
+        for elem in ["Central", "Targets"]:
+            res = utils.enrichment(
+                self.grn,
+                of=elem,
+                gene_sets=[
+                    {"TFs": utils.TF},
+                    utils.file_dir + "/celltype.gmt",
+                ],
+                doplot=False,
+                top_k=10,
+            )
+            if (
+                len(res.res2d[(res.res2d["FDR q-val"] < 0.1) & (res.res2d["NES"] > 1)])
+                > 0
+            ):
+                metrics.update(
+                    {
+                        "enriched_terms_"
+                        + elem: res.res2d[
+                            (res.res2d["FDR q-val"] < 0.1) & (res.res2d["NES"] > 1)
+                        ].Term.tolist()
+                    }
+                )
+                if self.doplot:
+                    _ = res.plot(
+                        terms=res.res2d[
+                            (res.res2d["FDR q-val"] < 0.1) & (res.res2d["NES"] > 1)
+                        ]
+                        .sort_values(by=["NES"], ascending=False)
+                        .Term.iloc[0]
+                    )
+            if self.doplot:
+                try:
+                    _ = res.plot(terms="0__TFs")
+                    plt.show()
+                except KeyError:
+                    pass
+        print("_________________________________________")
+        print("TF specific enrichment")
+        tfchip = gp.get_library(name="ENCODE_TF_ChIP-seq_2014")
+        TFinchip = {i: i.split(" ")[0] for i in tfchip.keys()}
+        res = {}
+        i, j = 0, 0
+        for k, v in TFinchip.items():
+            if v not in self.grn.grn.columns:
+                continue
+            # print(k)
+            j += 1
+            test = self.grn.grn.loc[v].sort_values(ascending=False)
+            if len(set(test.index) & set(tfchip[k])) == 0:
+                continue
+            if test.sum() == 0:
+                continue
+            pre_res = gp.prerank(
+                rnk=test,  # or rnk = rnk,
+                gene_sets=[
+                    # "Chromosome_Location",
+                    {v: tfchip[k]}
+                ],
+                min_size=1,
+                max_size=4000,
+                permutation_num=1000,
+            )
+            val = (
+                pre_res.res2d[
+                    (pre_res.res2d["FDR q-val"] < 0.1) & (pre_res.res2d["NES"] > 1)
+                ]
+                .sort_values(by=["NES"], ascending=False)
+                .drop(columns=["Name"])
+            )
+            if len(val.Term.tolist()) > 0:
+                print("found! ", val.Term.tolist()[0])
+                print(pre_res.res2d["NES"])
+                print("\n")
+                i += 1
+            res[k] = pre_res.res2d
+            # print(val.Term.tolist()[:2])
+        print("found some significant results for ", i * 100 / j, "% TFs\n")
+        metrics.update({"significant_enriched_TFtargets": i * 100 / j})
+        print("_________________________________________")
+        metrics.update(self.compare_to(to="omnipath", organism="human"))
+        return metrics
+
+
+def train_classifier(
+    adj,
+    genes,
+    gt="omnipath",
+    other=None,
+    train_size=1_000_000,
+    doplot=True,
+    class_weight={1: 200, 0: 1},
+):
+    if other is not None:
         pass
+    else:
+        gt = get_GT_db(name=gt)
+
+    varnames = set(gt.iloc[:, :2].values.flatten())
+    intersection = varnames & set(genes)
+
+    loc = np.isin(genes, np.array(list(intersection)))
+    genes = np.array(genes)[loc].tolist()
+    adj = adj[:, loc, :][loc, :, :]
+
+    da = np.zeros((len(genes), len(genes)), dtype=np.float)
+    for i, j in gt.iloc[:, :2].values:
+        if i in genes and j in genes:
+            da[genes.index(i), genes.index(j)] = 1
+            da[genes.index(j), genes.index(i)] = 1
+    print("true elem", da.sum())
+    da = da.flatten()
+    adj = adj.reshape(-1, adj.shape[-1])
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        adj, da, random_state=0, train_size=train_size
+    )
+
+    clf = LogisticRegression(
+        penalty="l1",
+        C=1,
+        solver="liblinear",
+        class_weight=class_weight,
+        max_iter=10_000,
+        n_jobs=8,
+    )
+    clf.fit(X_train, y_train)
+    print("coef", clf.coef_)
+
+    pred = clf.predict(X_test)
+    print("precision", (pred[y_test == 1] == 1).sum() / (pred == 1).sum())
+    print("random precision", y_test.sum() / len(y_test))
+    print("recall", (pred[y_test == 1] == 1).sum() / y_test.sum())
+    print("predicted true", pred.sum())
+    print("number of true", y_test.sum())
+    if doplot:
+        PrecisionRecallDisplay.from_estimator(
+            clf, X_test, y_test, plot_chance_level=True
+        )
+        plt.show()
 
 
 def get_scenicplus(
@@ -191,7 +390,7 @@ def get_sroy_gt(join="outer"):
     )
     adata_liu.obs["dataset"] = "liu"
     adata_chen.obs["dataset"] = "chen"
-    adata = concat([adata_liu, adata_chen], join=join)
+    adata = concat([adata_liu, adata_chen], join=join, fill_value=0)
     return from_adata_and_longform(adata, df)
 
 
@@ -219,7 +418,6 @@ def compute_scenic(adata, data_dir=FILEDIR + "/../data"):
     if not os.path.exists(file2):
         urllib.request.urlretrieve(url2, file2)
     dbs = RankingDatabase(fname=file2, name="genes_10kb_human_rank_v10")
-
     adjacencies = grnboost2(
         expression_data=adata.to_df(), tf_names=utils.TF, verbose=True
     )
@@ -246,6 +444,7 @@ def compute_scenic(adata, data_dir=FILEDIR + "/../data"):
         for k, v in reg.gene2weight.items():
             da[i, var_names.index(k)] = v
     grn.varp["modules"] = da
+    grn.var["TFs"] = [True if i in utils.TF else False for i in grn.var_names]
     return grn
 
 
@@ -267,7 +466,10 @@ def compute_genie3(adata, nthreads=30, ntrees=100, **kwargs):
     var = adata.var[mat.sum(0) > 0]
     mat = mat[:, mat.sum(0) > 0]
     VIM = GENIE3(mat, gene_names=names, nthreads=nthreads, ntrees=ntrees, **kwargs)
-    return GRNAnnData(grn=VIM, X=mat, var=var, obs=adata.obs)
+    grn = GRNAnnData(grn=VIM, X=mat, var=var, obs=adata.obs)
+    grn.var_names = grn.var["symbol"]
+    grn.var["TFs"] = [True if i in utils.TF else False for i in grn.var_names]
+    return grn
 
 
 def get_GT_db(name="collectri", cell_type=None, organism="human", split_complexes=True):
@@ -297,15 +499,25 @@ def get_GT_db(name="collectri", cell_type=None, organism="human", split_complexe
         )
     elif name == "dorothea":
         net = dc.get_dorothea(organism=organism)
-    elif name == "regulonDB":
-        pass
+    elif name == "omnipath":
+        if not os.path.exists(FILEDIR + "/../data/omnipath.parquet"):
+            interactions = AllInteractions()
+            net = interactions.get(exclude=["small_molecule", "lncrna_mrna"])
+            hgnc = Annotations.get(resources="HGNC")
+            rename = {v.uniprot: v.genesymbol for k, v in hgnc.iterrows()}
+            net.source = net.source.replace(rename)
+            net.target = net.target.replace(rename)
+            net.to_parquet(FILEDIR + "/../data/omnipath.parquet")
+        else:
+            net = pd.read_parquet(FILEDIR + "/../data/omnipath.parquet")
     else:
         raise ValueError(f"provided name: '{name}' is not amongst the available names.")
-    varnames = list(set(net.iloc[:, :2].values.flatten()))
-    adata = AnnData(var=varnames)
-    adata.var_names = varnames
-    grn = from_adata_and_longform(adata, net, has_weight=True)
-    return grn
+    # varnames = list(set(net.iloc[:, :2].values.flatten()))
+    # adata = AnnData(var=varnames)
+    # adata.var_names = varnames
+    # grn = from_adata_and_longform(adata, net, has_weight=True)
+    # return grn
+    return net
 
 
 def pd_load_cached(url, loc="/tmp/", cache=True, **kwargs):
@@ -315,3 +527,115 @@ def pd_load_cached(url, loc="/tmp/", cache=True, **kwargs):
         urllib.request.urlretrieve(url, loc)
     # Load the data from the file
     return pd.read_csv(loc, **kwargs)
+
+
+def compute_auprc(grn: pd.DataFrame, true_con: set, base_pr_threshold=0, doplot=True):
+    metrics = {}
+    grn_con = set(
+        [
+            frozenset([grn.index[i], grn.columns[j]])
+            for i, j in zip(*np.where(grn > base_pr_threshold))
+        ]
+    )
+    rand = grn.shape[0] * grn.shape[1]  # / 2) + (grn.shape[0] / 2))
+    precision = len(true_con & grn_con) / len(grn_con)
+    recall = len(true_con & grn_con) / len(true_con)
+    rand_rec = len(grn_con) / rand
+    rand_prec = len(true_con) / rand
+
+    if doplot:
+        print(
+            "precision: ",
+            precision,
+            "\nrecall: ",
+            recall,
+            "\nrandom recall:",
+            rand_rec,
+            "\nrandom precision:",
+            rand_prec,
+        )
+    # Initialize lists to store precision and recall values
+    precision_list = [precision]
+    recall_list = [recall]
+    rand_recall_list = [rand_rec]
+    # Define the thresholds to vary
+    thresholds = np.linspace(grn.values.min(), grn.values.max(), 50)
+    # Calculate precision and recall for each threshold
+    for threshold in tqdm.tqdm(thresholds[1:]):
+        grn_con_threshold = set(
+            [
+                frozenset([grn.index[i], grn.columns[j]])
+                for i, j in zip(*np.where(grn >= threshold))
+            ]
+        )
+        precision = len(true_con & grn_con_threshold) / len(grn_con_threshold)
+        recall = len(true_con & grn_con_threshold) / len(true_con)
+        rand_rec = len(grn_con_threshold) / rand
+        precision_list.append(precision)
+        recall_list.append(recall)
+        rand_recall_list.append(rand_rec)
+
+    # Calculate AUPRC by integrating the precision-recall curve
+    auprc = -np.trapz(precision_list, recall_list)
+    metrics["auprc"] = auprc
+    maxv = np.max(np.array(recall_list) - np.array(rand_recall_list))
+    meanv = np.mean(np.array(recall_list) - np.array(rand_recall_list))
+    metrics.update({"pr_increase_to_random": (meanv, maxv)})
+    if doplot:
+        print("Area Under Precision-Recall Curve (AUPRC): ", auprc)
+        print("overal increase: (mean, max)", (meanv, maxv))
+        # compute EPR
+        # Flatten the array and get the indices of the top K values
+        indices = np.argpartition(grn.values.flatten(), -len(true_con))[
+            -len(true_con) :
+        ]
+        # Convert the indices to 2D
+        top_K_indices = np.column_stack(np.unravel_index(indices, grn.shape))
+        grn_con_topk = set(
+            [frozenset([grn.index[i], grn.columns[j]]) for i, j in top_K_indices]
+        )
+        # Compute the odds ratio
+        true_positive = len(true_con & grn_con_topk)
+        false_positive = len(grn_con_topk) - true_positive
+        false_negative = len(true_con) - true_positive
+        true_negative = rand - true_positive - false_positive - false_negative
+        print("true_positive", true_positive)
+        print("True Negative: ", true_negative)
+        print("False Positive: ", false_positive)
+        print("False Negative: ", false_negative)
+
+        # Avoid division by zero
+        if true_negative == 0 or false_positive == 0:
+            odds_ratio = float("inf")
+        else:
+            odds_ratio = (true_positive * true_negative) / (
+                false_positive * false_negative
+            )
+
+        print("Odds Ratio: ", odds_ratio)
+
+        plt.figure(figsize=(10, 8))
+        plt.plot(
+            recall_list,
+            precision_list,
+            marker=".",
+            linestyle="-",
+            color="b",
+            label="p-r",
+        )
+        plt.plot(
+            rand_recall_list,
+            precision_list,
+            marker=".",
+            linestyle="-",
+            color="r",
+            label="rand rec",
+        )
+        plt.legend(loc="lower left")
+        plt.title("Precision-Recall Curve")
+        plt.xlabel("Recall")
+        plt.ylabel("Precision")
+        plt.xscale("log")
+        plt.grid(True)
+        plt.show()
+    return metrics

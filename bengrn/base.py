@@ -55,7 +55,11 @@ def precision_recall(true_con, grn_con):
 
 class BenGRN:
     def __init__(
-        self, grn: GRNAnnData, full_dataset: Optional[AnnData] = None, doplot=True
+        self,
+        grn: GRNAnnData,
+        full_dataset: Optional[AnnData] = None,
+        doplot=True,
+        do_auc=True,
     ):
         """
         Initializes the BenGRN class.
@@ -67,6 +71,7 @@ class BenGRN:
         self.grn = grn
         self.full_dataset = full_dataset
         self.doplot = doplot
+        self.do_auc = do_auc
 
     def do_tests(
         self,
@@ -155,33 +160,41 @@ class BenGRN:
         if other is None:
             print("loading GT, ", to)
             gt = get_GT_db(name=to, organism=organism)
+            varnames = list(set(gt.iloc[:, :2].values.flatten()))
+            intersection = self.grn.grn.index.intersection(varnames)
+
+            gt = gt[gt.source.isin(intersection) & gt.target.isin(intersection)]
+            true_con = set([(i, j) for i, j in gt.iloc[:, :2].values])
+
+            varnames = list(set(gt.iloc[:, :2].values.flatten()))
+            grn = self.grn.grn.loc[varnames, varnames]
+            if self.doplot:
+                print("intersection of {} genes".format(intersection.size))
+                print("intersection pct:", intersection.size / self.grn.grn.index.size)
         else:
-            other = other.grn[(other.grn.sum(0) != 0)]
-            other = other.loc[:, other.sum() > 0]
-            gt = []
-            for k, v in zip(*np.where(other != 0)):
-                gt.append([other.index[k], other.columns[v], 1])
-            gt = pd.DataFrame(gt, columns=["source", "target", "weight"])
+            elems = other.var[other.grn.sum(1) != 0].index.tolist()
+            sub = other.get(self.grn.var.index.tolist()).get(elems).targets
+            if sub.shape[1] < 5:
+                print("sub is very small: ", sub.shape[1])
+            # sub = sub.iloc[6:]
+            grn = self.grn.grn.loc[sub.index.values, sub.columns.values]
+            true_con = set(
+                [(sub.index[i], grn.columns[j]) for i, j in zip(*np.where(sub > 0))]
+            )
+            print(grn.shape, sub.sum(1))
 
-        varnames = list(set(gt.iloc[:, :2].values.flatten()))
-        intersection = self.grn.grn.index.intersection(varnames)
-
-        gt = gt[gt.source.isin(intersection) & gt.target.isin(intersection)]
-        true_con = set([frozenset([i, j]) for i, j in gt.iloc[:, :2].values])
-
-        varnames = list(set(gt.iloc[:, :2].values.flatten()))
-        if self.doplot:
-            print("intersection of {} genes".format(intersection.size))
-            print("intersection pct:", intersection.size / self.grn.grn.index.size)
-        grn = self.grn.grn.loc[varnames, varnames]
-        return compute_auprc(
-            grn, true_con, base_pr_threshold=base_pr_threshold, doplot=self.doplot
+        return compute_pr(
+            grn,
+            true_con,
+            base_pr_threshold=base_pr_threshold,
+            doplot=self.doplot,
+            do_auc=self.do_auc,
         )
 
     def scprint_benchmark(self, base_pr_threshold=0):
         print("base enrichment")
         metrics = {}
-        for elem in ["Central", "Targets"]:
+        for elem in ["Central", "Targets", "Regulators"]:
             res = utils.enrichment(
                 self.grn,
                 of=elem,
@@ -256,6 +269,8 @@ class BenGRN:
                 print(pre_res.res2d["NES"])
                 print("\n")
                 i += 1
+            else:
+                print("no sig...")
             res[k] = pre_res.res2d
             # print(val.Term.tolist()[:2])
         print("found some significant results for ", i * 100 / j, "% TFs\n")
@@ -266,61 +281,83 @@ class BenGRN:
 
 
 def train_classifier(
-    adj,
-    genes,
+    grn,
     gt="omnipath",
     other=None,
-    train_size=1_000_000,
+    train_size=0.2,
     doplot=True,
     class_weight={1: 200, 0: 1},
+    max_iter=4_000,
+    C=1,
+    return_full=True,
+    shuffle=True,
 ):
     if other is not None:
-        pass
+        elems = other.var[other.grn.sum(1) != 0].index.tolist()
+        sub = other.get(grn.var["symbol"].tolist()).get(elems).targets
+        if sub.shape[1] < 5:
+            print("sub is very small: ", sub.shape[1])
+        genes = grn.var["symbol"].tolist()
+        args = np.argsort(genes)
+        genes = np.array(genes)[args]
+        adj = grn.varp["GRN"][args, :, :][:, args, :][np.isin(genes, sub.index.values)][
+            :, np.isin(genes, sub.columns.values)
+        ]
+        print("pred shape", adj.shape)
+        da = sub.values
     else:
         gt = get_GT_db(name=gt)
+        varnames = set(gt.iloc[:, :2].values.flatten())
+        intersection = varnames & set(grn.var["symbol"].tolist())
+        loc = grn.var["symbol"].isin(intersection)
+        adj = grn.varp["GRN"][:, loc, :][loc, :, :]
+        genes = grn.var.loc[loc]["symbol"].tolist()
 
-    varnames = set(gt.iloc[:, :2].values.flatten())
-    intersection = varnames & set(genes)
+        da = np.zeros((len(genes), len(genes)), dtype=np.float)
+        for i, j in gt.iloc[:, :2].values:
+            if i in genes and j in genes:
+                da[genes.index(i), genes.index(j)] = 1
 
-    loc = np.isin(genes, np.array(list(intersection)))
-    genes = np.array(genes)[loc].tolist()
-    adj = adj[:, loc, :][loc, :, :]
-
-    da = np.zeros((len(genes), len(genes)), dtype=np.float)
-    for i, j in gt.iloc[:, :2].values:
-        if i in genes and j in genes:
-            da[genes.index(i), genes.index(j)] = 1
-            da[genes.index(j), genes.index(i)] = 1
-    print("true elem", da.sum())
+    print("true elem", int(da.sum()), "...")
     da = da.flatten()
     adj = adj.reshape(-1, adj.shape[-1])
 
     X_train, X_test, y_train, y_test = train_test_split(
-        adj, da, random_state=0, train_size=train_size
+        adj, da, random_state=0, train_size=train_size, shuffle=shuffle
     )
-
+    print("doing regression....")
     clf = LogisticRegression(
         penalty="l1",
-        C=1,
+        C=C,
         solver="liblinear",
         class_weight=class_weight,
-        max_iter=10_000,
+        max_iter=max_iter,
         n_jobs=8,
     )
     clf.fit(X_train, y_train)
-    print("coef", clf.coef_)
-
     pred = clf.predict(X_test)
-    print("precision", (pred[y_test == 1] == 1).sum() / (pred == 1).sum())
-    print("random precision", y_test.sum() / len(y_test))
-    print("recall", (pred[y_test == 1] == 1).sum() / y_test.sum())
-    print("predicted true", pred.sum())
-    print("number of true", y_test.sum())
+    epr = compute_epr(clf, X_test, y_test)
+    metrics = {
+        "used_heads": (clf.coef_ != 0).sum(),
+        "precision": (pred[y_test == 1] == 1).sum() / (pred == 1).sum(),
+        "random_precision": y_test.sum() / len(y_test),
+        "recall": (pred[y_test == 1] == 1).sum() / y_test.sum(),
+        "random_recall": pred.sum() / len(pred),
+        "predicted_true": pred.sum(),
+        "number_of_true": y_test.sum(),
+        "epr": epr,
+    }
     if doplot:
         PrecisionRecallDisplay.from_estimator(
             clf, X_test, y_test, plot_chance_level=True
         )
         plt.show()
+    adj = grn.varp["GRN"]
+    if return_full:
+        grn.varp["classified"] = clf.predict_proba(
+            adj.reshape(-1, adj.shape[-1])
+        ).reshape(len(grn.var), len(grn.var), 2)[:, :, 1]
+    return grn, metrics
 
 
 def get_scenicplus(
@@ -349,7 +386,7 @@ def get_scenicplus(
     return from_scope_loomfile(filepath)
 
 
-def get_sroy_gt(join="outer"):
+def get_sroy_gt(get="all", join="outer", species="human", gt="full"):
     """
     This function retrieves the ground truth data from Stone and Sroy's study.
 
@@ -361,36 +398,110 @@ def get_sroy_gt(join="outer"):
     Returns:
         GrnAnnData: The ground truth data as a grnndata object
     """
-    adata_liu = AnnData(
-        (
-            2
-            ** pd.read_csv(
-                FILEDIR
-                + "/../data/GroundTruth/stone_and_sroy/scRNA/liu_rna_filtered_log2.tsv.gz",
-                sep="\t",
+    if species == "human":
+        adata_liu = AnnData(
+            (
+                2
+                ** pd.read_csv(
+                    FILEDIR
+                    + "/../data/GroundTruth/stone_and_sroy/scRNA/liu_rna_filtered_log2.tsv.gz",
+                    sep="\t",
+                )
             )
-        )
-        - 1
-    ).T
-    adata_chen = AnnData(
-        (
-            2
-            ** pd.read_csv(
-                FILEDIR
-                + "/../data/GroundTruth/stone_and_sroy/scRNA/chen_rna_filtered_log2.tsv.gz",
-                sep="\t",
+            - 1
+        ).T
+        adata_chen = AnnData(
+            (
+                2
+                ** pd.read_csv(
+                    FILEDIR
+                    + "/../data/GroundTruth/stone_and_sroy/scRNA/chen_rna_filtered_log2.tsv.gz",
+                    sep="\t",
+                )
             )
-        )
-        - 1
-    ).T
-    df = pd.read_csv(
-        FILEDIR + "/../data/GroundTruth/stone_and_sroy/hESC_ground_truth.tsv",
-        sep="\t",
-        header=None,
-    )
-    adata_liu.obs["dataset"] = "liu"
-    adata_chen.obs["dataset"] = "chen"
-    adata = concat([adata_liu, adata_chen], join=join, fill_value=0)
+            - 1
+        ).T
+        if gt == "full":
+            df = pd.read_csv(
+                FILEDIR + "/../data/GroundTruth/stone_and_sroy/hESC_ground_truth.tsv",
+                sep="\t",
+                header=None,
+            )
+        elif gt == "chip":
+            df = pd.read_csv(
+                FILEDIR
+                + "/../data/GroundTruth/stone_and_sroy/gold_standards/hESC/hESC_chipunion.txt",
+                sep="\t",
+                header=None,
+            )
+        elif gt == "ko":
+            df = pd.read_csv(
+                FILEDIR
+                + "/../data/GroundTruth/stone_and_sroy/gold_standards/hESC/hESC_KDUnion.txt",
+                sep="\t",
+                header=None,
+            )
+        adata_liu.obs["dataset"] = "liu"
+        adata_chen.obs["dataset"] = "chen"
+        if get == "liu":
+            adata = adata_liu
+        elif get == "chen":
+            adata = adata_chen
+        elif get == "all":
+            adata = concat([adata_liu, adata_chen], join=join, fill_value=0)
+        adata.obs["organism_ontology_term_id"] = "NCBITaxon:9606"
+    elif species == "mouse":
+        adata_duren = AnnData(
+            (
+                2
+                ** pd.read_csv(
+                    FILEDIR
+                    + "/../data/GroundTruth/stone_and_sroy/scRNA/duren_rna_filtered_log2.tsv.gz",
+                    sep="\t",
+                )
+            )
+            - 1
+        ).T
+        adata_sem = AnnData(
+            (
+                2
+                ** pd.read_csv(
+                    FILEDIR
+                    + "/../data/GroundTruth/stone_and_sroy/scRNA/semrau_rna_filtered_log2.tsv.gz",
+                    sep="\t",
+                )
+            )
+            - 1
+        ).T
+        if gt == "full":
+            df = pd.read_csv(
+                FILEDIR + "/../data/GroundTruth/stone_and_sroy/mESC_ground_truth.tsv",
+                sep="\t",
+                header=None,
+            )
+        elif gt == "chip":
+            df = pd.read_csv(
+                FILEDIR
+                + "/../data/GroundTruth/stone_and_sroy/gold_standards/mESC/mESC_chipunion.txt",
+                sep="\t",
+                header=None,
+            )
+        elif gt == "ko":
+            df = pd.read_csv(
+                FILEDIR
+                + "/../data/GroundTruth/stone_and_sroy/gold_standards/mESC/mESC_KDUnion.txt",
+                sep="\t",
+                header=None,
+            )
+        adata_duren.obs["dataset"] = "duren"
+        adata_sem.obs["dataset"] = "semrau"
+        if get == "duren":
+            adata = adata_duren
+        elif get == "semrau":
+            adata = adata_sem
+        elif get == "all":
+            adata = concat([adata_duren, adata_sem], join=join, fill_value=0)
+        adata.obs["organism_ontology_term_id"] = "NCBITaxon:10090"
     return from_adata_and_longform(adata, df)
 
 
@@ -529,15 +640,17 @@ def pd_load_cached(url, loc="/tmp/", cache=True, **kwargs):
     return pd.read_csv(loc, **kwargs)
 
 
-def compute_auprc(grn: pd.DataFrame, true_con: set, base_pr_threshold=0, doplot=True):
+def compute_pr(
+    grn: pd.DataFrame, true_con: set, base_pr_threshold=0, do_auc=True, doplot=True
+):
     metrics = {}
     grn_con = set(
         [
-            frozenset([grn.index[i], grn.columns[j]])
+            (grn.index[i], grn.columns[j])
             for i, j in zip(*np.where(grn > base_pr_threshold))
         ]
     )
-    rand = grn.shape[0] * grn.shape[1]  # / 2) + (grn.shape[0] / 2))
+    rand = grn.shape[0] * grn.shape[1] - (grn.shape[0])
     precision = len(true_con & grn_con) / len(grn_con)
     recall = len(true_con & grn_con) / len(true_con)
     rand_rec = len(grn_con) / rand
@@ -554,6 +667,14 @@ def compute_auprc(grn: pd.DataFrame, true_con: set, base_pr_threshold=0, doplot=
             "\nrandom precision:",
             rand_prec,
         )
+    metrics.update(
+        {
+            "precision": precision,
+            "recall": recall,
+            "rand_recall": rand_rec,
+            "rand_precision": rand_prec,
+        }
+    )
     # Initialize lists to store precision and recall values
     precision_list = [precision]
     recall_list = [recall]
@@ -561,59 +682,59 @@ def compute_auprc(grn: pd.DataFrame, true_con: set, base_pr_threshold=0, doplot=
     # Define the thresholds to vary
     thresholds = np.linspace(grn.values.min(), grn.values.max(), 50)
     # Calculate precision and recall for each threshold
-    for threshold in tqdm.tqdm(thresholds[1:]):
-        grn_con_threshold = set(
-            [
-                frozenset([grn.index[i], grn.columns[j]])
-                for i, j in zip(*np.where(grn >= threshold))
-            ]
-        )
-        precision = len(true_con & grn_con_threshold) / len(grn_con_threshold)
-        recall = len(true_con & grn_con_threshold) / len(true_con)
-        rand_rec = len(grn_con_threshold) / rand
-        precision_list.append(precision)
-        recall_list.append(recall)
-        rand_recall_list.append(rand_rec)
-
-    # Calculate AUPRC by integrating the precision-recall curve
-    auprc = -np.trapz(precision_list, recall_list)
-    metrics["auprc"] = auprc
-    maxv = np.max(np.array(recall_list) - np.array(rand_recall_list))
-    meanv = np.mean(np.array(recall_list) - np.array(rand_recall_list))
-    metrics.update({"pr_increase_to_random": (meanv, maxv)})
-    if doplot:
-        print("Area Under Precision-Recall Curve (AUPRC): ", auprc)
-        print("overal increase: (mean, max)", (meanv, maxv))
-        # compute EPR
-        # Flatten the array and get the indices of the top K values
-        indices = np.argpartition(grn.values.flatten(), -len(true_con))[
-            -len(true_con) :
-        ]
-        # Convert the indices to 2D
-        top_K_indices = np.column_stack(np.unravel_index(indices, grn.shape))
-        grn_con_topk = set(
-            [frozenset([grn.index[i], grn.columns[j]]) for i, j in top_K_indices]
-        )
-        # Compute the odds ratio
-        true_positive = len(true_con & grn_con_topk)
-        false_positive = len(grn_con_topk) - true_positive
-        false_negative = len(true_con) - true_positive
-        true_negative = rand - true_positive - false_positive - false_negative
-        print("true_positive", true_positive)
-        print("True Negative: ", true_negative)
-        print("False Positive: ", false_positive)
-        print("False Negative: ", false_negative)
-
-        # Avoid division by zero
-        if true_negative == 0 or false_positive == 0:
-            odds_ratio = float("inf")
-        else:
-            odds_ratio = (true_positive * true_negative) / (
-                false_positive * false_negative
+    if do_auc:
+        for threshold in tqdm.tqdm(thresholds[1:]):
+            grn_con_threshold = set(
+                [
+                    (grn.index[i], grn.columns[j])
+                    for i, j in zip(*np.where(grn >= threshold))
+                ]
             )
+            precision = len(true_con & grn_con_threshold) / len(grn_con_threshold)
+            recall = len(true_con & grn_con_threshold) / len(true_con)
+            rand_rec = len(grn_con_threshold) / rand
+            precision_list.append(precision)
+            recall_list.append(recall)
+            rand_recall_list.append(rand_rec)
 
-        print("Odds Ratio: ", odds_ratio)
+        # Calculate AUPRC by integrating the precision-recall curve
+        auprc = -np.trapz(precision_list, recall_list)
+        metrics["auprc"] = auprc
+        maxv = np.max(np.array(recall_list) - np.array(rand_recall_list))
+        meanv = np.mean(np.array(recall_list) - np.array(rand_recall_list))
+        metrics.update({"pr_increase_to_random": (meanv, maxv)})
+        metrics.update({"auprc": auprc})
+        if doplot:
+            print("Area Under Precision-Recall Curve (AUPRC): ", auprc)
+            print("overal increase: (mean, max)", (meanv, maxv))
+    # compute EPR
+    # Flatten the array and get the indices of the top K values
+    indices = np.argpartition(grn.values.flatten(), -len(true_con))[-len(true_con) :]
+    # Convert the indices to 2D
+    top_K_indices = np.column_stack(np.unravel_index(indices, grn.shape))
+    grn_con_topk = set([(grn.index[i], grn.columns[j]) for i, j in top_K_indices])
+    # Compute the odds ratio
+    true_positive = len(true_con & grn_con_topk)
+    false_positive = len(grn_con_topk) - true_positive
+    false_negative = len(true_con) - true_positive
+    true_negative = rand - true_positive - false_positive - false_negative
 
+    metrics.update(
+        {
+            "true_positive": true_positive,
+            "true_negative": true_negative,
+            "false_positive": false_positive,
+            "false_negative": false_negative,
+        }
+    )
+    # Avoid division by zero
+    if true_negative == 0 or false_positive == 0:
+        odds_ratio = float("inf")
+    else:
+        odds_ratio = (true_positive * true_negative) / (false_positive * false_negative)
+
+    metrics.update({"EPR": odds_ratio})
+    if doplot:
         plt.figure(figsize=(10, 8))
         plt.plot(
             recall_list,
@@ -639,3 +760,19 @@ def compute_auprc(grn: pd.DataFrame, true_con: set, base_pr_threshold=0, doplot=
         plt.grid(True)
         plt.show()
     return metrics
+
+
+def compute_epr(clf, X_test, y_test):
+    prb = clf.predict_proba(X_test)[:, 1]
+
+    K = sum(y_test)
+    # get only the top-K elems from prb
+    pred = np.zeros(prb.shape)
+    pred[np.argsort(prb)[-int(K) :]] = 1
+
+    true_positive = np.sum(pred[y_test == 1] == 1)
+    false_positive = np.sum(pred[y_test == 0] == 1)
+    false_negative = np.sum(pred[y_test == 1] == 0)
+    true_negative = np.sum(pred[y_test == 0] == 0)
+    odds_ratio = (true_positive * true_negative) / (false_positive * false_negative)
+    return odds_ratio

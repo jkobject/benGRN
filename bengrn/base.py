@@ -32,6 +32,7 @@ from omnipath.requests import Annotations
 import gseapy as gp
 
 import tqdm
+import logging
 
 import matplotlib.pyplot as plt
 
@@ -160,32 +161,31 @@ class BenGRN:
         if other is None:
             print("loading GT, ", to)
             gt = get_GT_db(name=to, organism=organism)
-            varnames = list(set(gt.iloc[:, :2].values.flatten()))
-            intersection = self.grn.grn.index.intersection(varnames)
+            varnames = set(gt.iloc[:, :2].values.flatten())
+            intersection = varnames & set(self.grn.var["symbol"].tolist())
+            loc = self.grn.var["symbol"].isin(intersection)
+            adj = self.grn.varp["GRN"][:, loc][loc, :]
+            genes = self.grn.var.loc[loc, "symbol"].tolist()
 
-            gt = gt[gt.source.isin(intersection) & gt.target.isin(intersection)]
-            true_con = set([(i, j) for i, j in gt.iloc[:, :2].values])
-
-            varnames = list(set(gt.iloc[:, :2].values.flatten()))
-            grn = self.grn.grn.loc[varnames, varnames]
+            da = np.zeros(adj.shape, dtype=np.float)
+            for i, j in gt.iloc[:, :2].values:
+                if i in genes and j in genes:
+                    da[genes.index(i), genes.index(j)] = 1
             if self.doplot:
-                print("intersection of {} genes".format(intersection.size))
-                print("intersection pct:", intersection.size / self.grn.grn.index.size)
+                print("intersection of {} genes".format(len(intersection)))
+                print("intersection pct:", len(intersection) / len(self.grn.grn.index))
         else:
             elems = other.var[other.grn.sum(1) != 0].index.tolist()
-            sub = other.get(self.grn.var.index.tolist()).get(elems).targets
-            if sub.shape[1] < 5:
-                print("sub is very small: ", sub.shape[1])
-            # sub = sub.iloc[6:]
-            grn = self.grn.grn.loc[sub.index.values, sub.columns.values]
-            true_con = set(
-                [(sub.index[i], grn.columns[j]) for i, j in zip(*np.where(sub > 0))]
-            )
-            print(grn.shape, sub.sum(1))
+            da = other.get(self.grn.var.index.tolist()).get(elems).targets
+            if da.shape[1] < 5:
+                print("da is very small: ", da.shape[1])
+            # da = da.iloc[6:]
+            adj = self.grn.grn.loc[da.index.values, da.columns.values].values
+            da = da.values
 
         return compute_pr(
-            grn,
-            true_con,
+            adj,
+            da,
             base_pr_threshold=base_pr_threshold,
             doplot=self.doplot,
             do_auc=self.do_auc,
@@ -195,6 +195,9 @@ class BenGRN:
         print("base enrichment")
         metrics = {}
         for elem in ["Central", "Targets", "Regulators"]:
+            if elem == "Central" and (self.grn.varp["GRN"] != 0).sum() > 100_000_000:
+                print("too many genes for central computation")
+                continue
             res = utils.enrichment(
                 self.grn,
                 of=elem,
@@ -237,6 +240,8 @@ class BenGRN:
         TFinchip = {i: i.split(" ")[0] for i in tfchip.keys()}
         res = {}
         i, j = 0, 0
+        previous_level = logging.root.manager.disable
+        logging.disable(logging.WARNING)
         for k, v in TFinchip.items():
             if v not in self.grn.grn.columns:
                 continue
@@ -247,6 +252,7 @@ class BenGRN:
                 continue
             if test.sum() == 0:
                 continue
+
             pre_res = gp.prerank(
                 rnk=test,  # or rnk = rnk,
                 gene_sets=[
@@ -259,20 +265,23 @@ class BenGRN:
             )
             val = (
                 pre_res.res2d[
-                    (pre_res.res2d["FDR q-val"] < 0.1) & (pre_res.res2d["NES"] > 1)
+                    (pre_res.res2d["FDR q-val"] < 0.05) & (pre_res.res2d["NES"] > 1)
                 ]
                 .sort_values(by=["NES"], ascending=False)
                 .drop(columns=["Name"])
             )
             if len(val.Term.tolist()) > 0:
-                print("found! ", val.Term.tolist()[0])
-                print(pre_res.res2d["NES"])
-                print("\n")
+                # print("found! ", val.Term.tolist()[0])
+                # print(pre_res.res2d["NES"])
+                # print(pre_res.res2d["FDR q-val"])
+                # print("\n")
                 i += 1
             else:
-                print("no sig...")
+                pass
+                # print("no sig...")
             res[k] = pre_res.res2d
             # print(val.Term.tolist()[:2])
+        logging.disable(previous_level)
         print("found some significant results for ", i * 100 / j, "% TFs\n")
         metrics.update({"significant_enriched_TFtargets": i * 100 / j})
         print("_________________________________________")
@@ -290,7 +299,7 @@ def train_classifier(
     max_iter=4_000,
     C=1,
     return_full=True,
-    shuffle=True,
+    shuffle=False,
 ):
     if other is not None:
         elems = other.var[other.grn.sum(1) != 0].index.tolist()
@@ -641,20 +650,16 @@ def pd_load_cached(url, loc="/tmp/", cache=True, **kwargs):
 
 
 def compute_pr(
-    grn: pd.DataFrame, true_con: set, base_pr_threshold=0, do_auc=True, doplot=True
+    grn: np.array, true: np.array, base_pr_threshold=0, do_auc=True, doplot=True
 ):
+    if grn.shape != true.shape:
+        raise ValueError("The shape of the GRN and the true matrix do not match.")
     metrics = {}
-    grn_con = set(
-        [
-            (grn.index[i], grn.columns[j])
-            for i, j in zip(*np.where(grn > base_pr_threshold))
-        ]
-    )
-    rand = grn.shape[0] * grn.shape[1] - (grn.shape[0])
-    precision = len(true_con & grn_con) / len(grn_con)
-    recall = len(true_con & grn_con) / len(true_con)
-    rand_rec = len(grn_con) / rand
-    rand_prec = len(true_con) / rand
+    true = true.astype(bool)
+    tot = (grn.shape[0] * grn.shape[1]) - grn.shape[0]
+    precision = (grn[true] != 0).sum() / (grn != 0).sum()
+    recall = (grn[true] != 0).sum() / true.sum()
+    rand_prec = true.sum() / tot
 
     if doplot:
         print(
@@ -662,8 +667,6 @@ def compute_pr(
             precision,
             "\nrecall: ",
             recall,
-            "\nrandom recall:",
-            rand_rec,
             "\nrandom precision:",
             rand_prec,
         )
@@ -671,62 +674,37 @@ def compute_pr(
         {
             "precision": precision,
             "recall": recall,
-            "rand_recall": rand_rec,
             "rand_precision": rand_prec,
         }
     )
     # Initialize lists to store precision and recall values
     precision_list = [precision]
     recall_list = [recall]
-    rand_recall_list = [rand_rec]
     # Define the thresholds to vary
-    thresholds = np.linspace(grn.values.min(), grn.values.max(), 50)
+    thresholds = np.linspace(grn.min(), grn.max(), 100)
     # Calculate precision and recall for each threshold
     if do_auc:
         for threshold in tqdm.tqdm(thresholds[1:]):
-            grn_con_threshold = set(
-                [
-                    (grn.index[i], grn.columns[j])
-                    for i, j in zip(*np.where(grn >= threshold))
-                ]
-            )
-            precision = len(true_con & grn_con_threshold) / len(grn_con_threshold)
-            recall = len(true_con & grn_con_threshold) / len(true_con)
-            rand_rec = len(grn_con_threshold) / rand
+            precision = (grn[true] > threshold).sum() / (grn > threshold).sum()
+            recall = (grn[true] > threshold).sum() / true.sum()
             precision_list.append(precision)
             recall_list.append(recall)
-            rand_recall_list.append(rand_rec)
-
         # Calculate AUPRC by integrating the precision-recall curve
+        precision_list = np.nan_to_num(np.array(precision_list))
+        recall_list = np.nan_to_num(np.array(recall_list))
         auprc = -np.trapz(precision_list, recall_list)
         metrics["auprc"] = auprc
-        maxv = np.max(np.array(recall_list) - np.array(rand_recall_list))
-        meanv = np.mean(np.array(recall_list) - np.array(rand_recall_list))
-        metrics.update({"pr_increase_to_random": (meanv, maxv)})
         metrics.update({"auprc": auprc})
         if doplot:
             print("Area Under Precision-Recall Curve (AUPRC): ", auprc)
-            print("overal increase: (mean, max)", (meanv, maxv))
     # compute EPR
-    # Flatten the array and get the indices of the top K values
-    indices = np.argpartition(grn.values.flatten(), -len(true_con))[-len(true_con) :]
-    # Convert the indices to 2D
-    top_K_indices = np.column_stack(np.unravel_index(indices, grn.shape))
-    grn_con_topk = set([(grn.index[i], grn.columns[j]) for i, j in top_K_indices])
+    # get the indices of the topK highest values in "grn"
+    indices = np.argpartition(grn.flatten(), -int(true.sum()))[-int(true.sum()) :]
     # Compute the odds ratio
-    true_positive = len(true_con & grn_con_topk)
-    false_positive = len(grn_con_topk) - true_positive
-    false_negative = len(true_con) - true_positive
-    true_negative = rand - true_positive - false_positive - false_negative
-
-    metrics.update(
-        {
-            "true_positive": true_positive,
-            "true_negative": true_negative,
-            "false_positive": false_positive,
-            "false_negative": false_negative,
-        }
-    )
+    true_positive = true[np.unravel_index(indices, true.shape)].sum()
+    false_positive = grn.sum() - true_positive
+    false_negative = true.sum() - true_positive
+    true_negative = tot - true_positive - false_positive - false_negative
     # Avoid division by zero
     if true_negative == 0 or false_positive == 0:
         odds_ratio = float("inf")
@@ -735,6 +713,7 @@ def compute_pr(
 
     metrics.update({"EPR": odds_ratio})
     if doplot:
+        print("EPR:", odds_ratio)
         plt.figure(figsize=(10, 8))
         plt.plot(
             recall_list,
@@ -745,12 +724,11 @@ def compute_pr(
             label="p-r",
         )
         plt.plot(
-            rand_recall_list,
-            precision_list,
-            marker=".",
-            linestyle="-",
+            [recall_list[0], recall_list[-1]],
+            [rand_prec, rand_prec],
+            linestyle="--",
             color="r",
-            label="rand rec",
+            label="Random Precision",
         )
         plt.legend(loc="lower left")
         plt.title("Precision-Recall Curve")

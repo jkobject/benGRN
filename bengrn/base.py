@@ -175,12 +175,13 @@ class BenGRN:
                 except KeyError:
                     pass
             try:
+                istrue = metrics.get("TF_enr", False)
                 metrics.update(
                     {
-                        "TF_enr": res.res2d.loc[
+                        "TF_enr": (res.res2d.loc[
                             res.res2d.Term == "0__TFs", "FDR q-val"
                         ][0]
-                        < 0.1
+                        < 0.1) | istrue
                     }
                 )
             except KeyError:

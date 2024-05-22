@@ -135,3 +135,5 @@ data/GroundTruth/adamson_raw/
 *.loom
 *.feather
 *.tbl
+data/BH-corrected.csv.gz
+data/ess_perturb_sc.h5ad

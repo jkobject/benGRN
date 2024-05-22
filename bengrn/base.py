@@ -1,7 +1,6 @@
 """
 bengrn base module.
 """
-
 import pandas as pd
 import urllib.request
 import os.path
@@ -35,6 +34,10 @@ import tqdm
 import logging
 
 import matplotlib.pyplot as plt
+
+from scipy.sparse import csr_matrix
+
+import scanpy as sc
 
 # example constant variable
 NAME = "bengrn"
@@ -74,71 +77,6 @@ class BenGRN:
         self.doplot = doplot
         self.do_auc = do_auc
 
-    def do_tests(
-        self,
-    ):
-        """
-        This method performs tests on the Gene Regulatory Network (GRN) and the full dataset.
-        It compares the GRN network structure with the ground truth (GT) database and computes various metrics.
-
-        Parameters:
-            to (str, optional): The name of the GT database to use. Defaults to "collectri".
-            organism (str, optional): The organism to consider for the GT database. Defaults to "human".
-
-        Returns:
-            dict: A dictionary containing the computed metrics.
-        """
-        self.gt = get_GT_db(name=to, organism=organism)
-        # similarity in network structure
-        # Get the GRN network from both grn objects
-        grn_self = self.grn.grn
-        grn_gt = self.gt.grn
-
-        intersection = grn_self.index.intersection(grn_gt.index)
-        print("intersection of {} genes".format(intersection.size))
-        res = {"intersection": intersection.size / grn_self.index.size}
-        intersection = list(intersection)
-        grn_self = grn_self.loc[intersection, intersection]
-        grn_gt = grn_gt.loc[intersection, intersection]
-        similar_edges = (
-            (grn_self != 0) & (grn_gt != 0) & (np.sign(grn_self) == np.sign(grn_gt))
-        )
-        similar_edges_ct = np.sum(np.sum(similar_edges))
-
-        # Compute the total number of edges
-        total_edges = np.sum(np.sum(grn_self != 0))
-
-        # Compute the total number of edges in the other GRN
-        total_edges_other = np.sum(np.sum((grn_gt != 0)))
-        precision = similar_edges_ct / total_edges
-        recall = similar_edges_ct / total_edges_other
-        accuracy = similar_edges_ct / (
-            total_edges + total_edges_other - similar_edges_ct
-        )
-
-        # Compute the Spearman's rank correlation between the two overlapping sets of edges
-        spearman_corr = scipy.stats.spearmanr(
-            grn_self.values[similar_edges].flatten(),
-            grn_gt.values[similar_edges].flatten(),
-        )
-        res.update(
-            {
-                "precision": precision,
-                "recall": recall,
-                "accuracy": accuracy,
-                "spearman_corr": spearman_corr,
-            }
-        )
-
-        gt = grn_gt.values.flatten() != 0
-        preval = gt.sum() / len(gt)
-        pr, re, _ = precision_recall_curve(gt, grn_self.values.flatten())
-        res.update({"auc": auc(re, pr)})
-        disp = PrecisionRecallDisplay(pr, re, prevalence_pos_label=preval)
-        disp.plot(plot_chance_level=True)
-        disp.ax_.set_ylim([0, min(pr[:-1].max() * 3, 1)])
-        return res
-
     def get_self_metrics(self):
         print("I'm getting my own metrics")
         pass
@@ -161,6 +99,7 @@ class BenGRN:
         if other is None:
             print("loading GT, ", to)
             gt = get_GT_db(name=to, organism=organism)
+            # gt = gt[gt.type != "post_translational"]
             varnames = set(gt.iloc[:, :2].values.flatten())
             intersection = varnames & set(self.grn.var["symbol"].tolist())
             loc = self.grn.var["symbol"].isin(intersection)
@@ -202,10 +141,11 @@ class BenGRN:
                 self.grn,
                 of=elem,
                 gene_sets=[
-                    {"TFs": utils.TF},
+                    {"TFs": [i.split(".")[0] for i in utils.TF]},
                     utils.file_dir + "/celltype.gmt",
                 ],
                 doplot=False,
+                maxsize=2000,
                 top_k=10,
             )
             if (
@@ -234,6 +174,17 @@ class BenGRN:
                     plt.show()
                 except KeyError:
                     pass
+            try:
+                metrics.update(
+                    {
+                        "TF_enr": res.res2d.loc[
+                            res.res2d.Term == "0__TFs", "FDR q-val"
+                        ][0]
+                        < 0.1
+                    }
+                )
+            except KeyError:
+                pass
         print("_________________________________________")
         print("TF specific enrichment")
         tfchip = gp.get_library(name="ENCODE_TF_ChIP-seq_2014")
@@ -293,6 +244,7 @@ def train_classifier(
     grn,
     gt="omnipath",
     other=None,
+    use_col="symbol",
     train_size=0.2,
     doplot=True,
     class_weight={1: 200, 0: 1},
@@ -303,10 +255,10 @@ def train_classifier(
 ):
     if other is not None:
         elems = other.var[other.grn.sum(1) != 0].index.tolist()
-        sub = other.get(grn.var["symbol"].tolist()).get(elems).targets
+        sub = other.get(grn.var[use_col].tolist()).get(elems).targets
         if sub.shape[1] < 5:
             print("sub is very small: ", sub.shape[1])
-        genes = grn.var["symbol"].tolist()
+        genes = grn.var[use_col].tolist()
         args = np.argsort(genes)
         genes = np.array(genes)[args]
         adj = grn.varp["GRN"][args, :, :][:, args, :][np.isin(genes, sub.index.values)][
@@ -317,10 +269,10 @@ def train_classifier(
     else:
         gt = get_GT_db(name=gt)
         varnames = set(gt.iloc[:, :2].values.flatten())
-        intersection = varnames & set(grn.var["symbol"].tolist())
-        loc = grn.var["symbol"].isin(intersection)
+        intersection = varnames & set(grn.var[use_col].tolist())
+        loc = grn.var[use_col].isin(intersection)
         adj = grn.varp["GRN"][:, loc, :][loc, :, :]
-        genes = grn.var.loc[loc]["symbol"].tolist()
+        genes = grn.var.loc[loc][use_col].tolist()
 
         da = np.zeros((len(genes), len(genes)), dtype=np.float)
         for i, j in gt.iloc[:, :2].values:
@@ -351,12 +303,12 @@ def train_classifier(
         "precision": (pred[y_test == 1] == 1).sum() / (pred == 1).sum(),
         "random_precision": y_test.sum() / len(y_test),
         "recall": (pred[y_test == 1] == 1).sum() / y_test.sum(),
-        "random_recall": pred.sum() / len(pred),
         "predicted_true": pred.sum(),
         "number_of_true": y_test.sum(),
         "epr": epr,
     }
     if doplot:
+        print("metrics", metrics)
         PrecisionRecallDisplay.from_estimator(
             clf, X_test, y_test, plot_chance_level=True
         )
@@ -366,7 +318,7 @@ def train_classifier(
         grn.varp["classified"] = clf.predict_proba(
             adj.reshape(-1, adj.shape[-1])
         ).reshape(len(grn.var), len(grn.var), 2)[:, :, 1]
-    return grn, metrics
+    return grn, metrics, clf
 
 
 def get_scenicplus(
@@ -514,6 +466,44 @@ def get_sroy_gt(get="all", join="outer", species="human", gt="full"):
     return from_adata_and_longform(adata, df)
 
 
+def get_perturb_gt(
+    url="https://plus.figshare.com/ndownloader/files/38349308",
+    filename=FILEDIR + "/../data/BH-corrected.csv.gz",
+):
+    if not os.path.exists(filename):
+        urllib.request.urlretrieve(url, filename)
+    pert = pd.read_csv(filename)
+    pert = pert.set_index("Unnamed: 0").T
+    pert.index = [i.split("_")[-1] for i in pert.index]
+    pert = pert[~pert.index.duplicated(keep="first")].T
+    pert = pert < 0.05
+    adata_sc = sc.read(
+        FILEDIR + "/../data/ess_perturb_sc.h5ad",
+        backup_url="https://plus.figshare.com/ndownloader/files/35773219",
+    )
+    adata_sc = adata_sc[adata_sc.obs.gene_id == "non-targeting"]
+    adata_sc[:, adata_sc.var.index.isin(set(pert.index) | set(pert.columns))]
+    adata_sc.obs["organism_ontology_term_id"] = "NCBITaxon:9606"
+    adata_sc = adata_sc[:, adata_sc.var.sort_index().index]
+
+    pert = pert.loc[pert.index.isin(adata_sc.var.index)].loc[
+        :, pert.columns.isin(adata_sc.var.index)
+    ]
+
+    missing_indices = list(set(adata_sc.var.index) - set(pert.index))
+    pert = pert.reindex(pert.index.union(missing_indices), fill_value=False)
+    missing_indices = list(set(adata_sc.var.index) - set(pert.columns))
+    pert = pert.reindex(columns=pert.columns.union(missing_indices), fill_value=False)
+
+    pert = pert.loc[adata_sc.var.index].loc[:, adata_sc.var.index]
+    return GRNAnnData(
+        X=csr_matrix(adata_sc.X.toarray()),
+        var=adata_sc.var,
+        obs=adata_sc.obs,
+        grn=csr_matrix(pert.values),
+    )
+
+
 def compute_scenic(adata, data_dir=FILEDIR + "/../data"):
     """
     This function computes the SCENIC algorithm on the given data.
@@ -604,7 +594,6 @@ def get_GT_db(name="collectri", cell_type=None, organism="human", split_complexe
     Raises:
         ValueError: if the provided name is not amongst the available names.
     """
-    # TODO: use omnipath instead
     if name == "tflink":
         TFLINK = "https://cdn.netbiol.org/tflink/download_files/TFLink_Homo_sapiens_interactions_All_simpleFormat_v1.0.tsv.gz"
         net = pd_load_cached(TFLINK)
@@ -650,7 +639,11 @@ def pd_load_cached(url, loc="/tmp/", cache=True, **kwargs):
 
 
 def compute_pr(
-    grn: np.array, true: np.array, base_pr_threshold=0, do_auc=True, doplot=True
+    grn: np.array,
+    true: np.array,
+    base_pr_threshold=0,
+    do_auc=True,
+    doplot=True,
 ):
     if grn.shape != true.shape:
         raise ValueError("The shape of the GRN and the true matrix do not match.")
@@ -681,7 +674,9 @@ def compute_pr(
     precision_list = [precision]
     recall_list = [recall]
     # Define the thresholds to vary
-    thresholds = np.linspace(grn.min(), grn.max(), 100)
+    thresholds = np.logspace(np.log10(grn.min()), np.log10(grn.max()), 50)
+    thresholds = np.append(thresholds, np.linspace(grn.min(), grn.max(), 50))
+    thresholds = np.sort(thresholds)
     # Calculate precision and recall for each threshold
     if do_auc:
         for threshold in tqdm.tqdm(thresholds[1:]):
@@ -690,6 +685,9 @@ def compute_pr(
             precision_list.append(precision)
             recall_list.append(recall)
         # Calculate AUPRC by integrating the precision-recall curve
+        if 1.0 not in recall_list:
+            precision_list.insert(0, rand_prec)
+            recall_list.insert(0, 1.0)
         precision_list = np.nan_to_num(np.array(precision_list))
         recall_list = np.nan_to_num(np.array(recall_list))
         auprc = -np.trapz(precision_list, recall_list)
@@ -699,13 +697,17 @@ def compute_pr(
             print("Area Under Precision-Recall Curve (AUPRC): ", auprc)
     # compute EPR
     # get the indices of the topK highest values in "grn"
+    if isinstance(grn, csr_matrix):
+        grn = grn.toarray()
     indices = np.argpartition(grn.flatten(), -int(true.sum()))[-int(true.sum()) :]
     # Compute the odds ratio
     true_positive = true[np.unravel_index(indices, true.shape)].sum()
-    false_positive = grn.sum() - true_positive
+    false_positive = true.sum() - true_positive
+    # this is normal as we compute on the same number of pred_pos as true_pos
     false_negative = true.sum() - true_positive
     true_negative = tot - true_positive - false_positive - false_negative
     # Avoid division by zero
+    # this is a debugger line
     if true_negative == 0 or false_positive == 0:
         odds_ratio = float("inf")
     else:

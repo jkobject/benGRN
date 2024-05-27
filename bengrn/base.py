@@ -1,9 +1,11 @@
 """
 bengrn base module.
 """
+
 import pandas as pd
 import urllib.request
 import os.path
+import json
 
 from grnndata import GRNAnnData, from_adata_and_longform, from_scope_loomfile, utils
 from anndata import AnnData, concat
@@ -13,20 +15,17 @@ import numpy as np
 
 from arboreto.algo import grnboost2
 
-from pyscenic.utils import modules_from_adjacencies
-from pyscenic.prune import prune2df, df2regulons
-from pyscenic.aucell import aucell
+# from pyscenic.utils import modules_from_adjacencies
+# from pyscenic.prune import prune2df, df2regulons
+# from pyscenic.aucell import aucell
+# issue here of using an older version of numpy calling np.object instead of np.object_
 
 from ctxcore.rnkdb import FeatherRankingDatabase as RankingDatabase
 
-import decoupler as dc
 import scipy.stats
 from sklearn.metrics import precision_recall_curve, auc, PrecisionRecallDisplay
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
-
-from omnipath.interactions import AllInteractions
-from omnipath.requests import Annotations
 
 import gseapy as gp
 
@@ -97,7 +96,8 @@ class BenGRN:
         base_pr_threshold=0,
     ):
         if other is None:
-            print("loading GT, ", to)
+            if self.doplot:
+                print("loading GT, ", to)
             gt = get_GT_db(name=to, organism=organism)
             # gt = gt[gt.type != "post_translational"]
             varnames = set(gt.iloc[:, :2].values.flatten())
@@ -106,7 +106,7 @@ class BenGRN:
             adj = self.grn.varp["GRN"][:, loc][loc, :]
             genes = self.grn.var.loc[loc, "symbol"].tolist()
 
-            da = np.zeros(adj.shape, dtype=np.float)
+            da = np.zeros(adj.shape, dtype=float)
             for i, j in gt.iloc[:, :2].values:
                 if i in genes and j in genes:
                     da[genes.index(i), genes.index(j)] = 1
@@ -178,17 +178,20 @@ class BenGRN:
                 istrue = metrics.get("TF_enr", False)
                 metrics.update(
                     {
-                        "TF_enr": (res.res2d.loc[
-                            res.res2d.Term == "0__TFs", "FDR q-val"
-                        ][0]
-                        < 0.1) | istrue
+                        "TF_enr": (
+                            res.res2d.loc[res.res2d.Term == "0__TFs", "FDR q-val"][0]
+                            < 0.1
+                        )
+                        | istrue
                     }
                 )
             except KeyError:
                 pass
-        print("_________________________________________")
-        print("TF specific enrichment")
-        tfchip = gp.get_library(name="ENCODE_TF_ChIP-seq_2014")
+        if self.doplot:
+            print("_________________________________________")
+            print("TF specific enrichment")
+        with open(FILEDIR + "/../data/tfchip_data.json", "r") as file:
+            tfchip = json.load(file)
         TFinchip = {i: i.split(" ")[0] for i in tfchip.keys()}
         res = {}
         i, j = 0, 0
@@ -199,18 +202,14 @@ class BenGRN:
                 continue
             # print(k)
             j += 1
-            test = self.grn.grn.loc[v].sort_values(ascending=False)
+            test = self.grn.grn.loc[[v]].sort_values(by=v, ascending=False).T
             if len(set(test.index) & set(tfchip[k])) == 0:
                 continue
-            if test.sum() == 0:
+            if test.iloc[:, 0].sum() == 0:
                 continue
-
             pre_res = gp.prerank(
-                rnk=test,  # or rnk = rnk,
-                gene_sets=[
-                    # "Chromosome_Location",
-                    {v: tfchip[k]}
-                ],
+                rnk=test,
+                gene_sets=[{v: tfchip[k]}],
                 min_size=1,
                 max_size=4000,
                 permutation_num=1000,
@@ -234,9 +233,10 @@ class BenGRN:
             res[k] = pre_res.res2d
             # print(val.Term.tolist()[:2])
         logging.disable(previous_level)
-        print("found some significant results for ", i * 100 / j, "% TFs\n")
+        if self.doplot:
+            print("found some significant results for ", i * 100 / j, "% TFs\n")
+            print("_________________________________________")
         metrics.update({"significant_enriched_TFtargets": i * 100 / j})
-        print("_________________________________________")
         metrics.update(self.compare_to(to="omnipath", organism="human"))
         return metrics
 
@@ -275,7 +275,7 @@ def train_classifier(
         adj = grn.varp["GRN"][:, loc, :][loc, :, :]
         genes = grn.var.loc[loc][use_col].tolist()
 
-        da = np.zeros((len(genes), len(genes)), dtype=np.float)
+        da = np.zeros((len(genes), len(genes)), dtype=float)
         for i, j in gt.iloc[:, :2].values:
             if i in genes and j in genes:
                 da[genes.index(i), genes.index(j)] = 1
@@ -468,19 +468,21 @@ def get_sroy_gt(get="all", join="outer", species="human", gt="full"):
 
 
 def get_perturb_gt(
-    url="https://plus.figshare.com/ndownloader/files/38349308",
-    filename=FILEDIR + "/../data/BH-corrected.csv.gz",
+    url_bh="https://plus.figshare.com/ndownloader/files/38349308",
+    filename_bh=FILEDIR + "/../data/BH-corrected.csv.gz",
+    url_adata="https://plus.figshare.com/ndownloader/files/35773219",
+    filename_adata=FILEDIR + "/../data/ess_perturb_sc.h5ad",
 ):
-    if not os.path.exists(filename):
-        urllib.request.urlretrieve(url, filename)
-    pert = pd.read_csv(filename)
+    if not os.path.exists(filename_bh):
+        urllib.request.urlretrieve(url_bh, filename_bh)
+    pert = pd.read_csv(filename_bh)
     pert = pert.set_index("Unnamed: 0").T
     pert.index = [i.split("_")[-1] for i in pert.index]
     pert = pert[~pert.index.duplicated(keep="first")].T
     pert = pert < 0.05
     adata_sc = sc.read(
-        FILEDIR + "/../data/ess_perturb_sc.h5ad",
-        backup_url="https://plus.figshare.com/ndownloader/files/35773219",
+        filename_adata,
+        backup_url=url_adata,
     )
     adata_sc = adata_sc[adata_sc.obs.gene_id == "non-targeting"]
     adata_sc[:, adata_sc.var.index.isin(set(pert.index) | set(pert.columns))]
@@ -541,7 +543,7 @@ def compute_scenic(adata, data_dir=FILEDIR + "/../data"):
 
     # compute the grn matrix
     var_names = adata.var_names.tolist()
-    da = np.zeros((len(var_names), len(var_names)), dtype=np.float)
+    da = np.zeros((len(var_names), len(var_names)), dtype=float)
     for reg in regulons:
         i = var_names.index(reg.transcription_factor)
         for k, v in reg.gene2weight.items():
@@ -549,7 +551,7 @@ def compute_scenic(adata, data_dir=FILEDIR + "/../data"):
     # create the grndata
     grn = GRNAnnData(adata, grn=da)
 
-    da = np.zeros((len(var_names), len(var_names)), dtype=np.float)
+    da = np.zeros((len(var_names), len(var_names)), dtype=float)
     for reg in modules:
         i = var_names.index(reg.transcription_factor)
         for k, v in reg.gene2weight.items():
@@ -604,13 +606,20 @@ def get_GT_db(name="collectri", cell_type=None, organism="human", split_complexe
         net = pd_load_cached(HTFTARGET)
         net = net.rename(columns={"TF": "source"})
     elif name == "collectri":
+        import decoupler as dc
+
         net = dc.get_collectri(organism=organism, split_complexes=split_complexes).drop(
             columns=["PMID"]
         )
     elif name == "dorothea":
+        import decoupler as dc
+
         net = dc.get_dorothea(organism=organism)
     elif name == "omnipath":
         if not os.path.exists(FILEDIR + "/../data/omnipath.parquet"):
+            from omnipath.interactions import AllInteractions
+            from omnipath.requests import Annotations
+
             interactions = AllInteractions()
             net = interactions.get(exclude=["small_molecule", "lncrna_mrna"])
             hgnc = Annotations.get(resources="HGNC")
@@ -714,7 +723,7 @@ def compute_pr(
     else:
         odds_ratio = (true_positive * true_negative) / (false_positive * false_negative)
 
-    metrics.update({"EPR": odds_ratio})
+    metrics.update({"epr": odds_ratio})
     if doplot:
         print("EPR:", odds_ratio)
         plt.figure(figsize=(10, 8))

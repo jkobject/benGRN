@@ -348,7 +348,7 @@ def get_scenicplus(
     return from_scope_loomfile(filepath)
 
 
-def get_sroy_gt(get="all", join="outer", species="human", gt="full"):
+def get_sroy_gt(get="main", join="outer", species="human", gt="full"):
     """
     This function retrieves the ground truth data from Stone and Sroy's study.
 
@@ -361,28 +361,6 @@ def get_sroy_gt(get="all", join="outer", species="human", gt="full"):
         GrnAnnData: The ground truth data as a grnndata object
     """
     if species == "human":
-        adata_liu = AnnData(
-            (
-                2
-                ** pd.read_csv(
-                    FILEDIR
-                    + "/../data/GroundTruth/stone_and_sroy/scRNA/liu_rna_filtered_log2.tsv.gz",
-                    sep="\t",
-                )
-            )
-            - 1
-        ).T
-        adata_chen = AnnData(
-            (
-                2
-                ** pd.read_csv(
-                    FILEDIR
-                    + "/../data/GroundTruth/stone_and_sroy/scRNA/chen_rna_filtered_log2.tsv.gz",
-                    sep="\t",
-                )
-            )
-            - 1
-        ).T
         if gt == "full":
             df = pd.read_csv(
                 FILEDIR + "/../data/GroundTruth/stone_and_sroy/hESC_ground_truth.tsv",
@@ -403,38 +381,44 @@ def get_sroy_gt(get="all", join="outer", species="human", gt="full"):
                 sep="\t",
                 header=None,
             )
-        adata_liu.obs["dataset"] = "liu"
-        adata_chen.obs["dataset"] = "chen"
         if get == "liu":
-            adata = adata_liu
+            adata = AnnData(
+                (
+                    2
+                    ** pd.read_csv(
+                        FILEDIR
+                        + "/../data/GroundTruth/stone_and_sroy/scRNA/liu_rna_filtered_log2.tsv.gz",
+                        sep="\t",
+                    )
+                )
+                - 1
+            ).T
         elif get == "chen":
-            adata = adata_chen
-        elif get == "all":
-            adata = concat([adata_liu, adata_chen], join=join, fill_value=0)
+            adata = AnnData(
+                (
+                    2
+                    ** pd.read_csv(
+                        FILEDIR
+                        + "/../data/GroundTruth/stone_and_sroy/scRNA/chen_rna_filtered_log2.tsv.gz",
+                        sep="\t",
+                    )
+                )
+                - 1
+            ).T
+        elif get == "han":
+            adata = AnnData(
+                unnormalize(
+                    pd.read_csv(
+                        FILEDIR
+                        + "/../data/GroundTruth/stone_and_sroy/scRNA/human_han_GSE107552.csv.gz",
+                    )
+                    .set_index("Cell")
+                    .T,
+                    is_root=True,
+                )
+            )
         adata.obs["organism_ontology_term_id"] = "NCBITaxon:9606"
     elif species == "mouse":
-        adata_duren = AnnData(
-            (
-                2
-                ** pd.read_csv(
-                    FILEDIR
-                    + "/../data/GroundTruth/stone_and_sroy/scRNA/duren_rna_filtered_log2.tsv.gz",
-                    sep="\t",
-                )
-            )
-            - 1
-        ).T
-        adata_sem = AnnData(
-            (
-                2
-                ** pd.read_csv(
-                    FILEDIR
-                    + "/../data/GroundTruth/stone_and_sroy/scRNA/semrau_rna_filtered_log2.tsv.gz",
-                    sep="\t",
-                )
-            )
-            - 1
-        ).T
         if gt == "full":
             df = pd.read_csv(
                 FILEDIR + "/../data/GroundTruth/stone_and_sroy/mESC_ground_truth.tsv",
@@ -455,14 +439,54 @@ def get_sroy_gt(get="all", join="outer", species="human", gt="full"):
                 sep="\t",
                 header=None,
             )
-        adata_duren.obs["dataset"] = "duren"
-        adata_sem.obs["dataset"] = "semrau"
         if get == "duren":
-            adata = adata_duren
+            adata = AnnData(
+                (
+                    2
+                    ** pd.read_csv(
+                        FILEDIR
+                        + "/../data/GroundTruth/stone_and_sroy/scRNA/duren_rna_filtered_log2.tsv.gz",
+                        sep="\t",
+                    )
+                )
+                - 1
+            ).T
         elif get == "semrau":
-            adata = adata_sem
-        elif get == "all":
-            adata = concat([adata_duren, adata_sem], join=join, fill_value=0)
+            adata = AnnData(
+                (
+                    2
+                    ** pd.read_csv(
+                        FILEDIR
+                        + "/../data/GroundTruth/stone_and_sroy/scRNA/semrau_rna_filtered_log2.tsv.gz",
+                        sep="\t",
+                    )
+                )
+                - 1
+            ).T
+        elif get == "tran":
+            adata = AnnData(
+                unnormalize(
+                    pd.read_csv(
+                        FILEDIR
+                        + "/../data/GroundTruth/stone_and_sroy/scRNA/mouse_tran_A2S.csv.gz",
+                    )
+                    .set_index("Cell")
+                    .T,
+                    is_root=True,
+                )
+            )
+        elif get == "zhao":
+            adata = AnnData(
+                unnormalize(
+                    pd.read_csv(
+                        FILEDIR
+                        + "/../data/GroundTruth/stone_and_sroy/scRNA/mouse_zhao_GSE114952.csv.gz",
+                    )
+                    .set_index("Cell")
+                    .T,
+                    is_root=True,
+                )
+            )
         adata.obs["organism_ontology_term_id"] = "NCBITaxon:10090"
     return from_adata_and_longform(adata, df)
 
@@ -766,3 +790,11 @@ def compute_epr(clf, X_test, y_test):
     true_negative = np.sum(pred[y_test == 0] == 0)
     odds_ratio = (true_positive * true_negative) / (false_positive * false_negative)
     return odds_ratio
+
+
+def unnormalize(df, is_root=False):
+    # rescale (logp1 or sqroot)
+    df = df**2 if is_root else (2**df) - 1
+    r = np.array([i[i != 0].min() for k, i in df.iterrows()])
+    df = (df.T / r).T.round()
+    return df

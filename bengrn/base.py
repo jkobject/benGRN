@@ -202,7 +202,7 @@ class BenGRN:
                 continue
             # print(k)
             j += 1
-            test = self.grn.grn.loc[[v]].sort_values(by=v, ascending=False).T
+            test = self.grn.grn.T.loc[[v]].sort_values(by=v, ascending=False).T
             if len(set(test.index) & set(tfchip[k])) == 0:
                 continue
             if test.iloc[:, 0].sum() == 0:
@@ -253,6 +253,7 @@ def train_classifier(
     C=1,
     return_full=True,
     shuffle=False,
+    **kwargs,
 ):
     if other is not None:
         elems = other.var[other.grn.sum(1) != 0].index.tolist()
@@ -287,7 +288,7 @@ def train_classifier(
     X_train, X_test, y_train, y_test = train_test_split(
         adj, da, random_state=0, train_size=train_size, shuffle=shuffle
     )
-    print("doing regression....")
+    print("doing classification....")
     clf = LogisticRegression(
         penalty="l1",
         C=C,
@@ -295,6 +296,8 @@ def train_classifier(
         class_weight=class_weight,
         max_iter=max_iter,
         n_jobs=8,
+        fit_intercept=False,
+        **kwargs,
     )
     clf.fit(X_train, y_train)
     pred = clf.predict(X_test)
@@ -708,9 +711,10 @@ def compute_pr(
     precision_list = [precision]
     recall_list = [recall]
     # Define the thresholds to vary
-    thresholds = np.logspace(np.log10(grn.min()), np.log10(grn.max()), 50)
-    thresholds = np.append(thresholds, np.linspace(grn.min(), grn.max(), 50))
-    thresholds = np.sort(thresholds)
+    thresholds = np.append(
+        np.linspace(0, 1, 101)[:-2], np.log10(np.logspace(0.99, 1, 30))
+    )
+    thresholds = np.quantile(grn, thresholds)
     # Calculate precision and recall for each threshold
     if do_auc:
         for threshold in tqdm.tqdm(thresholds[1:]):

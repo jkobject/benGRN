@@ -137,3 +137,4 @@ data/GroundTruth/adamson_raw/
 *.tbl
 data/BH-corrected.csv.gz
 data/ess_perturb_sc.h5ad
+data/GroundTruth/stone_and_sroy/scRNA/mouse_zhao_GSE114952.csv.gz

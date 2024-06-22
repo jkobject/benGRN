@@ -9,9 +9,11 @@ import json
 
 from grnndata import GRNAnnData, from_adata_and_longform, from_scope_loomfile, utils
 from anndata import AnnData, concat
-from typing import Optional
+from typing import Optional, Union
 from .tools import GENIE3
 import numpy as np
+import bionty as bt
+from anndata.utils import make_index_unique
 
 from arboreto.algo import grnboost2
 
@@ -233,6 +235,7 @@ class BenGRN:
             res[k] = pre_res.res2d
             # print(val.Term.tolist()[:2])
         logging.disable(previous_level)
+        j = j if j != 0 else 1
         if self.doplot:
             print("found some significant results for ", i * 100 / j, "% TFs\n")
             print("_________________________________________")
@@ -420,6 +423,27 @@ def get_sroy_gt(get="main", join="outer", species="human", gt="full"):
                     is_root=True,
                 )
             )
+        elif get == "mine":
+            # https://www.ebi.ac.uk/gxa/sc/experiments/E-GEOD-36552/downloads
+            adata = sc.read_mtx(
+                FILEDIR
+                + "/../data/GroundTruth/stone_and_sroy/scRNA/E-GEOD-36552.aggregated_filtered_counts.mtx"
+            ).T
+            col = pd.read_csv(
+                FILEDIR
+                + "/../data/GroundTruth/stone_and_sroy/scRNA/E-GEOD-36552.aggregated_filtered_counts.mtx_rows",
+                header=None,
+                sep="\t",
+            )
+            adata.var.index = col[0]
+            genesdf = load_genes()
+            intersect_genes = set(adata.var.index).intersection(set(genesdf.index))
+            adata = adata[:, list(intersect_genes)]
+            genesdf = genesdf.loc[adata.var.index]
+            adata.var["ensembl_id"] = adata.var.index
+            adata.var.index = make_index_unique(genesdf["symbol"].astype(str))
+        else:
+            raise ValueError("get must be one of 'liu', 'chen', 'han', or 'mine'")
         adata.obs["organism_ontology_term_id"] = "NCBITaxon:9606"
     elif species == "mouse":
         if gt == "full":
@@ -490,6 +514,8 @@ def get_sroy_gt(get="main", join="outer", species="human", gt="full"):
                     is_root=True,
                 )
             )
+        else:
+            raise ValueError("get must be one of 'duren', 'semrau', 'tran', or 'zhao'")
         adata.obs["organism_ontology_term_id"] = "NCBITaxon:10090"
     return from_adata_and_longform(adata, df)
 
@@ -725,6 +751,8 @@ def compute_pr(
         # Calculate AUPRC by integrating the precision-recall curve
         if 1.0 not in recall_list:
             precision_list.insert(0, rand_prec)
+            recall_list.insert(0, recall_list[0])
+            precision_list.insert(0, rand_prec)
             recall_list.insert(0, 1.0)
         precision_list = np.nan_to_num(np.array(precision_list))
         recall_list = np.nan_to_num(np.array(recall_list))
@@ -802,3 +830,25 @@ def unnormalize(df, is_root=False):
     r = np.array([i[i != 0].min() for k, i in df.iterrows()])
     df = (df.T / r).T.round()
     return df
+
+
+def load_genes(organisms: Union[str, list] = "NCBITaxon:9606"):  # "NCBITaxon:10090",
+    organismdf = []
+    if type(organisms) == str:
+        organisms = [organisms]
+    for organism in organisms:
+        genesdf = bt.Gene.filter(
+            organism_id=bt.Organism.filter(ontology_id=organism).first().id
+        ).df()
+        genesdf = genesdf[~genesdf["public_source_id"].isna()]
+        genesdf = genesdf.drop_duplicates(subset="ensembl_gene_id")
+        genesdf = genesdf.set_index("ensembl_gene_id").sort_index()
+        # mitochondrial genes
+        genesdf["mt"] = genesdf.symbol.astype(str).str.startswith("MT-")
+        # ribosomal genes
+        genesdf["ribo"] = genesdf.symbol.astype(str).str.startswith(("RPS", "RPL"))
+        # hemoglobin genes.
+        genesdf["hb"] = genesdf.symbol.astype(str).str.contains(("^HB[^(P)]"))
+        genesdf["organism"] = organism
+        organismdf.append(genesdf)
+    return pd.concat(organismdf)

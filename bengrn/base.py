@@ -36,7 +36,7 @@ import logging
 
 import matplotlib.pyplot as plt
 
-from scipy.sparse import csr_matrix
+from scipy.sparse import csr_matrix, csc_matrix
 
 import scanpy as sc
 
@@ -764,6 +764,8 @@ def compute_pr(
     # compute EPR
     # get the indices of the topK highest values in "grn"
     if isinstance(grn, csr_matrix):
+        grn = grn.toarray()
+    if isinstance(grn, csc_matrix):
         grn = grn.toarray()
     indices = np.argpartition(grn.flatten(), -int(true.sum()))[-int(true.sum()) :]
     # Compute the odds ratio

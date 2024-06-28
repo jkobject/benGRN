@@ -252,7 +252,7 @@ def train_classifier(
     train_size=0.2,
     doplot=True,
     class_weight={1: 200, 0: 1},
-    max_iter=4_000,
+    max_iter=1_000,
     C=1,
     return_full=True,
     shuffle=False,

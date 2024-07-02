@@ -150,6 +150,8 @@ class BenGRN:
                 maxsize=2000,
                 top_k=10,
             )
+            if res is None:
+                continue
             if (
                 len(res.res2d[(res.res2d["FDR q-val"] < 0.1) & (res.res2d["NES"] > 1)])
                 > 0
@@ -295,7 +297,7 @@ def train_classifier(
     clf = LogisticRegression(
         penalty="l1",
         C=C,
-        solver="liblinear",
+        solver="saga",
         class_weight=class_weight,
         max_iter=max_iter,
         n_jobs=8,

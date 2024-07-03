@@ -28,6 +28,7 @@ import scipy.stats
 from sklearn.metrics import precision_recall_curve, auc, PrecisionRecallDisplay
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
+from sklearn.linear_model import RidgeClassifier
 
 import gseapy as gp
 
@@ -135,7 +136,7 @@ class BenGRN:
     def scprint_benchmark(self, base_pr_threshold=0):
         print("base enrichment")
         metrics = {}
-        for elem in ["Central", "Targets", "Regulators"]:
+        for elem in ["Central", "Regulators"]:
             if elem == "Central" and (self.grn.varp["GRN"] != 0).sum() > 100_000_000:
                 print("too many genes for central computation")
                 continue
@@ -164,14 +165,6 @@ class BenGRN:
                         ].Term.tolist()
                     }
                 )
-                if self.doplot:
-                    _ = res.plot(
-                        terms=res.res2d[
-                            (res.res2d["FDR q-val"] < 0.1) & (res.res2d["NES"] > 1)
-                        ]
-                        .sort_values(by=["NES"], ascending=False)
-                        .Term.iloc[0]
-                    )
             if self.doplot:
                 try:
                     _ = res.plot(terms="0__TFs")
@@ -297,20 +290,29 @@ def train_classifier(
         adj, da, random_state=0, train_size=train_size, shuffle=shuffle
     )
     print("doing classification....")
-    clf = LogisticRegression(
-        penalty="l1",
-        C=C,
-        solver="saga",
-        class_weight=class_weight,
-        max_iter=max_iter,
-        n_jobs=8,
-        verbose=10,
+
+    clf = RidgeClassifier(
+        alpha=C,
         fit_intercept=False,
-        **kwargs,
+        class_weight=class_weight,
+        # solver="saga",
+        max_iter=max_iter,
+        positive=True,
     )
+    # clf = LogisticRegression(
+    #    penalty="l1",
+    #    C=C,
+    #    solver="saga",
+    #    class_weight=class_weight,
+    #    max_iter=max_iter,
+    #    n_jobs=8,
+    #    fit_intercept=False,
+    #    verbose=10,
+    #    **kwargs,
+    # )
     clf.fit(X_train, y_train)
     pred = clf.predict(X_test)
-    epr = compute_epr(clf, X_test, y_test)
+    # epr = compute_epr(clf, X_test, y_test)
     metrics = {
         "used_heads": (clf.coef_ != 0).sum(),
         "precision": (pred[y_test == 1] == 1).sum() / (pred == 1).sum(),
@@ -318,7 +320,7 @@ def train_classifier(
         "recall": (pred[y_test == 1] == 1).sum() / y_test.sum(),
         "predicted_true": pred.sum(),
         "number_of_true": y_test.sum(),
-        "epr": epr,
+        # "epr": epr,
     }
     if doplot:
         print("metrics", metrics)
@@ -326,11 +328,11 @@ def train_classifier(
             clf, X_test, y_test, plot_chance_level=True
         )
         plt.show()
-    adj = grn.varp["GRN"]
     if return_full:
-        grn.varp["classified"] = clf.predict_proba(
-            adj.reshape(-1, adj.shape[-1])
-        ).reshape(len(grn.var), len(grn.var), 2)[:, :, 1]
+        adj = grn.varp["GRN"]
+        grn.varp["classified"] = clf.predict(adj.reshape(-1, adj.shape[-1])).reshape(
+            len(grn.var), len(grn.var), 2
+        )[:, :, 1]
     return grn, metrics, clf
 
 

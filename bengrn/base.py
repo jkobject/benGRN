@@ -211,13 +211,16 @@ class BenGRN:
                 continue
             if test.iloc[:, 0].sum() == 0:
                 continue
-            pre_res = gp.prerank(
-                rnk=test,
-                gene_sets=[{v: tfchip[k]}],
-                min_size=1,
-                max_size=4000,
-                permutation_num=1000,
-            )
+            try:
+                pre_res = gp.prerank(
+                    rnk=test,
+                    gene_sets=[{v: tfchip[k]}],
+                    min_size=1,
+                    max_size=4000,
+                    permutation_num=1000,
+                )
+            except IndexError:
+                continue
             val = (
                 pre_res.res2d[
                     (pre_res.res2d["FDR q-val"] < 0.05) & (pre_res.res2d["NES"] > 1)
@@ -301,6 +304,7 @@ def train_classifier(
         class_weight=class_weight,
         max_iter=max_iter,
         n_jobs=8,
+        verbose=10,
         fit_intercept=False,
         **kwargs,
     )

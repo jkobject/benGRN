@@ -135,7 +135,7 @@ class BenGRN:
     def scprint_benchmark(self, base_pr_threshold=0):
         print("base enrichment")
         metrics = {}
-        for elem in ["Central", "Targets", "Regulators"]:
+        for elem in ["Central", "Regulators"]:
             if elem == "Central" and (self.grn.varp["GRN"] != 0).sum() > 100_000_000:
                 print("too many genes for central computation")
                 continue
@@ -164,14 +164,6 @@ class BenGRN:
                         ].Term.tolist()
                     }
                 )
-                if self.doplot:
-                    _ = res.plot(
-                        terms=res.res2d[
-                            (res.res2d["FDR q-val"] < 0.1) & (res.res2d["NES"] > 1)
-                        ]
-                        .sort_values(by=["NES"], ascending=False)
-                        .Term.iloc[0]
-                    )
             if self.doplot:
                 try:
                     _ = res.plot(terms="0__TFs")

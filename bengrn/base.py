@@ -208,6 +208,7 @@ class BenGRN:
                 pre_res = gp.prerank(
                     rnk=test,
                     gene_sets=[{v: tfchip[k]}],
+                    background=self.grn.var.index.tolist(),
                     min_size=1,
                     max_size=4000,
                     permutation_num=1000,
@@ -331,8 +332,8 @@ def train_classifier(
     if return_full:
         adj = grn.varp["GRN"]
         grn.varp["classified"] = clf.predict(adj.reshape(-1, adj.shape[-1])).reshape(
-            len(grn.var), len(grn.var), 2
-        )[:, :, 1]
+            len(grn.var), len(grn.var)
+        )
     return grn, metrics, clf
 
 

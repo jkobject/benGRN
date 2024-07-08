@@ -763,7 +763,6 @@ def compute_pr(
         recall_list = np.nan_to_num(np.array(recall_list))
         auprc = -np.trapz(precision_list, recall_list)
         metrics["auprc"] = auprc
-        metrics.update({"auprc": auprc})
         if doplot:
             print("Area Under Precision-Recall Curve (AUPRC): ", auprc)
     # compute EPR

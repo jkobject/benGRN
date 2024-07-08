@@ -28,6 +28,7 @@ import scipy.stats
 from sklearn.metrics import precision_recall_curve, auc, PrecisionRecallDisplay
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
+from sklearn.linear_model import RidgeClassifier
 
 import gseapy as gp
 
@@ -203,13 +204,17 @@ class BenGRN:
                 continue
             if test.iloc[:, 0].sum() == 0:
                 continue
-            pre_res = gp.prerank(
-                rnk=test,
-                gene_sets=[{v: tfchip[k]}],
-                min_size=1,
-                max_size=4000,
-                permutation_num=1000,
-            )
+            try:
+                pre_res = gp.prerank(
+                    rnk=test,
+                    gene_sets=[{v: tfchip[k]}],
+                    background=self.grn.var.index.tolist(),
+                    min_size=1,
+                    max_size=4000,
+                    permutation_num=1000,
+                )
+            except IndexError:
+                continue
             val = (
                 pre_res.res2d[
                     (pre_res.res2d["FDR q-val"] < 0.05) & (pre_res.res2d["NES"] > 1)
@@ -286,7 +291,6 @@ def train_classifier(
         adj, da, random_state=0, train_size=train_size, shuffle=shuffle
     )
     print("doing classification....")
-    from sklearn.linear_model import RidgeClassifier
 
     clf = RidgeClassifier(
         alpha=C,
@@ -328,8 +332,8 @@ def train_classifier(
     if return_full:
         adj = grn.varp["GRN"]
         grn.varp["classified"] = clf.predict(adj.reshape(-1, adj.shape[-1])).reshape(
-            len(grn.var), len(grn.var), 2
-        )[:, :, 1]
+            len(grn.var), len(grn.var)
+        )
     return grn, metrics, clf
 
 

@@ -767,8 +767,24 @@ def compute_pr(
         recall_list = np.nan_to_num(np.array(recall_list))
         auprc = -np.trapz(precision_list, recall_list)
         metrics["auprc"] = auprc
+
+        # Compute Average Precision (AP) manually
+        sorted_indices = np.argsort(-grn.flatten())
+        sorted_true = true.flatten()[sorted_indices]
+
+        tp_cumsum = np.cumsum(sorted_true)
+        fp_cumsum = np.cumsum(~sorted_true)
+
+        precision_at_k = tp_cumsum / (tp_cumsum + fp_cumsum)
+        recall_at_k = tp_cumsum / true.sum()
+
+        ap = np.sum(precision_at_k[1:] * np.diff(recall_at_k))
+        metrics["ap"] = ap
+        if doplot:
+            print("Average Precision (AP): ", ap)
         if doplot:
             print("Area Under Precision-Recall Curve (AUPRC): ", auprc)
+
     # compute EPR
     # get the indices of the topK highest values in "grn"
     if isinstance(grn, csr_matrix):

@@ -171,19 +171,11 @@ class BenGRN:
                     plt.show()
                 except KeyError:
                     pass
-            try:
-                istrue = metrics.get("TF_enr", False)
-                metrics.update(
-                    {
-                        "TF_enr": (
-                            res.res2d.loc[res.res2d.Term == "0__TFs", "FDR q-val"][0]
-                            < 0.1
-                        )
-                        | istrue
-                    }
-                )
-            except KeyError:
-                pass
+            istrue = metrics.get("TF_enr", False)
+            istrue = istrue or (
+                res.res2d.loc[res.res2d.Term == "0__TFs", "FDR q-val"].iloc[0] < 0.1
+            )
+            metrics.update({"TF_enr": istrue})
         if self.doplot:
             print("_________________________________________")
             print("TF specific enrichment")

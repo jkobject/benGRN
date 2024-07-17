@@ -133,10 +133,12 @@ class BenGRN:
             do_auc=self.do_auc,
         )
 
-    def scprint_benchmark(self, base_pr_threshold=0):
+    def scprint_benchmark(
+        self, base_pr_threshold=0, elems=["Central", "Regulators", "Targets"]
+    ):
         print("base enrichment")
         metrics = {}
-        for elem in ["Central", "Regulators"]:
+        for elem in elems:
             if elem == "Central" and (self.grn.varp["GRN"] != 0).sum() > 100_000_000:
                 print("too many genes for central computation")
                 continue

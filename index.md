@@ -60,6 +60,6 @@ see the notebooks in [docs](https://www.jkobject.com/benGRN/):
 
 ## Development
 
-Read the [CONTRIBUTING.md](CONTRIBUTING.md) file.
+Read the [CONTRIBUTING.md](../CONTRIBUTING.md) file.
 
 Awesome Benchmark of Gene Regulatory Networks created by @jkobject

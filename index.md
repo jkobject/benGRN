@@ -52,7 +52,11 @@ BenGRN(grndata).do_tests()
 some_test_function(grndata)
 ```
 
-see more in the notebooks in the docs folder or in the [documentation](https://jkobject.com/benGRN/)
+see the notebooks in [docs](https://www.jkobject.com/benGRN/):
+
+1. [omnipath](https://www.jkobject.com/benGRN/notebooks/bench_omni_genie3)
+2. [genome wide perturb seq](https://www.jkobject.com/benGRN/notebooks/bench_perturbseq_genie3/)
+3. [Mc Calla](https://www.jkobject.com/benGRN/notebooks/bench_sroy_genie3/)
 
 ## Development
 

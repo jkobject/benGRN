@@ -44,6 +44,10 @@
                 <li class="toctree-l1 current"><a class="reference internal current" href="#">Home</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#install-it-from-pypi">Install it from PyPI</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#install-it-locally-and-run-the-notebooks">Install it locally and run the notebooks:</a>
+    </li>
+        </ul>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a>
     </li>
@@ -84,18 +88,33 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="bengrn">BenGRN</h1>
-<p>Awesome Benchmark of Gene Regulatory Networks created by @jkobject</p>
-<p>The package is supposed to work with <a href="https://cantinilab.github.io/GRnnData/">GRnnData</a>
-It can run Genie3 &amp; pyscenic on your data as a comparison</p>
-<p>It has 4 different types of key ground truth data to compare your GRN to:
-- sushmita roy's ChIP+Perturb ground truth
-- collectri's literature curated ground truth
-- dorothea's literature curated ground truth
-- tf2gene's chip curated ground truth</p>
-<p>You can find the documentation <a href="https://jkobject.com/benGRN/">here</a></p>
+                <h1 id="bengrn">bengrn</h1>
+<p><a href="https://codecov.io/gh/jkobject/benGRN"><img alt="codecov" src="https://codecov.io/gh/jkobject/benGRN/branch/main/graph/badge.svg?token=benGRN_token_here" /></a>
+<a href="https://github.com/jkobject/benGRN/actions/workflows/main.yml"><img alt="CI" src="https://github.com/jkobject/benGRN/actions/workflows/main.yml/badge.svg" /></a>
+<a href="https://badge.fury.io/py/benGRN"><img alt="PyPI version" src="https://badge.fury.io/py/benGRN.svg" /></a>
+<a href="https://benGRN.readthedocs.io/en/latest/?badge=latest"><img alt="Documentation Status" src="https://readthedocs.org/projects/benGRN/badge/?version=latest" /></a>
+<a href="https://pepy.tech/project/benGRN"><img alt="Downloads" src="https://pepy.tech/badge/benGRN" /></a>
+<a href="https://pepy.tech/project/benGRN"><img alt="Downloads" src="https://pepy.tech/badge/benGRN/month" /></a>
+<a href="https://pepy.tech/project/benGRN"><img alt="Downloads" src="https://pepy.tech/badge/benGRN/week" /></a>
+<a href="https://img.shields.io/github/issues/jkobject/benGRN"><img alt="GitHub issues" src="https://img.shields.io/github/issues/jkobject/benGRN" /></a>
+<a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg" /></a>
+<a href="https://doi.org/10.1101/2024.07.29.605556"><img alt="DOI" src="https://img.shields.io/badge/DOI-10.1101%2F2024.07.29.605556-blue" /></a></p>
+<p>Benchmark your gene regulatory networks inference algorithm (from scRNAseq or bulk RNAseq dataset) with BenGRN</p>
+<p>The package is supposed to work with <a href="https://cantinilab.github.io/GRnnData/">GRnnData</a> and only uses biological ground truth datasets.</p>
+<p>It can run Genie3 &amp; pyscenic on your data as a comparison</p>
+<p>It has 3 main different types of key ground truth data to compare your GRN to:</p>
+<ul>
+<li>Mc Calla et al.'s ChIP+Perturb ground truth</li>
+<li>omnipath's literature curated ground truth</li>
+<li>genome wide perturb seq 's dataset</li>
+</ul>
+<p>You can find the documentation <a href="https://www.jkobject.com/benGRN/">here</a></p>
 <h2 id="install-it-from-pypi">Install it from PyPI</h2>
 <pre><code class="language-bash">pip install bengrn
+</code></pre>
+<h3 id="install-it-locally-and-run-the-notebooks">Install it locally and run the notebooks:</h3>
+<pre><code class="language-bash">git clone https://github.com/jkobject/benGRN.git
+pip install -e benGRN
 </code></pre>
 <h2 id="usage">Usage</h2>
 <pre><code class="language-py">from bengrn import BenGRN
@@ -111,6 +130,7 @@ some_test_function(grndata)
 <p>see more in the notebooks in the docs folder or in the <a href="https://jkobject.com/benGRN/">documentation</a></p>
 <h2 id="development">Development</h2>
 <p>Read the <a href="CONTRIBUTING.md">CONTRIBUTING.md</a> file.</p>
+<p>Awesome Benchmark of Gene Regulatory Networks created by @jkobject</p>
               
             </div>
           </div><footer>
@@ -159,5 +179,5 @@ some_test_function(grndata)
 
 <!--
 MkDocs version : 1.6.0
-Build Date UTC : 2024-08-06 10:41:10.362409+00:00
+Build Date UTC : 2024-08-06 10:46:21.215694+00:00
 -->

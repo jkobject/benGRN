@@ -21,7 +21,7 @@ It has 3 main different types of key ground truth data to compare your GRN to:
 
 - Mc Calla et al.'s ChIP+Perturb ground truth
 - omnipath's literature curated ground truth
-- genome wide perturb seq 's dataset
+- genome wide perturb seq 's dataset 
 
 You can find the documentation [here](https://www.jkobject.com/benGRN/)
 

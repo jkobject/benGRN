@@ -49,6 +49,17 @@ FILEDIR = os.path.dirname(os.path.realpath(__file__))
 
 # Define a function to calculate precision and recall
 def precision_recall(true_con, grn_con):
+    """
+    Calculate precision and recall from the true and predicted connections.
+
+    Args:
+        true_con (np.array): The true connections.
+        grn_con (np.array): The predicted connections.
+
+    Returns:
+        float: The precision value.
+        float: The recall value.
+    """
     tp = len(true_con & grn_con)
     fp = len(grn_con - true_con)
     fn = len(true_con - grn_con)
@@ -64,15 +75,17 @@ class BenGRN:
         self,
         grn: GRNAnnData,
         full_dataset: Optional[AnnData] = None,
-        doplot=True,
-        do_auc=True,
+        doplot: bool = True,
+        do_auc: bool = True,
     ):
         """
         Initializes the BenGRN class.
 
-        Parameters:
+        Args:
             grn (GRNAnnData): The Gene Regulatory Network data.
             full_dataset (Optional[AnnData]): The full dataset, defaults to None.
+            doplot (bool): Whether to plot the results, defaults to True.
+            do_auc (bool): Whether to calculate the Area Under the Precision-Recall Curve, defaults to True.
         """
         self.grn = grn
         self.full_dataset = full_dataset
@@ -95,9 +108,21 @@ class BenGRN:
         self,
         other: Optional[GRNAnnData] = None,
         to: str = "collectri",
-        organism="human",
-        base_pr_threshold=0,
+        organism: str = "human",
     ):
+        """
+        compare_to compares the GRN to another GRN.
+
+        Args:
+            other (Optional[GRNAnnData], optional): The other GRN to compare to. Defaults to None.
+                If not given can use a default GRN from the 'to' argument.
+            to (str, optional): The name of the other GRN to compare to. Defaults to "collectri".
+                If 'other' is given, this argument is ignored.
+            organism (str, optional): The organism of the GRN to compare to. Defaults to "human".
+
+        Returns:
+            dict: The metrics of the comparison.
+        """
         if other is None:
             if self.doplot:
                 print("loading GT, ", to)
@@ -128,14 +153,25 @@ class BenGRN:
         return compute_pr(
             adj,
             da,
-            base_pr_threshold=base_pr_threshold,
             doplot=self.doplot,
             do_auc=self.do_auc,
         )
 
-    def scprint_benchmark(
-        self, base_pr_threshold=0, elems=["Central", "Regulators", "Targets"]
-    ):
+    def scprint_benchmark(self, elems=["Central", "Regulators", "Targets"]):
+        """
+        scprint_benchmark full benchmarks of the GRN as in the scPRINT paper.
+
+        It will apply first an enrichment analysis over the [elems] of the GRN looking for TF enrichment and cell type marker gene enrichment
+        It will then apply an enrichment over each TF in the GRN for their targets in ENCODE.
+        Finaly, it will compare it to the OmniPath database GRN using precision recall type metrics.
+
+        Args:
+            elems (list, optional): The genes in the GRN, to benchmark. Defaults to ["Central", "Regulators", "Targets"].
+                It corresponds to different views of the network.
+
+        Returns:
+            dict: The metrics of the benchmark.
+        """
         print("base enrichment")
         metrics = {}
         for elem in elems:
@@ -238,19 +274,41 @@ class BenGRN:
 
 
 def train_classifier(
-    grn,
-    gt="omnipath",
-    other=None,
-    use_col="symbol",
-    train_size=0.2,
-    doplot=True,
-    class_weight={1: 200, 0: 1},
-    max_iter=1_000,
-    C=1,
-    return_full=True,
-    shuffle=False,
+    grn: GRNAnnData,
+    gt: str = "omnipath",
+    other: Optional[GRNAnnData] = None,
+    use_col: str = "symbol",
+    train_size: float = 0.2,
+    doplot: bool = True,
+    class_weight: dict = {1: 200, 0: 1},
+    max_iter: int = 1_000,
+    C: float = 1.0,
+    return_full: bool = True,
+    shuffle: bool = False,
     **kwargs,
 ):
+    """
+    train_classifier trains a classifier to generate a GRN that maps to the ground truth.
+
+    Uses a RidgeClassifier to select the best combination of networks to predict the ground truth.
+    It is used for the head classification part in the scPRINT paper.
+
+    Args:
+        grn (GRNAnnData): The Gene Regulatory Network data.
+        gt (str, optional): The name of the ground truth database to use. Defaults to "omnipath".
+        other (GRNAnnData, optional): Another GRN to compare against. Defaults to None.
+        use_col (str, optional): The column name to use for gene symbols. Defaults to "symbol".
+        train_size (float, optional): The proportion of the dataset to include in the train split. Defaults to 0.2.
+        doplot (bool, optional): Whether to plot the results. Defaults to True.
+        class_weight (dict, optional): Weights associated with classes in the form {class_label: weight}. Defaults to {1: 200, 0: 1}.
+        max_iter (int, optional): Maximum number of iterations for the classifier. Defaults to 1_000.
+        C (float, optional): Regularization strength; must be a positive float. Defaults to 1.0.
+        return_full (bool, optional): Whether to return the full classifier object. Defaults to True.
+        shuffle (bool, optional): Whether to shuffle the data before splitting. Defaults to False.
+
+    Returns:
+        (GRNAnnData, dict, RidgeClassifier): The Gene Regulatory Network data, the metrics of the classifier, and the classifier object.
+    """
     if other is not None:
         elems = other.var[other.grn.sum(1) != 0].index.tolist()
         sub = other.get(grn.var[use_col].tolist()).get(elems).targets
@@ -337,7 +395,7 @@ def get_scenicplus(
     """
     This function retrieves a loomx scenicplus data from a given file path and loads it as a GrnnData
 
-    Parameters:
+    Args:
         filepath : str, optional
             The path to the scenicplus data file.
             Default is FILEDIR + "/../data/10xPBMC_homo_scenicplus_genebased_scope.loom".
@@ -357,14 +415,17 @@ def get_scenicplus(
     return from_scope_loomfile(filepath)
 
 
-def get_sroy_gt(get="main", join="outer", species="human", gt="full"):
+def get_sroy_gt(
+    get: str = "main", join: str = "outer", species: str = "human", gt: str = "full"
+) -> GrnAnnData:
     """
-    This function retrieves the ground truth data from Stone and Sroy's study.
+    This function retrieves the ground truth data from the McCall et al.'s paper.
 
-    Parameters:
-        join : str, optional
-            The type of join to be performed when concatenating the data.
-            Default is "outer".
+    Args:
+        get (str): The specific dataset to retrieve. Options include "main", "liu", and "chen".
+        join (str, optional): The type of join to be performed when concatenating the data. Default is "outer".
+        species (str, optional): The species of the dataset. Default is "human".
+        gt (str, optional): The type of ground truth data to retrieve. Options include "full", "chip", and "ko". Default is "full".
 
     Returns:
         GrnAnnData: The ground truth data as a grnndata object
@@ -524,11 +585,23 @@ def get_sroy_gt(get="main", join="outer", species="human", gt="full"):
 
 
 def get_perturb_gt(
-    url_bh="https://plus.figshare.com/ndownloader/files/38349308",
-    filename_bh=FILEDIR + "/../data/BH-corrected.csv.gz",
-    url_adata="https://plus.figshare.com/ndownloader/files/35773219",
-    filename_adata=FILEDIR + "/../data/ess_perturb_sc.h5ad",
+    url_bh: str = "https://plus.figshare.com/ndownloader/files/38349308",
+    filename_bh: str = FILEDIR + "/../data/BH-corrected.csv.gz",
+    url_adata: str = "https://plus.figshare.com/ndownloader/files/35773219",
+    filename_adata: str = FILEDIR + "/../data/ess_perturb_sc.h5ad",
 ):
+    """
+    get_perturb_gt retrieves the genome wide perturb seq ground truth data.
+
+    Args:
+        url_bh (str, optional): The URL to download the BH-corrected data. Defaults to "https://plus.figshare.com/ndownloader/files/38349308".
+        filename_bh (str, optional): The local filename to save the BH-corrected data. Defaults to FILEDIR + "/../data/BH-corrected.csv.gz".
+        url_adata (str, optional): The URL to download the single-cell perturbation data. Defaults to "https://plus.figshare.com/ndownloader/files/35773219".
+        filename_adata (str, optional): The local filename to save the single-cell perturbation data. Defaults to FILEDIR + "/../data/ess_perturb_sc.h5ad".
+
+    Returns:
+        GRNAnnData: The Gene Regulatory Network data as a GRNAnnData object.
+    """
     if not os.path.exists(filename_bh):
         urllib.request.urlretrieve(url_bh, filename_bh)
     pert = pd.read_csv(filename_bh)
@@ -565,9 +638,9 @@ def get_perturb_gt(
 
 def compute_scenic(adata, data_dir=FILEDIR + "/../data"):
     """
-    This function computes the SCENIC algorithm on the given data.
+    This function computes the SCENIC algorithm on the given dataset.
 
-    Parameters:
+    Args:
         adata (AnnData): The annotated data matrix of shape n_obs x n_vars. Rows correspond to cells and columns to genes.
         data_dir (str, optional): The directory where the data files will be stored. Defaults to FILEDIR + "/../data".
 
@@ -617,11 +690,13 @@ def compute_scenic(adata, data_dir=FILEDIR + "/../data"):
     return grn
 
 
-def compute_genie3(adata, nthreads=30, ntrees=100, **kwargs):
+def compute_genie3(
+    adata: AnnData, nthreads: int = 30, ntrees: int = 100, **kwargs
+) -> GRNAnnData:
     """
     This function computes the GENIE3 algorithm on the given data.
 
-    Parameters:
+    Args:
         adata (AnnData): The annotated data matrix of shape n_obs x n_vars. Rows correspond to cells and columns to genes.
         nthreads (int, optional): The number of threads to use for computation. Defaults to 30.
         ntrees (int, optional): The number of trees to use for the Random Forests. Defaults to 100.
@@ -641,7 +716,9 @@ def compute_genie3(adata, nthreads=30, ntrees=100, **kwargs):
     return grn
 
 
-def get_GT_db(name="collectri", cell_type=None, organism="human", split_complexes=True):
+def get_GT_db(
+    name: str = "collectri", organism: str = "human", split_complexes: bool = True
+) -> pd.DataFrame:
     """
     use_prior_network loads a prior GRN from a list of available networks.
 
@@ -649,6 +726,9 @@ def get_GT_db(name="collectri", cell_type=None, organism="human", split_complexe
         name (str, optional): name of the network to load. Defaults to "collectri".
         organism (str, optional): organism to load the network for. Defaults to "human".
         split_complexes (bool, optional): whether to split complexes into individual genes. Defaults to True.
+
+    Returns:
+        pd.DataFrame: The prior GRN as a pandas DataFrame.
 
     Raises:
         ValueError: if the provided name is not amongst the available names.
@@ -707,10 +787,24 @@ def pd_load_cached(url, loc="/tmp/", cache=True, **kwargs):
 def compute_pr(
     grn: np.array,
     true: np.array,
-    base_pr_threshold=0,
-    do_auc=True,
-    doplot=True,
+    do_auc: bool = True,
+    doplot: bool = True,
 ):
+    """
+    compute_pr computes the precision and recall metrics for the given GRN and true matrix.
+
+    Args:
+        grn (np.array): The Gene Regulatory Network matrix, where each element represents the strength of the regulatory relationship between genes.
+        true (np.array): The ground truth matrix, where each element indicates the presence (1) or absence (0) of a regulatory relationship.
+        do_auc (bool, optional): Whether to compute the Area Under the Precision-Recall Curve (AUPRC). Defaults to True.
+        doplot (bool, optional): Whether to plot the precision and recall metrics. Defaults to True.
+
+    Raises:
+        ValueError: If the shape of the GRN and the true matrix do not match.
+
+    Returns:
+        dict: A dictionary containing precision, recall, and random precision metrics.
+    """
     if grn.shape != true.shape:
         raise ValueError("The shape of the GRN and the true matrix do not match.")
     metrics = {}
@@ -828,7 +922,18 @@ def compute_pr(
     return metrics
 
 
-def compute_epr(clf, X_test, y_test):
+def compute_epr(clf, X_test: np.ndarray, y_test: np.ndarray) -> float:
+    """
+    compute_epr computes the Expected Precision Recall (EPR) metric for the given classifier, test data, and true labels.
+
+    Args:
+        clf (sklearn.base.ClassifierMixin): The classifier to evaluate.
+        X_test (numpy.ndarray): The test data features.
+        y_test (numpy.ndarray): The true labels for the test data.
+
+    Returns:
+        float: The computed Expected Precision Recall (EPR) metric.
+    """
     prb = clf.predict_proba(X_test)[:, 1]
 
     K = sum(y_test)
@@ -853,6 +958,15 @@ def unnormalize(df, is_root=False):
 
 
 def load_genes(organisms: Union[str, list] = "NCBITaxon:9606"):  # "NCBITaxon:10090",
+    """
+    load_genes loads the genes for the given organisms.
+
+    Args:
+        organisms (Union[str, list], optional): The organism(s) to load genes for. Can be a single organism string or a list of organism strings. Defaults to "NCBITaxon:9606".
+
+    Returns:
+        pd.DataFrame: A DataFrame containing gene information for the specified organisms, including columns for gene symbols, mitochondrial genes, ribosomal genes, hemoglobin genes, and organism.
+    """
     organismdf = []
     if type(organisms) == str:
         organisms = [organisms]

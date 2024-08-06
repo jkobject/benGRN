@@ -1,9 +1,10 @@
 from sklearn.tree import BaseDecisionTree
 from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
-from numpy import *
 import time
 from operator import itemgetter
 from multiprocessing import Pool
+from typing import Optional, Union
+from numpy import ndarray, array, transpose, std, zeros, ndenumerate, random
 
 
 def compute_feature_importances(estimator):
@@ -19,40 +20,24 @@ def compute_feature_importances(estimator):
 
 
 def get_link_list(
-    VIM, gene_names=None, regulators="all", maxcount="all", file_name=None
+    VIM: ndarray,
+    gene_names: Optional[list[str]] = None,
+    regulators: Union[list[str], str] = "all",
+    maxcount: Union[int, str] = "all",
+    file_name: Optional[str] = None,
 ):
     """Gets the ranked list of (directed) regulatory links.
 
-    Parameters
-    ----------
-
-    VIM: numpy array
-        Array as returned by the function GENIE3(), in which the element (i,j) is the score of the edge directed from the i-th gene to the j-th gene.
-
-    gene_names: list of strings, optional
-        List of length p, where p is the number of rows/columns in VIM, containing the names of the genes. The i-th item of gene_names must correspond to the i-th row/column of VIM. When the gene names are not provided, the i-th gene is named Gi.
-        default: None
-
-    regulators: list of strings, optional
-        List containing the names of the candidate regulators. When a list of regulators is provided, the names of all the genes must be provided (in gene_names), and the returned list contains only edges directed from the candidate regulators. When regulators is set to 'all', any gene can be a candidate regulator.
-        default: 'all'
-
-    maxcount: 'all' or positive integer, optional
-        Writes only the first maxcount regulatory links of the ranked list. When maxcount is set to 'all', all the regulatory links are written.
-        default: 'all'
-
-    file_name: string, optional
-        Writes the ranked list of regulatory links to the file file_name.
-        default: None
-
-
+    Args
+        VIM (np.array): Array as returned by the function GENIE3(), in which the element (i,j) is the score of the edge directed from the i-th gene to the j-th gene.
+        gene_names (list[str] optional): List of length p, where p is the number of rows/columns in VIM, containing the names of the genes. The i-th item of gene_names must correspond to the i-th row/column of VIM. When the gene names are not provided, the i-th gene is named Gi. Default is None.
+        regulators (list[str], optional): List containing the names of the candidate regulators. When a list of regulators is provided, the names of all the genes must be provided (in gene_names), and the returned list contains only edges directed from the candidate regulators. When regulators is set to 'all', any gene can be a candidate regulator. Default is 'all'.
+        maxcount (Union[str, int], optional): Writes only the first maxcount regulatory links of the ranked list. When maxcount is set to 'all', all the regulatory links are written. Default is 'all'.
+        file_name (str, optional): Writes the ranked list of regulatory links to the file file_name. Default is None.
 
     Returns
-    -------
-
-    The list of regulatory links, ordered according to the edge score. Auto-regulations do not appear in the list. Regulatory links with a score equal to zero are randomly permuted. In the ranked list of edges, each line has format:
-
-        regulator   target gene     score of edge
+        pd.Dataframe: The list of regulatory links, ordered according to the edge score. Auto-regulations do not appear in the list. Regulatory links with a score equal to zero are randomly permuted. In the ranked list of edges, each line has format:
+            regulator   target gene     score of edge
     """
 
     # Check input arguments
@@ -166,54 +151,29 @@ def get_link_list(
 
 
 def GENIE3(
-    expr_data,
-    gene_names=None,
-    regulators="all",
-    tree_method="RF",
-    K="sqrt",
-    ntrees=1000,
-    nthreads=1,
+    expr_data: ndarray,
+    gene_names: Optional[list[str]] = None,
+    regulators: Union[list[str], str] = "all",
+    tree_method: str = "RF",
+    K: Union[str, int] = "sqrt",
+    ntrees: int = 1000,
+    nthreads: int = 1,
 ):
-    """Computation of tree-based scores for all putative regulatory links.
-
-    Parameters
-    ----------
-
-    expr_data: numpy array
-        Array containing gene expression values. Each row corresponds to a condition and each column corresponds to a gene.
-
-    gene_names: list of strings, optional
-        List of length p, where p is the number of columns in expr_data, containing the names of the genes. The i-th item of gene_names must correspond to the i-th column of expr_data.
-        default: None
-
-    regulators: list of strings, optional
-        List containing the names of the candidate regulators. When a list of regulators is provided, the names of all the genes must be provided (in gene_names). When regulators is set to 'all', any gene can be a candidate regulator.
-        default: 'all'
-
-    tree-method: 'RF' or 'ET', optional
-        Specifies which tree-based procedure is used: either Random Forest ('RF') or Extra-Trees ('ET')
-        default: 'RF'
-
-    K: 'sqrt', 'all' or a positive integer, optional
-        Specifies the number of selected attributes at each node of one tree: either the square root of the number of candidate regulators ('sqrt'), the total number of candidate regulators ('all'), or any positive integer.
-        default: 'sqrt'
-
-    ntrees: positive integer, optional
-        Specifies the number of trees grown in an ensemble.
-        default: 1000
-
-    nthreads: positive integer, optional
-        Number of threads used for parallel computing
-        default: 1
-
-
-    Returns
-    -------
-
-    An array in which the element (i,j) is the score of the edge directed from the i-th gene to the j-th gene. All diagonal elements are set to zero (auto-regulations are not considered). When a list of candidate regulators is provided, the scores of all the edges directed from a gene that is not a candidate regulator are set to zero.
-
     """
+    GENIE3 Computation of tree-based scores for all putative regulatory links.
 
+    Args:
+        expr_data (numpy.ndarray): Array containing gene expression values. Each row corresponds to a condition and each column corresponds to a gene.
+        gene_names (list[str], optional): List of length p, where p is the number of columns in expr_data, containing the names of the genes. The i-th item of gene_names must correspond to the i-th column of expr_data. Defaults to None.
+        regulators (list[str], optional): List containing the names of the candidate regulators. When a list of regulators is provided, the names of all the genes must be provided (in gene_names). When regulators is set to 'all', any gene can be a candidate regulator. Defaults to 'all'.
+        tree_method (str, optional): Specifies which tree-based procedure is used: either Random Forest ('RF') or Extra-Trees ('ET'). Defaults to 'RF'.
+        K (str or int, optional): Specifies the number of selected attributes at each node of one tree: either the square root of the number of candidate regulators ('sqrt'), the total number of candidate regulators ('all'), or any positive integer. Defaults to 'sqrt'.
+        ntrees (int, optional): Specifies the number of trees grown in an ensemble. Defaults to 1000.
+        nthreads (int, optional): Number of threads used for parallel computing. Defaults to 1.
+
+    Returns:
+        numpy.ndarray: An array in which the element (i,j) is the score of the edge directed from the i-th gene to the j-th gene. All diagonal elements are set to zero (auto-regulations are not considered). When a list of candidate regulators is provided, the scores of all the edges directed from a gene that is not a candidate regulator are set to zero.
+    """
     time_start = time.time()
 
     # Check input arguments

@@ -1,4 +1,4 @@
 # Documentation for `base` module
 
-:::bengrn.base
+::: bengrn.base
     handler: python

@@ -1,9 +1,10 @@
 [tool.poetry]
 name = "bengrn"
-version = "0.1.0"
+version = "1.0.1"
 description = "benchmarking gene regulatory networks"
 authors = ["jkobject"]
 readme = "README.md"
+keywords = ["scRNAseq", "GRN", "gene regulatory networks", "benchmark", "comp bio", "scPrint"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -37,7 +38,6 @@ mkdocstrings = "*"
 mkdocs-git-authors-plugin = "*"
 mkdocs-jupyter = "*"
 mkdocstrings-python = "*"
-
 
 [build-system]
 requires = ["poetry-core"]

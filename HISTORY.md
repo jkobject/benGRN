@@ -2,12 +2,86 @@ Changelog
 =========
 
 
-0.1.2 (2021-08-14)
-------------------
-- Fix release, README and windows CI. [Bruno Rocha]
-- Release: version 0.1.0. [Bruno Rocha]
+(unreleased)
+------------
+- Merge branch 'main' of https://github.com/jkobject/benGRN into main.
+  [jkobject]
+- Using all sides for enrichment. [maestro-jk]
+- Solve issue. [jkobject]
+- No. [jkobject]
+- Merge branch 'main' of https://github.com/jkobject/benGRN into main.
+  [jkobject]
+- Adding background. [maestro-jk]
+- Merge branch 'main' of https://github.com/jkobject/benGRN. [maestro-
+  jk]
+- Solve bug. [maestro-jk]
+- Nothing. [jkobject]
+- New classifier. [jkobject]
+- New classifier. [jkobject]
+- Solve issues. [jkobject]
+- Merge branch 'main' of https://github.com/jkobject/benGRN into main.
+  [jkobject]
+- One usecase. [maestro-jk]
+- Better iter. [jkobject]
+- Debug and new dataset. [jkobject]
+- Adding more GT and improvement. [jkobject]
+- Novel ground truths. [jkobject]
+- Making it work on new hardware. [maestro-jk]
+- Easier output. [jkobject]
+- Adding and cleaning benchmarks. [jkobject]
+- Better auprc. [jkobject]
+- Some cleanups and renameings. [jkobject]
+- Decoupling different tests. [jkobject]
+- Quick debugs. [jkobject]
+- Update README.md. [Jérémie Kalfon]
 
 
-0.1.0 (2021-08-14)
+1.0.0 (2024-01-16)
 ------------------
-- Add release command. [Bruno Rocha]
+- Adding doc. [jkobject]
+- Finishing a first version. [jkobject]
+- Cleanup and poetry switch. [jkobject]
+- Update LICENSE. [Jérémie Kalfon]
+- Merge pull request #3 from
+  jkobject/dependabot/github_actions/stefanzweifel/git-auto-commit-
+  action-5. [Jérémie Kalfon]
+
+  Bump stefanzweifel/git-auto-commit-action from 4 to 5
+- ✅ Ready to clone and code. [dependabot[bot]]
+- Bump stefanzweifel/git-auto-commit-action from 4 to 5.
+  [dependabot[bot]]
+
+  Bumps [stefanzweifel/git-auto-commit-action](https://github.com/stefanzweifel/git-auto-commit-action) from 4 to 5.
+  - [Release notes](https://github.com/stefanzweifel/git-auto-commit-action/releases)
+  - [Changelog](https://github.com/stefanzweifel/git-auto-commit-action/blob/master/CHANGELOG.md)
+  - [Commits](https://github.com/stefanzweifel/git-auto-commit-action/compare/v4...v5)
+
+  ---
+  updated-dependencies:
+  - dependency-name: stefanzweifel/git-auto-commit-action
+    dependency-type: direct:production
+    update-type: version-update:semver-major
+  ...
+- Merge pull request #2 from
+  jkobject/dependabot/github_actions/actions/checkout-4. [Jérémie
+  Kalfon]
+
+  Bump actions/checkout from 3 to 4
+- ✅ Ready to clone and code. [dependabot[bot]]
+- Bump actions/checkout from 3 to 4. [dependabot[bot]]
+
+  Bumps [actions/checkout](https://github.com/actions/checkout) from 3 to 4.
+  - [Release notes](https://github.com/actions/checkout/releases)
+  - [Changelog](https://github.com/actions/checkout/blob/main/CHANGELOG.md)
+  - [Commits](https://github.com/actions/checkout/compare/v3...v4)
+
+  ---
+  updated-dependencies:
+  - dependency-name: actions/checkout
+    dependency-type: direct:production
+    update-type: version-update:semver-major
+  ...
+- ✅ Ready to clone and code. [jkobject]
+- Initial commit. [Jérémie Kalfon]
+
+

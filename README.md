@@ -55,11 +55,11 @@ some_test_function(grndata)
 see the notebooks in [docs](https://www.jkobject.com/benGRN/):
 
 1. [omnipath](https://www.jkobject.com/benGRN/notebooks/bench_omni_genie3)
-2. [genome wide perturb seq](https://www.jkobject.com/benGRN/notebooks/bench_perturbseq_genie3/)
-3. [Mc Calla](https://www.jkobject.com/benGRN/notebooks/bench_sroy_genie3/)
+2. [genome wide perturb seq](https://www.jkobject.com/benGRN/notebooks/bench_perturbseq_genie3_transp/)
+3. [Mc Calla](https://www.jkobject.com/benGRN/notebooks/bench_sroy_genie3_transp/)
 
 ## Development
 
-Read the [CONTRIBUTING.md](../CONTRIBUTING.md) file.
+Read the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 Awesome Benchmark of Gene Regulatory Networks created by @jkobject

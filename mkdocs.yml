@@ -8,8 +8,8 @@ nav:
   - Home: index.md
   - example notebook:
       - Omnipath: notebooks/bench_omni_genie3.ipynb
-      - Genome-wide perturbseq: notebooks/bench_perturbseq_genie3.ipynb
-      - Mc. Calla et al.: notebooks/bench_sroy_genie3.ipynb
+      - Genome-wide perturbseq: notebooks/bench_perturbseq_genie3_transp.ipynb
+      - Mc. Calla et al.: notebooks/bench_sroy_genie3_transp.ipynb
   - documentation:
       - base: base.md
       - genie3: genie3.md

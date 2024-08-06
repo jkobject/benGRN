@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://www.jkobject.com/benGRN/genie3/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Documentation for genie3 module - bengrn</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Documentation for genie3 module";
+        var mkdocs_page_input_path = "genie3.md";
+        var mkdocs_page_url = "/benGRN/genie3/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> bengrn
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="../notebooks/example.ipynb">example notebook</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">documentation</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../base/">base</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">bengrn</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Documentation for genie3 module</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="documentation-for-genie3-module">Documentation for <code>genie3</code> module</h1>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="bengrn.tools.genie3" class="doc doc-heading">
+            <code>bengrn.tools.genie3</code>
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="bengrn.tools.genie3.GENIE3" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">GENIE3</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+      <p>GENIE3 Computation of tree-based scores for all putative regulatory links.</p>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b><code>expr_data</code></b>
+                  (<code><span title="numpy.ndarray">ndarray</span></code>)
+              –
+              <div class="doc-md-description">
+                <p>Array containing gene expression values. Each row corresponds to a condition and each column corresponds to a gene.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>gene_names</code></b>
+                  (<code>list[str]</code>, default:
+                      <code>None</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>List of length p, where p is the number of columns in expr_data, containing the names of the genes. The i-th item of gene_names must correspond to the i-th column of expr_data. Defaults to None.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>regulators</code></b>
+                  (<code>list[str]</code>, default:
+                      <code>&#39;all&#39;</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>List containing the names of the candidate regulators. When a list of regulators is provided, the names of all the genes must be provided (in gene_names). When regulators is set to 'all', any gene can be a candidate regulator. Defaults to 'all'.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>tree_method</code></b>
+                  (<code>str</code>, default:
+                      <code>&#39;RF&#39;</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Specifies which tree-based procedure is used: either Random Forest ('RF') or Extra-Trees ('ET'). Defaults to 'RF'.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>K</code></b>
+                  (<code>str or int</code>, default:
+                      <code>&#39;sqrt&#39;</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Specifies the number of selected attributes at each node of one tree: either the square root of the number of candidate regulators ('sqrt'), the total number of candidate regulators ('all'), or any positive integer. Defaults to 'sqrt'.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>ntrees</code></b>
+                  (<code>int</code>, default:
+                      <code>1000</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Specifies the number of trees grown in an ensemble. Defaults to 1000.</p>
+              </div>
+            </li>
+            <li>
+              <b><code>nthreads</code></b>
+                  (<code>int</code>, default:
+                      <code>1</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Number of threads used for parallel computing. Defaults to 1.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Returns:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              –
+              <div class="doc-md-description">
+                <p>numpy.ndarray: An array in which the element (i,j) is the score of the edge directed from the i-th gene to the j-th gene. All diagonal elements are set to zero (auto-regulations are not considered). When a list of candidate regulators is provided, the scores of all the edges directed from a gene that is not a candidate regulator are set to zero.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+            <details class="quote">
+              <summary>Source code in <code>bengrn/tools/genie3.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">GENIE3</span><span class="p">(</span>
+    <span class="n">expr_data</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">gene_names</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">regulators</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
+    <span class="n">tree_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;RF&quot;</span><span class="p">,</span>
+    <span class="n">K</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;sqrt&quot;</span><span class="p">,</span>
+    <span class="n">ntrees</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+    <span class="n">nthreads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    GENIE3 Computation of tree-based scores for all putative regulatory links.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        expr_data (numpy.ndarray): Array containing gene expression values. Each row corresponds to a condition and each column corresponds to a gene.</span>
+<span class="sd">        gene_names (list[str], optional): List of length p, where p is the number of columns in expr_data, containing the names of the genes. The i-th item of gene_names must correspond to the i-th column of expr_data. Defaults to None.</span>
+<span class="sd">        regulators (list[str], optional): List containing the names of the candidate regulators. When a list of regulators is provided, the names of all the genes must be provided (in gene_names). When regulators is set to &#39;all&#39;, any gene can be a candidate regulator. Defaults to &#39;all&#39;.</span>
+<span class="sd">        tree_method (str, optional): Specifies which tree-based procedure is used: either Random Forest (&#39;RF&#39;) or Extra-Trees (&#39;ET&#39;). Defaults to &#39;RF&#39;.</span>
+<span class="sd">        K (str or int, optional): Specifies the number of selected attributes at each node of one tree: either the square root of the number of candidate regulators (&#39;sqrt&#39;), the total number of candidate regulators (&#39;all&#39;), or any positive integer. Defaults to &#39;sqrt&#39;.</span>
+<span class="sd">        ntrees (int, optional): Specifies the number of trees grown in an ensemble. Defaults to 1000.</span>
+<span class="sd">        nthreads (int, optional): Number of threads used for parallel computing. Defaults to 1.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy.ndarray: An array in which the element (i,j) is the score of the edge directed from the i-th gene to the j-th gene. All diagonal elements are set to zero (auto-regulations are not considered). When a list of candidate regulators is provided, the scores of all the edges directed from a gene that is not a candidate regulator are set to zero.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">time_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="c1"># Check input arguments</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expr_data</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;expr_data must be an array in which each row corresponds to a condition/sample and each column corresponds to a gene&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">ngenes</span> <span class="o">=</span> <span class="n">expr_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">gene_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gene_names</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;input argument gene_names must be a list of gene names&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">gene_names</span><span class="p">)</span> <span class="o">!=</span> <span class="n">ngenes</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;input argument gene_names must be a list of length p, where p is the number of columns/genes in the expr_data&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">regulators</span> <span class="o">!=</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">regulators</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;input argument regulators must be a list of gene names&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">gene_names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;the gene names must be specified (in input argument gene_names)&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sIntersection</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">gene_names</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">regulators</span><span class="p">))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">sIntersection</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;the genes must contain at least one candidate regulator&quot;</span>
+                <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">tree_method</span> <span class="o">!=</span> <span class="s2">&quot;RF&quot;</span> <span class="ow">and</span> <span class="n">tree_method</span> <span class="o">!=</span> <span class="s2">&quot;ET&quot;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s1">&#39;input argument tree_method must be &quot;RF&quot; (Random Forests) or &quot;ET&quot; (Extra-Trees)&#39;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">K</span> <span class="o">!=</span> <span class="s2">&quot;sqrt&quot;</span> <span class="ow">and</span> <span class="n">K</span> <span class="o">!=</span> <span class="s2">&quot;all&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s1">&#39;input argument K must be &quot;sqrt&quot;, &quot;all&quot; or a stricly positive integer&#39;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">K</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s1">&#39;input argument K must be &quot;sqrt&quot;, &quot;all&quot; or a stricly positive integer&#39;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ntrees</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;input argument ntrees must be a stricly positive integer&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">ntrees</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;input argument ntrees must be a stricly positive integer&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nthreads</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;input argument nthreads must be a stricly positive integer&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">nthreads</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;input argument nthreads must be a stricly positive integer&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Tree method: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">tree_method</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;K: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">K</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Number of trees: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ntrees</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Get the indices of the candidate regulators</span>
+    <span class="k">if</span> <span class="n">regulators</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
+        <span class="n">input_idx</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">ngenes</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">input_idx</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">gene</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gene_names</span><span class="p">)</span> <span class="k">if</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">regulators</span><span class="p">]</span>
+
+    <span class="c1"># Learn an ensemble of trees for each target gene, and compute scores for candidate regulators</span>
+    <span class="n">VIM</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">ngenes</span><span class="p">,</span> <span class="n">ngenes</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">nthreads</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;running jobs on </span><span class="si">%d</span><span class="s2"> threads&quot;</span> <span class="o">%</span> <span class="n">nthreads</span><span class="p">)</span>
+
+        <span class="n">input_data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ngenes</span><span class="p">):</span>
+            <span class="n">input_data</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">expr_data</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">input_idx</span><span class="p">,</span> <span class="n">tree_method</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">ntrees</span><span class="p">])</span>
+
+        <span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="n">nthreads</span><span class="p">)</span>
+        <span class="n">alloutput</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">wr_GENIE3_single</span><span class="p">,</span> <span class="n">input_data</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">vi</span> <span class="ow">in</span> <span class="n">alloutput</span><span class="p">:</span>
+            <span class="n">VIM</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">vi</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;running single threaded jobs&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ngenes</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Gene </span><span class="si">%d</span><span class="s2">/</span><span class="si">%d</span><span class="s2">...&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ngenes</span><span class="p">))</span>
+
+            <span class="n">vi</span> <span class="o">=</span> <span class="n">GENIE3_single</span><span class="p">(</span><span class="n">expr_data</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">input_idx</span><span class="p">,</span> <span class="n">tree_method</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">ntrees</span><span class="p">)</span>
+            <span class="n">VIM</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">vi</span>
+
+    <span class="n">VIM</span> <span class="o">=</span> <span class="n">transpose</span><span class="p">(</span><span class="n">VIM</span><span class="p">)</span>
+
+    <span class="n">time_end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Elapsed time: </span><span class="si">%.2f</span><span class="s2"> seconds&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">time_end</span> <span class="o">-</span> <span class="n">time_start</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">VIM</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="bengrn.tools.genie3.get_link_list" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_link_list</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+      <p>Gets the ranked list of (directed) regulatory links.</p>
+<p>Args
+    VIM (np.array): Array as returned by the function GENIE3(), in which the element (i,j) is the score of the edge directed from the i-th gene to the j-th gene.
+    gene_names (list[str] optional): List of length p, where p is the number of rows/columns in VIM, containing the names of the genes. The i-th item of gene_names must correspond to the i-th row/column of VIM. When the gene names are not provided, the i-th gene is named Gi. Default is None.
+    regulators (list[str], optional): List containing the names of the candidate regulators. When a list of regulators is provided, the names of all the genes must be provided (in gene_names), and the returned list contains only edges directed from the candidate regulators. When regulators is set to 'all', any gene can be a candidate regulator. Default is 'all'.
+    maxcount (Union[str, int], optional): Writes only the first maxcount regulatory links of the ranked list. When maxcount is set to 'all', all the regulatory links are written. Default is 'all'.
+    file_name (str, optional): Writes the ranked list of regulatory links to the file file_name. Default is None.</p>
+<p>Returns
+    pd.Dataframe: The list of regulatory links, ordered according to the edge score. Auto-regulations do not appear in the list. Regulatory links with a score equal to zero are randomly permuted. In the ranked list of edges, each line has format:
+        regulator   target gene     score of edge</p>
+
+            <details class="quote">
+              <summary>Source code in <code>bengrn/tools/genie3.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 22</span>
+<span class="normal"> 23</span>
+<span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_link_list</span><span class="p">(</span>
+    <span class="n">VIM</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">gene_names</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">regulators</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
+    <span class="n">maxcount</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
+    <span class="n">file_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Gets the ranked list of (directed) regulatory links.</span>
+
+<span class="sd">    Args</span>
+<span class="sd">        VIM (np.array): Array as returned by the function GENIE3(), in which the element (i,j) is the score of the edge directed from the i-th gene to the j-th gene.</span>
+<span class="sd">        gene_names (list[str] optional): List of length p, where p is the number of rows/columns in VIM, containing the names of the genes. The i-th item of gene_names must correspond to the i-th row/column of VIM. When the gene names are not provided, the i-th gene is named Gi. Default is None.</span>
+<span class="sd">        regulators (list[str], optional): List containing the names of the candidate regulators. When a list of regulators is provided, the names of all the genes must be provided (in gene_names), and the returned list contains only edges directed from the candidate regulators. When regulators is set to &#39;all&#39;, any gene can be a candidate regulator. Default is &#39;all&#39;.</span>
+<span class="sd">        maxcount (Union[str, int], optional): Writes only the first maxcount regulatory links of the ranked list. When maxcount is set to &#39;all&#39;, all the regulatory links are written. Default is &#39;all&#39;.</span>
+<span class="sd">        file_name (str, optional): Writes the ranked list of regulatory links to the file file_name. Default is None.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">        pd.Dataframe: The list of regulatory links, ordered according to the edge score. Auto-regulations do not appear in the list. Regulatory links with a score equal to zero are randomly permuted. In the ranked list of edges, each line has format:</span>
+<span class="sd">            regulator   target gene     score of edge</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Check input arguments</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">VIM</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;VIM must be a square array&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">VIM</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">VIM</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;VIM must be a square array&quot;</span><span class="p">)</span>
+
+    <span class="n">ngenes</span> <span class="o">=</span> <span class="n">VIM</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">gene_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gene_names</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;input argument gene_names must be a list of gene names&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">gene_names</span><span class="p">)</span> <span class="o">!=</span> <span class="n">ngenes</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;input argument gene_names must be a list of length p, where p is the number of columns/genes in the expression data&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">regulators</span> <span class="o">!=</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">regulators</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;input argument regulators must be a list of gene names&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">gene_names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;the gene names must be specified (in input argument gene_names)&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sIntersection</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">gene_names</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">regulators</span><span class="p">))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">sIntersection</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;The genes must contain at least one candidate regulator&quot;</span>
+                <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">maxcount</span> <span class="o">!=</span> <span class="s2">&quot;all&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">maxcount</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;input argument maxcount must be &quot;all&quot; or a positive integer&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">file_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;input argument file_name must be a string&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Get the indices of the candidate regulators</span>
+    <span class="k">if</span> <span class="n">regulators</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
+        <span class="n">input_idx</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">ngenes</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">input_idx</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">gene</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gene_names</span><span class="p">)</span> <span class="k">if</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">regulators</span><span class="p">]</span>
+
+    <span class="c1"># Get the non-ranked list of regulatory links</span>
+    <span class="n">vInter</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">),</span> <span class="n">score</span> <span class="ow">in</span> <span class="n">ndenumerate</span><span class="p">(</span><span class="n">VIM</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">input_idx</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Rank the list according to the weights of the edges</span>
+    <span class="n">vInter_sort</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">vInter</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">nInter</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">vInter_sort</span><span class="p">)</span>
+
+    <span class="c1"># Random permutation of edges with score equal to 0</span>
+    <span class="n">flag</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">flag</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">nInter</span><span class="p">:</span>
+        <span class="p">(</span><span class="n">TF_idx</span><span class="p">,</span> <span class="n">target_idx</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span> <span class="o">=</span> <span class="n">vInter_sort</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">score</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">flag</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">flag</span><span class="p">:</span>
+        <span class="n">items_perm</span> <span class="o">=</span> <span class="n">vInter_sort</span><span class="p">[</span><span class="n">i</span><span class="p">:]</span>
+        <span class="n">items_perm</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">items_perm</span><span class="p">)</span>
+        <span class="n">vInter_sort</span><span class="p">[</span><span class="n">i</span><span class="p">:]</span> <span class="o">=</span> <span class="n">items_perm</span>
+
+    <span class="c1"># Write the ranked list of edges</span>
+    <span class="n">nToWrite</span> <span class="o">=</span> <span class="n">nInter</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">maxcount</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">maxcount</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">maxcount</span> <span class="o">&lt;</span> <span class="n">nInter</span><span class="p">:</span>
+        <span class="n">nToWrite</span> <span class="o">=</span> <span class="n">maxcount</span>
+
+    <span class="k">if</span> <span class="n">file_name</span><span class="p">:</span>
+        <span class="n">outfile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">gene_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nToWrite</span><span class="p">):</span>
+                <span class="p">(</span><span class="n">TF_idx</span><span class="p">,</span> <span class="n">target_idx</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span> <span class="o">=</span> <span class="n">vInter_sort</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">TF_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">TF_idx</span><span class="p">)</span>
+                <span class="n">target_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">target_idx</span><span class="p">)</span>
+                <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="si">%s</span><span class="se">\t</span><span class="si">%s</span><span class="se">\t</span><span class="si">%.6f</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="o">%</span> <span class="p">(</span><span class="n">gene_names</span><span class="p">[</span><span class="n">TF_idx</span><span class="p">],</span> <span class="n">gene_names</span><span class="p">[</span><span class="n">target_idx</span><span class="p">],</span> <span class="n">score</span><span class="p">)</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nToWrite</span><span class="p">):</span>
+                <span class="p">(</span><span class="n">TF_idx</span><span class="p">,</span> <span class="n">target_idx</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span> <span class="o">=</span> <span class="n">vInter_sort</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">TF_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">TF_idx</span><span class="p">)</span>
+                <span class="n">target_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">target_idx</span><span class="p">)</span>
+                <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;G</span><span class="si">%d</span><span class="se">\t</span><span class="s2">G</span><span class="si">%d</span><span class="se">\t</span><span class="si">%.6f</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">TF_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">target_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">score</span><span class="p">))</span>
+
+        <span class="n">outfile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">gene_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nToWrite</span><span class="p">):</span>
+                <span class="p">(</span><span class="n">TF_idx</span><span class="p">,</span> <span class="n">target_idx</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span> <span class="o">=</span> <span class="n">vInter_sort</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">TF_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">TF_idx</span><span class="p">)</span>
+                <span class="n">target_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">target_idx</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="si">%s</span><span class="se">\t</span><span class="si">%s</span><span class="se">\t</span><span class="si">%.6f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">gene_names</span><span class="p">[</span><span class="n">TF_idx</span><span class="p">],</span> <span class="n">gene_names</span><span class="p">[</span><span class="n">target_idx</span><span class="p">],</span> <span class="n">score</span><span class="p">)</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nToWrite</span><span class="p">):</span>
+                <span class="p">(</span><span class="n">TF_idx</span><span class="p">,</span> <span class="n">target_idx</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span> <span class="o">=</span> <span class="n">vInter_sort</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">TF_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">TF_idx</span><span class="p">)</span>
+                <span class="n">target_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">target_idx</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;G</span><span class="si">%d</span><span class="se">\t</span><span class="s2">G</span><span class="si">%d</span><span class="se">\t</span><span class="si">%.6f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">TF_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">target_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">score</span><span class="p">))</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

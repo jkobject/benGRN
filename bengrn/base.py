@@ -417,7 +417,7 @@ def get_scenicplus(
 
 def get_sroy_gt(
     get: str = "main", join: str = "outer", species: str = "human", gt: str = "full"
-) -> GrnAnnData:
+) -> GRNAnnData:
     """
     This function retrieves the ground truth data from the McCall et al.'s paper.
 

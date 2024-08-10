@@ -808,6 +808,10 @@ def compute_pr(
     if grn.shape != true.shape:
         raise ValueError("The shape of the GRN and the true matrix do not match.")
     metrics = {}
+    if isinstance(grn, (csr_matrix, csc_matrix)):
+        grn = grn.toarray()
+    if isinstance(true, (csr_matrix, csc_matrix)):
+        true = true.toarray()
     true = true.astype(bool)
     tot = (grn.shape[0] * grn.shape[1]) - grn.shape[0]
     precision = (grn[true] != 0).sum() / (grn != 0).sum()

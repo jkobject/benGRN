@@ -4,7 +4,7 @@ version = "1.0.1"
 description = "benchmarking gene regulatory networks"
 authors = ["jkobject"]
 readme = "README.md"
-keywords = ["scRNAseq", "GRN", "gene regulatory networks", "benchmark", "comp bio", "scPrint"]
+keywords = ["scRNAseq", "GRN", "gene regulatory networks", "benchmark", "comp bio", "scPRINT"]
 
 [tool.poetry.dependencies]
 python = "^3.10"

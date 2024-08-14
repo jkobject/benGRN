@@ -989,4 +989,8 @@ def load_genes(organisms: Union[str, list] = "NCBITaxon:9606"):  # "NCBITaxon:10
         genesdf["hb"] = genesdf.symbol.astype(str).str.contains(("^HB[^(P)]"))
         genesdf["organism"] = organism
         organismdf.append(genesdf)
-    return pd.concat(organismdf)
+    organismdf = pd.concat(organismdf)
+    organismdf.drop(
+        columns=["source_id", "run_id", "created_by_id", "updated_at"], inplace=True
+    )
+    return organismdf

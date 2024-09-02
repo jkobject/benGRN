@@ -17,11 +17,10 @@ from anndata.utils import make_index_unique
 
 from arboreto.algo import grnboost2
 
-from pyscenic.utils import modules_from_adjacencies
-from pyscenic.prune import prune2df, df2regulons
-from pyscenic.aucell import aucell
-
 # issue here of using an older version of numpy calling np.object instead of np.object_
+# from pyscenic.utils import modules_from_adjacencies
+# from pyscenic.prune import prune2df, df2regulons
+# from pyscenic.aucell import aucell
 
 from ctxcore.rnkdb import FeatherRankingDatabase as RankingDatabase
 
@@ -637,59 +636,59 @@ def get_perturb_gt(
     )
 
 
-def compute_scenic(adata, data_dir=FILEDIR + "/../data"):
-    """
-    This function computes the SCENIC algorithm on the given dataset.
-
-    Args:
-        adata (AnnData): The annotated data matrix of shape n_obs x n_vars. Rows correspond to cells and columns to genes.
-        data_dir (str, optional): The directory where the data files will be stored. Defaults to FILEDIR + "/../data".
-
-    Returns:
-        GRNAnnData: The Gene Regulatory Network data.
-    """
-    raise NotImplementedError("This function is not implemented yet")
-    os.makedirs(data_dir, exist_ok=True)
-
-    url1 = "https://resources.aertslab.org/cistarget/motif2tf/motifs-v10nr_clust-nr.hgnc-m0.001-o0.0.tbl"
-    url2 = "https://resources.aertslab.org/cistarget/databases/homo_sapiens/hg38/refseq_r80/mc_v10_clust/gene_based/hg38_10kbp_up_10kbp_down_full_tx_v10_clust.genes_vs_motifs.rankings.feather"
-
-    file1 = os.path.join(data_dir, os.path.basename(url1))
-    file2 = os.path.join(data_dir, os.path.basename(url2))
-
-    if not os.path.exists(file1):
-        urllib.request.urlretrieve(url1, file1)
-    if not os.path.exists(file2):
-        urllib.request.urlretrieve(url2, file2)
-    dbs = RankingDatabase(fname=file2, name="genes_10kb_human_rank_v10")
-    adjacencies = grnboost2(
-        expression_data=adata.to_df(), tf_names=utils.TF, verbose=True
-    )
-    modules = list(modules_from_adjacencies(adjacencies, adata.to_df()))
-
-    df = prune2df([dbs], modules, file1)
-    regulons = df2regulons(df)
-    # auc_mtx = aucell(adata.to_df(), regulons, num_workers=8)
-    # sns.clustermap(auc_mtx, figsize=(12,12))
-
-    # compute the grn matrix
-    var_names = adata.var_names.tolist()
-    da = np.zeros((len(var_names), len(var_names)), dtype=float)
-    for reg in regulons:
-        i = var_names.index(reg.transcription_factor)
-        for k, v in reg.gene2weight.items():
-            da[i, var_names.index(k)] = v
-    # create the grndata
-    grn = GRNAnnData(adata, grn=da)
-
-    da = np.zeros((len(var_names), len(var_names)), dtype=float)
-    for reg in modules:
-        i = var_names.index(reg.transcription_factor)
-        for k, v in reg.gene2weight.items():
-            da[i, var_names.index(k)] = v
-    grn.varp["modules"] = da
-    grn.var["TFs"] = [True if i in utils.TF else False for i in grn.var_names]
-    return grn
+# def compute_scenic(adata, data_dir=FILEDIR + "/../data"):
+#    """
+#    This function computes the SCENIC algorithm on the given dataset.
+#
+#    Args:
+#        adata (AnnData): The annotated data matrix of shape n_obs x n_vars. Rows correspond to cells and columns to genes.
+#        data_dir (str, optional): The directory where the data files will be stored. Defaults to FILEDIR + "/../data".
+#
+#    Returns:
+#        GRNAnnData: The Gene Regulatory Network data.
+#    """
+#    raise NotImplementedError("This function is not implemented yet")
+#    os.makedirs(data_dir, exist_ok=True)
+#
+#    url1 = "https://resources.aertslab.org/cistarget/motif2tf/motifs-v10nr_clust-nr.hgnc-m0.001-o0.0.tbl"
+#    url2 = "https://resources.aertslab.org/cistarget/databases/homo_sapiens/hg38/refseq_r80/mc_v10_clust/gene_based/hg38_10kbp_up_10kbp_down_full_tx_v10_clust.genes_vs_motifs.rankings.feather"
+#
+#    file1 = os.path.join(data_dir, os.path.basename(url1))
+#    file2 = os.path.join(data_dir, os.path.basename(url2))
+#
+#    if not os.path.exists(file1):
+#        urllib.request.urlretrieve(url1, file1)
+#    if not os.path.exists(file2):
+#        urllib.request.urlretrieve(url2, file2)
+#    dbs = RankingDatabase(fname=file2, name="genes_10kb_human_rank_v10")
+#    adjacencies = grnboost2(
+#        expression_data=adata.to_df(), tf_names=utils.TF, verbose=True
+#    )
+#    modules = list(modules_from_adjacencies(adjacencies, adata.to_df()))
+#
+#    df = prune2df([dbs], modules, file1)
+#    regulons = df2regulons(df)
+#    # auc_mtx = aucell(adata.to_df(), regulons, num_workers=8)
+#    # sns.clustermap(auc_mtx, figsize=(12,12))
+#
+#    # compute the grn matrix
+#    var_names = adata.var_names.tolist()
+#    da = np.zeros((len(var_names), len(var_names)), dtype=float)
+#    for reg in regulons:
+#        i = var_names.index(reg.transcription_factor)
+#        for k, v in reg.gene2weight.items():
+#            da[i, var_names.index(k)] = v
+#    # create the grndata
+#    grn = GRNAnnData(adata, grn=da)
+#
+#    da = np.zeros((len(var_names), len(var_names)), dtype=float)
+#    for reg in modules:
+#        i = var_names.index(reg.transcription_factor)
+#        for k, v in reg.gene2weight.items():
+#            da[i, var_names.index(k)] = v
+#    grn.varp["modules"] = da
+#    grn.var["TFs"] = [True if i in utils.TF else False for i in grn.var_names]
+#    return grn
 
 
 def compute_genie3(

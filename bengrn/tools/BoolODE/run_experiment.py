@@ -60,7 +60,6 @@ def Experiment(
         i for i in range(len(mg.varmapper.keys())) if "p_" in mg.varmapper[i]
     ]
 
-    y0 = [mg.ModelSpec["ics"][mg.varmapper[i]] for i in range(len(mg.varmapper.keys()))]
     ss = np.zeros(len(mg.varmapper.keys()))
 
     for i, k in mg.varmapper.items():
@@ -93,7 +92,7 @@ def Experiment(
     if len(mg.proteinlist) == 0:
         result = pd.DataFrame(index=pd.Index([mg.varmapper[i] for i in rnaIndex]))
     else:
-        speciesoi = [revvarmapper["p_" + p] for p in proteinlist]
+        speciesoi = [revvarmapper["p_" + p] for p in mg.proteinlist]
         speciesoi.extend([revvarmapper["x_" + g] for g in mg.genelist])
         result = pd.DataFrame(index=pd.Index([mg.varmapper[i] for i in speciesoi]))
 
@@ -221,9 +220,7 @@ def startRun(settings):
     Start a simulation run. Loads model file, starts an Experiment(),
     and generates the appropriate input files
     """
-    validInput = utils.checkValidModelDefinitionPath(
-        settings["modelpath"], settings["name"]
-    )
+    _ = utils.checkValidModelDefinitionPath(settings["modelpath"], settings["name"])
     startfull = time.time()
 
     outdir = settings["outprefix"]
@@ -239,8 +236,6 @@ def startRun(settings):
     parameterSetDF = utils.checkValidInputPath(settings["parameter_set"])
     icsDF = utils.checkValidInputPath(settings["icsPath"])
     interactionStrengthDF = utils.checkValidInputPath(settings["interaction_strengths"])
-
-    speciesTypeDF = utils.checkValidInputPath(settings["species_type"])
     ##########################################
 
     # Simulator settings
@@ -252,7 +247,6 @@ def startRun(settings):
     mg = GenerateModel(
         settings, parameterInputsDF, parameterSetDF, interactionStrengthDF
     )
-    genesDict = {}
 
     # Load the ODE model file
     model = SourceFileLoader("model", mg.path_to_ode_model.as_posix()).load_module()
@@ -289,7 +283,6 @@ def simulateAndSample(argdict):
     Handles parallelization of ODE simulations.
     Calls the simulator with simulation settings.
     """
-    mg = argdict["mg"]
     allParameters = argdict["allParameters"]
     parNames = argdict["parNames"]
     Model = argdict["Model"]
@@ -362,7 +355,6 @@ def simulateAndSample(argdict):
         ## less than 10% of the y_max, drop the simulation.
         ## This check stems from the observation that in some simulations,
         ## all genes go to the 0 steady state in some rare simulations.
-        dfmax = df.max()
         for col in df.columns:
             colmax = df[col].max()
             if colmax < 0.1 * x_max:

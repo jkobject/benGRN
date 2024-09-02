@@ -80,7 +80,7 @@ class GenerateModel:
            is present in the file, the node is treated as an input parameter
            (b) Else, a self-edge is added to the node
         3. Adds dummy genes - *This is experimental*
-        4. Finally, create a gene (x\_) and protein (p\_)  variable corresponding to
+        4. Finally, create a gene (x_) and protein (p_)  variable corresponding to
            each node in the network, taking into consideration user defined types.
         """
         self.df = pd.read_csv(self.settings["modelpath"], sep="\t", engine="python")
@@ -152,7 +152,7 @@ class GenerateModel:
                     self.varspecs.update({"x_" + node: "", "p_" + node: ""})
                     self.genelist.append(node)
 
-    def addDummyGenes(self):
+    def addDummyGenes(self, allnodes, max_parents):
         """
         Add dummy genes.
         Starts with the user specified Boolean model, and grows the
@@ -188,7 +188,7 @@ class GenerateModel:
             )
         self.df.to_csv(self.setting["outPrefix"] + "rules-with-added-genes.csv")
 
-    def getParameters(self):
+    def getParameters(self, signalingtimescale):
         """Create and assigns the kinetic parameters for each equations the
         corresponding parameter value.
 
@@ -239,14 +239,11 @@ class GenerateModel:
             "l_p_": self.kineticParameterDefaults["proteinDegradation"],
         }
 
-        par = dict()
         ## If there is even one signaling protein,
         ## create the y_max parameter
         if len(self.proteinlist) > 0:
             self.par["y_max"] = y_max
             self.par["signalingtimescale"] = signalingtimescale
-
-        interactionStrengths = {}
 
         ## Carry out a series of checks to handle user defined input to model
 
@@ -276,7 +273,7 @@ class GenerateModel:
         # Update user defined parameter values
         if not self.parameterSetDF.empty:
             for pname, pval in self.parameterSetDF.iterrows():
-                self.par[pname] = pvalue[1]
+                self.par[pname] = pval[1]
 
     def addParameterInputs(self):
         """

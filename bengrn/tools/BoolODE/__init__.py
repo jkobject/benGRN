@@ -111,7 +111,7 @@ class BoolODE(object):
             as specified in the config file, if the folder doesn't already exist.
             Contents of existing folders will be rewritten!
         """
-        base_output_dir = self.output_dir
+        _ = self.output_dir
 
         alljobs = self.jobs.keys()
         print("Creating output folders")
@@ -211,7 +211,7 @@ class BoolODE(object):
                 num_invalid = 0
                 for jobid in alljobs:
                     for gsampPath in generatedPaths[jobid]:
-                        print(f"perplexity=", perplexity)
+                        print("perplexity=", perplexity)
                         settings = {}
                         invalid = False
                         settings["expr"] = Path(gsampPath, "ExpressionData.csv")
@@ -231,7 +231,7 @@ class BoolODE(object):
                                 break
                         if not invalid:
                             po.doDimRed(settings)
-                            all_invalid = False
+                            _ = False
                     if num_invalid == len(alljobs):
                         break
 

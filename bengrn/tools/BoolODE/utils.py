@@ -163,7 +163,6 @@ def normalizeExp(DF):
     """
     genes = DF.index
     newDF = DF.copy()
-    Pnorm = []
     for g in genes:
         P = DF.loc[g].values
         newDF.loc[g] = minmaxnorm(P)
@@ -214,7 +213,7 @@ def generateInputFiles(
     for g in genes:
         row = BoolDF[BoolDF["Gene"] == g]
         rhs = list(row["Rule"].values)[0]
-        rule = list(row["Rule"].values)[0]
+        _ = list(row["Rule"].values)[0]
         rhs = rhs.replace("(", " ")
         rhs = rhs.replace(")", " ")
         tokens = rhs.split(" ")
@@ -328,7 +327,7 @@ def sampleTimeSeries(
         else:
             speciesoi = [revvarmapper["p_" + p] for p in proteinlist]
             speciesoi.extend([revvarmapper["x_" + g] for g in genelist])
-            result = pd.DataFrame(index=pd.Index([varmapper[i] for i in speciesoi]))
+            _ = pd.DataFrame(index=pd.Index([varmapper[i] for i in speciesoi]))
 
             for si in speciesoi:
                 sampleDict[varmapper[si]] = {
@@ -370,7 +369,7 @@ def sampleCellFromTraj(
         else:
             speciesoi = [revvarmapper["p_" + p] for p in proteinlist]
             speciesoi.extend([revvarmapper["x_" + g] for g in genelist])
-            result = pd.DataFrame(index=pd.Index([varmapper[i] for i in speciesoi]))
+            _ = pd.DataFrame(index=pd.Index([varmapper[i] for i in speciesoi]))
             for si in speciesoi:
                 sampleDict[varmapper[si]] = {header[cellid]: P[ri][timepoint]}
 

@@ -17,9 +17,10 @@ from anndata.utils import make_index_unique
 
 from arboreto.algo import grnboost2
 
-# from pyscenic.utils import modules_from_adjacencies
-# from pyscenic.prune import prune2df, df2regulons
-# from pyscenic.aucell import aucell
+from pyscenic.utils import modules_from_adjacencies
+from pyscenic.prune import prune2df, df2regulons
+from pyscenic.aucell import aucell
+
 # issue here of using an older version of numpy calling np.object instead of np.object_
 
 from ctxcore.rnkdb import FeatherRankingDatabase as RankingDatabase
@@ -647,6 +648,7 @@ def compute_scenic(adata, data_dir=FILEDIR + "/../data"):
     Returns:
         GRNAnnData: The Gene Regulatory Network data.
     """
+    raise NotImplementedError("This function is not implemented yet")
     os.makedirs(data_dir, exist_ok=True)
 
     url1 = "https://resources.aertslab.org/cistarget/motif2tf/motifs-v10nr_clust-nr.hgnc-m0.001-o0.0.tbl"
@@ -991,6 +993,7 @@ def load_genes(organisms: Union[str, list] = "NCBITaxon:9606"):  # "NCBITaxon:10
         organismdf.append(genesdf)
     organismdf = pd.concat(organismdf)
     organismdf.drop(
-        columns=["source_id", "run_id", "created_by_id", "updated_at", "stable_id"], inplace=True
+        columns=["source_id", "run_id", "created_by_id", "updated_at", "stable_id"],
+        inplace=True,
     )
     return organismdf

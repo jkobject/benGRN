@@ -6,6 +6,7 @@ from pathlib import Path
 from sklearn.cluster import KMeans
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 def genSamples(opts):
@@ -169,8 +170,8 @@ def computeSSPT(opts):
     ptDF = pd.read_csv(opts["pseudo"], index_col=0, header=0)
     nClust = opts["nClusters"]
     outPath = opts["outPrefix"]
-    perplexity = opts["perplexity"]
     noEnd = opts["noEnd"]
+    settings = opts
 
     if nClust == 1:
         # Return simulation time as PseduoTime

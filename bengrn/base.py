@@ -972,7 +972,7 @@ def load_genes(organisms: Union[str, list] = "NCBITaxon:9606"):  # "NCBITaxon:10
         pd.DataFrame: A DataFrame containing gene information for the specified organisms, including columns for gene symbols, mitochondrial genes, ribosomal genes, hemoglobin genes, and organism.
     """
     organismdf = []
-    if type(organisms) == str:
+    if type(organisms) is str:
         organisms = [organisms]
     for organism in organisms:
         genesdf = bt.Gene.filter(

@@ -34,20 +34,20 @@ mkdocs = { version = "^1.5.3", optional = true }
 
 [tool.poetry.extras]
 dev = [
-    "pytest",
-    "coverage",
-    "flake8",
-    "black",
-    "isort",
-    "pytest-cov",
-    "mypy",
-    "gitchangelog",
-    "mkdocs",
-    "mkdocs-git-revision-date-localized-plugin",
-    "mkdocstrings",
-    "mkdocs-git-authors-plugin",
-    "mkdocs-jupyter",
-    "mkdocstrings-python"
+  "pytest",
+  "coverage",
+  "flake8",
+  "black",
+  "isort",
+  "pytest-cov",
+  "mypy",
+  "gitchangelog",
+  "mkdocs",
+  "mkdocs-git-revision-date-localized-plugin",
+  "mkdocstrings",
+  "mkdocs-git-authors-plugin",
+  "mkdocs-jupyter",
+  "mkdocstrings-python"
 ]
 
 [build-system]

@@ -73,8 +73,6 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#bengrn.base.compute_pr">compute_pr</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#bengrn.base.compute_scenic">compute_scenic</a>
-    </li>
     <li class="toctree-l3"><a class="reference internal" href="#bengrn.base.get_GT_db">get_GT_db</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#bengrn.base.get_perturb_gt">get_perturb_gt</a>
@@ -135,7 +133,7 @@
 
     <div class="doc doc-contents first">
 
-      <p>bengrn base module.</p>
+        <p>bengrn base module.</p>
 
 
 
@@ -161,7 +159,7 @@
     <div class="doc doc-contents ">
 
 
-      <p>Initializes the BenGRN class.</p>
+        <p>Initializes the BenGRN class.</p>
 
 
 <table class="field-list">
@@ -284,7 +282,7 @@
 
     <div class="doc doc-contents ">
 
-      <p>compare_to compares the GRN to another GRN.</p>
+        <p>compare_to compares the GRN to another GRN.</p>
 
 
 <table class="field-list">
@@ -478,7 +476,7 @@ If 'other' is given, this argument is ignored.</p>
 
     <div class="doc doc-contents ">
 
-      <p>scprint_benchmark full benchmarks of the GRN as in the scPRINT paper.</p>
+        <p>scprint_benchmark full benchmarks of the GRN as in the scPRINT paper.</p>
 <p>It will apply first an enrichment analysis over the [elems] of the GRN looking for TF enrichment and cell type marker gene enrichment
 It will then apply an enrichment over each TF in the GRN for their targets in ENCODE.
 Finaly, it will compare it to the OmniPath database GRN using precision recall type metrics.</p>
@@ -787,7 +785,7 @@ It corresponds to different views of the network.</p>
 
     <div class="doc doc-contents ">
 
-      <p>compute_epr computes the Expected Precision Recall (EPR) metric for the given classifier, test data, and true labels.</p>
+        <p>compute_epr computes the Expected Precision Recall (EPR) metric for the given classifier, test data, and true labels.</p>
 
 
 <table class="field-list">
@@ -854,12 +852,7 @@ It corresponds to different views of the network.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>bengrn/base.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">925</span>
-<span class="normal">926</span>
-<span class="normal">927</span>
-<span class="normal">928</span>
-<span class="normal">929</span>
-<span class="normal">930</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">930</span>
 <span class="normal">931</span>
 <span class="normal">932</span>
 <span class="normal">933</span>
@@ -878,7 +871,12 @@ It corresponds to different views of the network.</p>
 <span class="normal">946</span>
 <span class="normal">947</span>
 <span class="normal">948</span>
-<span class="normal">949</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">compute_epr</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">X_test</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y_test</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="normal">949</span>
+<span class="normal">950</span>
+<span class="normal">951</span>
+<span class="normal">952</span>
+<span class="normal">953</span>
+<span class="normal">954</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">compute_epr</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">X_test</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y_test</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    compute_epr computes the Expected Precision Recall (EPR) metric for the given classifier, test data, and true labels.</span>
 
@@ -920,7 +918,7 @@ It corresponds to different views of the network.</p>
 
     <div class="doc doc-contents ">
 
-      <p>This function computes the GENIE3 algorithm on the given data.</p>
+        <p>This function computes the GENIE3 algorithm on the given data.</p>
 
 
 <table class="field-list">
@@ -998,8 +996,7 @@ It corresponds to different views of the network.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>bengrn/base.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">693</span>
-<span class="normal">694</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">694</span>
 <span class="normal">695</span>
 <span class="normal">696</span>
 <span class="normal">697</span>
@@ -1021,7 +1018,8 @@ It corresponds to different views of the network.</p>
 <span class="normal">713</span>
 <span class="normal">714</span>
 <span class="normal">715</span>
-<span class="normal">716</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">compute_genie3</span><span class="p">(</span>
+<span class="normal">716</span>
+<span class="normal">717</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">compute_genie3</span><span class="p">(</span>
     <span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span> <span class="n">nthreads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span> <span class="n">ntrees</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GRNAnnData</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1062,7 +1060,7 @@ It corresponds to different views of the network.</p>
 
     <div class="doc doc-contents ">
 
-      <p>compute_pr computes the precision and recall metrics for the given GRN and true matrix.</p>
+        <p>compute_pr computes the precision and recall metrics for the given GRN and true matrix.</p>
 
 
 <table class="field-list">
@@ -1163,8 +1161,7 @@ It corresponds to different views of the network.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>bengrn/base.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">787</span>
-<span class="normal">788</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">788</span>
 <span class="normal">789</span>
 <span class="normal">790</span>
 <span class="normal">791</span>
@@ -1298,7 +1295,12 @@ It corresponds to different views of the network.</p>
 <span class="normal">919</span>
 <span class="normal">920</span>
 <span class="normal">921</span>
-<span class="normal">922</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">compute_pr</span><span class="p">(</span>
+<span class="normal">922</span>
+<span class="normal">923</span>
+<span class="normal">924</span>
+<span class="normal">925</span>
+<span class="normal">926</span>
+<span class="normal">927</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">compute_pr</span><span class="p">(</span>
     <span class="n">grn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
     <span class="n">true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
     <span class="n">do_auc</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -1322,6 +1324,10 @@ It corresponds to different views of the network.</p>
     <span class="k">if</span> <span class="n">grn</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">true</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The shape of the GRN and the true matrix do not match.&quot;</span><span class="p">)</span>
     <span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">grn</span><span class="p">,</span> <span class="p">(</span><span class="n">csr_matrix</span><span class="p">,</span> <span class="n">csc_matrix</span><span class="p">)):</span>
+        <span class="n">grn</span> <span class="o">=</span> <span class="n">grn</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">true</span><span class="p">,</span> <span class="p">(</span><span class="n">csr_matrix</span><span class="p">,</span> <span class="n">csc_matrix</span><span class="p">)):</span>
+        <span class="n">true</span> <span class="o">=</span> <span class="n">true</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
     <span class="n">true</span> <span class="o">=</span> <span class="n">true</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
     <span class="n">tot</span> <span class="o">=</span> <span class="p">(</span><span class="n">grn</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">grn</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="n">grn</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">precision</span> <span class="o">=</span> <span class="p">(</span><span class="n">grn</span><span class="p">[</span><span class="n">true</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="n">grn</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
@@ -1443,186 +1449,6 @@ It corresponds to different views of the network.</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="bengrn.base.compute_scenic" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">compute_scenic</span></code>
-
-</h3>
-
-
-    <div class="doc doc-contents ">
-
-      <p>This function computes the SCENIC algorithm on the given dataset.</p>
-
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Parameters:</th>
-      <td class="field-body">
-        <ul class="first simple">
-            <li>
-              <b><code>adata</code></b>
-                  (<code><span title="anndata.AnnData">AnnData</span></code>)
-              –
-              <div class="doc-md-description">
-                <p>The annotated data matrix of shape n_obs x n_vars. Rows correspond to cells and columns to genes.</p>
-              </div>
-            </li>
-            <li>
-              <b><code>data_dir</code></b>
-                  (<code>str</code>, default:
-                      <code><span title="bengrn.base.FILEDIR">FILEDIR</span> + &#39;/../data&#39;</code>
-)
-              –
-              <div class="doc-md-description">
-                <p>The directory where the data files will be stored. Defaults to FILEDIR + "/../data".</p>
-              </div>
-            </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
-<table class="field-list">
-  <colgroup>
-    <col class="field-name" />
-    <col class="field-body" />
-  </colgroup>
-  <tbody valign="top">
-    <tr class="field">
-      <th class="field-name">Returns:</th>
-      <td class="field-body">
-        <ul class="first simple">
-            <li>
-<b><code>GRNAnnData</code></b>              –
-              <div class="doc-md-description">
-                <p>The Gene Regulatory Network data.</p>
-              </div>
-            </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-            <details class="quote">
-              <summary>Source code in <code>bengrn/base.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">639</span>
-<span class="normal">640</span>
-<span class="normal">641</span>
-<span class="normal">642</span>
-<span class="normal">643</span>
-<span class="normal">644</span>
-<span class="normal">645</span>
-<span class="normal">646</span>
-<span class="normal">647</span>
-<span class="normal">648</span>
-<span class="normal">649</span>
-<span class="normal">650</span>
-<span class="normal">651</span>
-<span class="normal">652</span>
-<span class="normal">653</span>
-<span class="normal">654</span>
-<span class="normal">655</span>
-<span class="normal">656</span>
-<span class="normal">657</span>
-<span class="normal">658</span>
-<span class="normal">659</span>
-<span class="normal">660</span>
-<span class="normal">661</span>
-<span class="normal">662</span>
-<span class="normal">663</span>
-<span class="normal">664</span>
-<span class="normal">665</span>
-<span class="normal">666</span>
-<span class="normal">667</span>
-<span class="normal">668</span>
-<span class="normal">669</span>
-<span class="normal">670</span>
-<span class="normal">671</span>
-<span class="normal">672</span>
-<span class="normal">673</span>
-<span class="normal">674</span>
-<span class="normal">675</span>
-<span class="normal">676</span>
-<span class="normal">677</span>
-<span class="normal">678</span>
-<span class="normal">679</span>
-<span class="normal">680</span>
-<span class="normal">681</span>
-<span class="normal">682</span>
-<span class="normal">683</span>
-<span class="normal">684</span>
-<span class="normal">685</span>
-<span class="normal">686</span>
-<span class="normal">687</span>
-<span class="normal">688</span>
-<span class="normal">689</span>
-<span class="normal">690</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">compute_scenic</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">data_dir</span><span class="o">=</span><span class="n">FILEDIR</span> <span class="o">+</span> <span class="s2">&quot;/../data&quot;</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This function computes the SCENIC algorithm on the given dataset.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        adata (AnnData): The annotated data matrix of shape n_obs x n_vars. Rows correspond to cells and columns to genes.</span>
-<span class="sd">        data_dir (str, optional): The directory where the data files will be stored. Defaults to FILEDIR + &quot;/../data&quot;.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        GRNAnnData: The Gene Regulatory Network data.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-    <span class="n">url1</span> <span class="o">=</span> <span class="s2">&quot;https://resources.aertslab.org/cistarget/motif2tf/motifs-v10nr_clust-nr.hgnc-m0.001-o0.0.tbl&quot;</span>
-    <span class="n">url2</span> <span class="o">=</span> <span class="s2">&quot;https://resources.aertslab.org/cistarget/databases/homo_sapiens/hg38/refseq_r80/mc_v10_clust/gene_based/hg38_10kbp_up_10kbp_down_full_tx_v10_clust.genes_vs_motifs.rankings.feather&quot;</span>
-
-    <span class="n">file1</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">url1</span><span class="p">))</span>
-    <span class="n">file2</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">url2</span><span class="p">))</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file1</span><span class="p">):</span>
-        <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlretrieve</span><span class="p">(</span><span class="n">url1</span><span class="p">,</span> <span class="n">file1</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file2</span><span class="p">):</span>
-        <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlretrieve</span><span class="p">(</span><span class="n">url2</span><span class="p">,</span> <span class="n">file2</span><span class="p">)</span>
-    <span class="n">dbs</span> <span class="o">=</span> <span class="n">RankingDatabase</span><span class="p">(</span><span class="n">fname</span><span class="o">=</span><span class="n">file2</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;genes_10kb_human_rank_v10&quot;</span><span class="p">)</span>
-    <span class="n">adjacencies</span> <span class="o">=</span> <span class="n">grnboost2</span><span class="p">(</span>
-        <span class="n">expression_data</span><span class="o">=</span><span class="n">adata</span><span class="o">.</span><span class="n">to_df</span><span class="p">(),</span> <span class="n">tf_names</span><span class="o">=</span><span class="n">utils</span><span class="o">.</span><span class="n">TF</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
-    <span class="p">)</span>
-    <span class="n">modules</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">modules_from_adjacencies</span><span class="p">(</span><span class="n">adjacencies</span><span class="p">,</span> <span class="n">adata</span><span class="o">.</span><span class="n">to_df</span><span class="p">()))</span>
-
-    <span class="n">df</span> <span class="o">=</span> <span class="n">prune2df</span><span class="p">([</span><span class="n">dbs</span><span class="p">],</span> <span class="n">modules</span><span class="p">,</span> <span class="n">file1</span><span class="p">)</span>
-    <span class="n">regulons</span> <span class="o">=</span> <span class="n">df2regulons</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
-    <span class="c1"># auc_mtx = aucell(adata.to_df(), regulons, num_workers=8)</span>
-    <span class="c1"># sns.clustermap(auc_mtx, figsize=(12,12))</span>
-
-    <span class="c1"># compute the grn matrix</span>
-    <span class="n">var_names</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">var_names</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-    <span class="n">da</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">var_names</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_names</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">reg</span> <span class="ow">in</span> <span class="n">regulons</span><span class="p">:</span>
-        <span class="n">i</span> <span class="o">=</span> <span class="n">var_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">reg</span><span class="o">.</span><span class="n">transcription_factor</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">reg</span><span class="o">.</span><span class="n">gene2weight</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">da</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">var_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">k</span><span class="p">)]</span> <span class="o">=</span> <span class="n">v</span>
-    <span class="c1"># create the grndata</span>
-    <span class="n">grn</span> <span class="o">=</span> <span class="n">GRNAnnData</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">grn</span><span class="o">=</span><span class="n">da</span><span class="p">)</span>
-
-    <span class="n">da</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">var_names</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_names</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">reg</span> <span class="ow">in</span> <span class="n">modules</span><span class="p">:</span>
-        <span class="n">i</span> <span class="o">=</span> <span class="n">var_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">reg</span><span class="o">.</span><span class="n">transcription_factor</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">reg</span><span class="o">.</span><span class="n">gene2weight</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">da</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">var_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">k</span><span class="p">)]</span> <span class="o">=</span> <span class="n">v</span>
-    <span class="n">grn</span><span class="o">.</span><span class="n">varp</span><span class="p">[</span><span class="s2">&quot;modules&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">da</span>
-    <span class="n">grn</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;TFs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">utils</span><span class="o">.</span><span class="n">TF</span> <span class="k">else</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">grn</span><span class="o">.</span><span class="n">var_names</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">grn</span>
-</code></pre></div></td></tr></table></div>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
 <h3 id="bengrn.base.get_GT_db" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">get_GT_db</span></code>
 
@@ -1631,7 +1457,7 @@ It corresponds to different views of the network.</p>
 
     <div class="doc doc-contents ">
 
-      <p>use_prior_network loads a prior GRN from a list of available networks.</p>
+        <p>use_prior_network loads a prior GRN from a list of available networks.</p>
 
 
 <table class="field-list">
@@ -1727,8 +1553,7 @@ It corresponds to different views of the network.</p>
 </table>
             <details class="quote">
               <summary>Source code in <code>bengrn/base.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">719</span>
-<span class="normal">720</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">720</span>
 <span class="normal">721</span>
 <span class="normal">722</span>
 <span class="normal">723</span>
@@ -1783,7 +1608,8 @@ It corresponds to different views of the network.</p>
 <span class="normal">772</span>
 <span class="normal">773</span>
 <span class="normal">774</span>
-<span class="normal">775</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_GT_db</span><span class="p">(</span>
+<span class="normal">775</span>
+<span class="normal">776</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_GT_db</span><span class="p">(</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;collectri&quot;</span><span class="p">,</span> <span class="n">organism</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;human&quot;</span><span class="p">,</span> <span class="n">split_complexes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1857,7 +1683,7 @@ It corresponds to different views of the network.</p>
 
     <div class="doc doc-contents ">
 
-      <p>get_perturb_gt retrieves the genome wide perturb seq ground truth data.</p>
+        <p>get_perturb_gt retrieves the genome wide perturb seq ground truth data.</p>
 
 
 <table class="field-list">
@@ -2055,7 +1881,7 @@ It corresponds to different views of the network.</p>
 
     <div class="doc doc-contents ">
 
-      <p>This function retrieves a loomx scenicplus data from a given file path and loads it as a GrnnData</p>
+        <p>This function retrieves a loomx scenicplus data from a given file path and loads it as a GrnnData</p>
 
 
 <table class="field-list">
@@ -2193,7 +2019,7 @@ Default is FILEDIR + "/../data/10xPBMC_homo_scenicplus_genebased_scope.loom".</p
 
     <div class="doc doc-contents ">
 
-      <p>This function retrieves the ground truth data from the McCall et al.'s paper.</p>
+        <p>This function retrieves the ground truth data from the McCall et al.'s paper.</p>
 
 
 <table class="field-list">
@@ -2263,7 +2089,7 @@ Default is FILEDIR + "/../data/10xPBMC_homo_scenicplus_genebased_scope.loom".</p
       <td class="field-body">
         <ul class="first simple">
             <li>
-<b><code>GrnAnnData</code></b>(                  <code>GrnAnnData</code>
+<b><code>GrnAnnData</code></b>(                  <code><span title="grnndata.GRNAnnData">GRNAnnData</span></code>
 )              –
               <div class="doc-md-description">
                 <p>The ground truth data as a grnndata object</p>
@@ -2444,7 +2270,7 @@ Default is FILEDIR + "/../data/10xPBMC_homo_scenicplus_genebased_scope.loom".</p
 <span class="normal">583</span>
 <span class="normal">584</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_sroy_gt</span><span class="p">(</span>
     <span class="n">get</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;main&quot;</span><span class="p">,</span> <span class="n">join</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;outer&quot;</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;human&quot;</span><span class="p">,</span> <span class="n">gt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;full&quot;</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GrnAnnData</span><span class="p">:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GRNAnnData</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function retrieves the ground truth data from the McCall et al.&#39;s paper.</span>
 
@@ -2626,7 +2452,7 @@ Default is FILEDIR + "/../data/10xPBMC_homo_scenicplus_genebased_scope.loom".</p
 
     <div class="doc doc-contents ">
 
-      <p>load_genes loads the genes for the given organisms.</p>
+        <p>load_genes loads the genes for the given organisms.</p>
 
 
 <table class="field-list">
@@ -2678,12 +2504,7 @@ Default is FILEDIR + "/../data/10xPBMC_homo_scenicplus_genebased_scope.loom".</p
 </table>
             <details class="quote">
               <summary>Source code in <code>bengrn/base.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">960</span>
-<span class="normal">961</span>
-<span class="normal">962</span>
-<span class="normal">963</span>
-<span class="normal">964</span>
-<span class="normal">965</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">965</span>
 <span class="normal">966</span>
 <span class="normal">967</span>
 <span class="normal">968</span>
@@ -2706,7 +2527,17 @@ Default is FILEDIR + "/../data/10xPBMC_homo_scenicplus_genebased_scope.loom".</p
 <span class="normal">985</span>
 <span class="normal">986</span>
 <span class="normal">987</span>
-<span class="normal">988</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_genes</span><span class="p">(</span><span class="n">organisms</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;NCBITaxon:9606&quot;</span><span class="p">):</span>  <span class="c1"># &quot;NCBITaxon:10090&quot;,</span>
+<span class="normal">988</span>
+<span class="normal">989</span>
+<span class="normal">990</span>
+<span class="normal">991</span>
+<span class="normal">992</span>
+<span class="normal">993</span>
+<span class="normal">994</span>
+<span class="normal">995</span>
+<span class="normal">996</span>
+<span class="normal">997</span>
+<span class="normal">998</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_genes</span><span class="p">(</span><span class="n">organisms</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;NCBITaxon:9606&quot;</span><span class="p">):</span>  <span class="c1"># &quot;NCBITaxon:10090&quot;,</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    load_genes loads the genes for the given organisms.</span>
 
@@ -2717,7 +2548,7 @@ Default is FILEDIR + "/../data/10xPBMC_homo_scenicplus_genebased_scope.loom".</p
 <span class="sd">        pd.DataFrame: A DataFrame containing gene information for the specified organisms, including columns for gene symbols, mitochondrial genes, ribosomal genes, hemoglobin genes, and organism.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">organismdf</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">organisms</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">organisms</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
         <span class="n">organisms</span> <span class="o">=</span> <span class="p">[</span><span class="n">organisms</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">organism</span> <span class="ow">in</span> <span class="n">organisms</span><span class="p">:</span>
         <span class="n">genesdf</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Gene</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
@@ -2734,7 +2565,12 @@ Default is FILEDIR + "/../data/10xPBMC_homo_scenicplus_genebased_scope.loom".</p
         <span class="n">genesdf</span><span class="p">[</span><span class="s2">&quot;hb&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">genesdf</span><span class="o">.</span><span class="n">symbol</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">((</span><span class="s2">&quot;^HB[^(P)]&quot;</span><span class="p">))</span>
         <span class="n">genesdf</span><span class="p">[</span><span class="s2">&quot;organism&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">organism</span>
         <span class="n">organismdf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">genesdf</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">organismdf</span><span class="p">)</span>
+    <span class="n">organismdf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">organismdf</span><span class="p">)</span>
+    <span class="n">organismdf</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span>
+        <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;source_id&quot;</span><span class="p">,</span> <span class="s2">&quot;run_id&quot;</span><span class="p">,</span> <span class="s2">&quot;created_by_id&quot;</span><span class="p">,</span> <span class="s2">&quot;updated_at&quot;</span><span class="p">,</span> <span class="s2">&quot;stable_id&quot;</span><span class="p">],</span>
+        <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">organismdf</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2752,7 +2588,7 @@ Default is FILEDIR + "/../data/10xPBMC_homo_scenicplus_genebased_scope.loom".</p
 
     <div class="doc doc-contents ">
 
-      <p>Calculate precision and recall from the true and predicted connections.</p>
+        <p>Calculate precision and recall from the true and predicted connections.</p>
 
 
 <table class="field-list">
@@ -2872,7 +2708,7 @@ Default is FILEDIR + "/../data/10xPBMC_homo_scenicplus_genebased_scope.loom".</p
 
     <div class="doc doc-contents ">
 
-      <p>train_classifier trains a classifier to generate a GRN that maps to the ground truth.</p>
+        <p>train_classifier trains a classifier to generate a GRN that maps to the ground truth.</p>
 <p>Uses a RidgeClassifier to select the best combination of networks to predict the ground truth.
 It is used for the head classification part in the scPRINT paper.</p>
 

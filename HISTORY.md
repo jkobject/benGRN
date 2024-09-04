@@ -4,6 +4,7 @@ Changelog
 
 (unreleased)
 ------------
+- Release: version  🚀 [jkobject]
 - Release. [jkobject]
 - Release: version  🚀 [jkobject]
 - Last debug. [jkobject]

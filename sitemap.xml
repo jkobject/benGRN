@@ -3,25 +3,31 @@
     <url>
          <loc>https://www.jkobject.com/benGRN/</loc>
          <lastmod>2024-09-04</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://www.jkobject.com/benGRN/base/</loc>
          <lastmod>2024-09-04</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://www.jkobject.com/benGRN/genie3/</loc>
          <lastmod>2024-09-04</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://www.jkobject.com/benGRN/notebooks/bench_omni_genie3/</loc>
          <lastmod>2024-09-04</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://www.jkobject.com/benGRN/notebooks/bench_perturbseq_genie3_transp/</loc>
          <lastmod>2024-09-04</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://www.jkobject.com/benGRN/notebooks/bench_sroy_genie3_transp/</loc>
          <lastmod>2024-09-04</lastmod>
+         <changefreq>daily</changefreq>
     </url>
 </urlset>

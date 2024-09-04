@@ -2,8 +2,10 @@ Changelog
 =========
 
 
-(unreleased)
-------------
+1.0.5 (2024-09-04)
+------------------
+- Release ready. [jkobject]
+- Release: version  🚀 [jkobject]
 - Release: version  🚀 [jkobject]
 - Release. [jkobject]
 - Release: version  🚀 [jkobject]

@@ -12,7 +12,6 @@ from anndata import AnnData, concat
 from typing import Optional, Union
 from .tools import GENIE3
 import numpy as np
-import bionty as bt
 from anndata.utils import make_index_unique
 
 from arboreto.algo import grnboost2
@@ -972,6 +971,14 @@ def load_genes(organisms: Union[str, list] = "NCBITaxon:9606"):  # "NCBITaxon:10
     Returns:
         pd.DataFrame: A DataFrame containing gene information for the specified organisms, including columns for gene symbols, mitochondrial genes, ribosomal genes, hemoglobin genes, and organism.
     """
+    try:
+        import bionty as bt
+    except ImportError:
+        raise ImportError(
+            "bionty is not installed. Please install it with pip install bionty \
+            you will also need to populate its genes, have a look at jkobject/scdataloader's package \
+            and its populate_ontology function"
+        )
     organismdf = []
     if type(organisms) is str:
         organisms = [organisms]

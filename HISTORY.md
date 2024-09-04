@@ -4,6 +4,13 @@ Changelog
 
 (unreleased)
 ------------
+- Debug. [jkobject]
+- Removing dependency on fasttransformer. [jkobject]
+
+
+1.0.7 (2024-09-04)
+------------------
+- Release: version 1.0.7 🚀 [jkobject]
 - Release: version 1.0.6 🚀 [jkobject]
 
 

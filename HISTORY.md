@@ -4,6 +4,21 @@ Changelog
 
 (unreleased)
 ------------
+- Last debug. [jkobject]
+- Format and clean. [jkobject]
+- Nothing. [jkobject]
+- Small debug. [jkobject]
+- Debug gene_df. [jkobject]
+- Now testing benGRN. [jkobject]
+- Debug. [jkobject]
+- Push for CI. [jkobject]
+- Adding tests. [jkobject]
+- Tiny debugs. [jkobject]
+- Cleanup notebooks. [jkobject]
+- Adding doc. [jkobject]
+- Nothing. [jkobject]
+- Adding doc. [jkobject]
+- Release: version 1.0.0 🚀 [jkobject]
 - Merge branch 'main' of https://github.com/jkobject/benGRN into main.
   [jkobject]
 - Using all sides for enrichment. [maestro-jk]

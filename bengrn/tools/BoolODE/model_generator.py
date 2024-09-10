@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # coding: utf-8
+from itertools import combinations
+
 import numpy as np
 import pandas as pd
-
-from itertools import combinations
 
 # local imports
 from . import utils

@@ -1,10 +1,11 @@
-from sklearn.tree import BaseDecisionTree
-from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
 import time
-from operator import itemgetter
 from multiprocessing import Pool
+from operator import itemgetter
 from typing import Optional, Union
-from numpy import ndarray, array, transpose, std, zeros, ndenumerate, random
+
+from numpy import array, ndarray, ndenumerate, random, std, transpose, zeros
+from sklearn.ensemble import ExtraTreesRegressor, RandomForestRegressor
+from sklearn.tree import BaseDecisionTree
 
 
 def compute_feature_importances(estimator):

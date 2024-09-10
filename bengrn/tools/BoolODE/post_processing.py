@@ -1,12 +1,13 @@
 import os
-from tqdm import tqdm
+from pathlib import Path
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from pathlib import Path
+import seaborn as sns
 from sklearn.cluster import KMeans
 from sklearn.manifold import TSNE
-import matplotlib.pyplot as plt
-import seaborn as sns
+from tqdm import tqdm
 
 
 def genSamples(opts):

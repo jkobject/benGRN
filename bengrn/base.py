@@ -2,43 +2,35 @@
 bengrn base module.
 """
 
-import pandas as pd
-import urllib.request
-import os.path
 import json
-
-from grnndata import GRNAnnData, from_adata_and_longform, from_scope_loomfile, utils
-from anndata import AnnData, concat
+import logging
+import os.path
+import urllib.request
 from typing import Optional, Union
-from .tools import GENIE3
-import numpy as np
-from anndata.utils import make_index_unique
 
+import gseapy as gp
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import scanpy as sc
+import scipy.stats
+import tqdm
+from anndata import AnnData, concat
+from anndata.utils import make_index_unique
 from arboreto.algo import grnboost2
 
 # issue here of using an older version of numpy calling np.object instead of np.object_
 # from pyscenic.utils import modules_from_adjacencies
 # from pyscenic.prune import prune2df, df2regulons
 # from pyscenic.aucell import aucell
-
 from ctxcore.rnkdb import FeatherRankingDatabase as RankingDatabase
-
-import scipy.stats
-from sklearn.metrics import precision_recall_curve, auc, PrecisionRecallDisplay
-from sklearn.linear_model import LogisticRegression
+from grnndata import GRNAnnData, from_adata_and_longform, from_scope_loomfile, utils
+from scipy.sparse import csc_matrix, csr_matrix
+from sklearn.linear_model import LogisticRegression, RidgeClassifier
+from sklearn.metrics import PrecisionRecallDisplay, auc, precision_recall_curve
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import RidgeClassifier
 
-import gseapy as gp
-
-import tqdm
-import logging
-
-import matplotlib.pyplot as plt
-
-from scipy.sparse import csr_matrix, csc_matrix
-
-import scanpy as sc
+from .tools import GENIE3
 
 # example constant variable
 NAME = "bengrn"

@@ -2,9 +2,10 @@ import os
 from pathlib import Path
 from typing import Dict
 
+from . import post_processing as po
+
 # Local imports
 from . import run_experiment as runexp
-from . import post_processing as po
 
 
 class BoolODE(object):

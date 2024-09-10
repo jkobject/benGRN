@@ -1,11 +1,12 @@
-import scanpy as sc
-import numpy as np
 import os
+
+import numpy as np
+import pytest
+import scanpy as sc
+from grnndata import GRNAnnData
 from scipy.sparse import csr_matrix
 
-from grnndata import GRNAnnData
 from bengrn.base import NAME, BenGRN
-import pytest
 
 
 def test_base():

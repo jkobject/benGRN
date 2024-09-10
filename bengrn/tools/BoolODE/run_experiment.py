@@ -1,20 +1,20 @@
 #!/usr/bin/env python
 # coding: utf-8
-import os
 import ast
+import multiprocessing as mp
+import os
 import time
+from importlib.machinery import SourceFileLoader
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
-from pathlib import Path
 from sklearn.cluster import KMeans
-from importlib.machinery import SourceFileLoader
-import multiprocessing as mp
+from tqdm import tqdm
 
 # local imports
-from . import utils
+from . import simulator, utils
 from .model_generator import GenerateModel
-from . import simulator
 
 np.seterr(all="raise")
 

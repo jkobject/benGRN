@@ -29,7 +29,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install project
-        run: make install
+        run: make virtualenv
         continue-on-error: false
       - name: Run linter
         run: make lint

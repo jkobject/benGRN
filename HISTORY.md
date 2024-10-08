@@ -4,6 +4,20 @@ Changelog
 
 (unreleased)
 ------------
+- Tests. [jkobject]
+- Fmt. [jkobject]
+- Uv run. [jkobject]
+- Shell bash. [jkobject]
+- Oups source. [jkobject]
+- Virtual env? [jkobject]
+- Update uv. [jkobject]
+- Added ruff and uv. [jkobject]
+- Better tests. [jkobject]
+
+
+1.1.0 (2024-09-04)
+------------------
+- Release: version 1.1.0 🚀 [jkobject]
 - Debug. [jkobject]
 - Removing dependency on fasttransformer. [jkobject]
 

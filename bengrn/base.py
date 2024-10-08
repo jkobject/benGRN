@@ -188,8 +188,7 @@ class BenGRN:
             ):
                 metrics.update(
                     {
-                        "enriched_terms_"
-                        + elem: res.res2d[
+                        "enriched_terms_" + elem: res.res2d[
                             (res.res2d["FDR q-val"] < 0.1) & (res.res2d["NES"] > 1)
                         ].Term.tolist()
                     }

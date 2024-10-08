@@ -67,6 +67,7 @@ virtualenv:       ## Create a virtual environment.
 	@echo "creating virtualenv ..."
 	@rm -rf .venv
 	@uv venv
+	@source .venv/bin/activate
 	@make install
 	@echo "!!! Please run 'source .venv/bin/activate' to enable the environment !!!"
 

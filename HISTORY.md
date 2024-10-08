@@ -2,8 +2,9 @@ Changelog
 =========
 
 
-(unreleased)
-------------
+1.1.2 (2024-10-08)
+------------------
+- Release: version 1.1.2 🚀 [jkobject]
 - Removing build. [jkobject]
 
 

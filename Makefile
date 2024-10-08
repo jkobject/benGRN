@@ -32,8 +32,8 @@ fmt:              ## Format code using black & isort.
 
 .PHONY: lint
 lint:             ## Run pep8, black, mypy linters.
-	$(ENV_PREFIX)ruff check --fix bengrn/
-	$(ENV_PREFIX)ruff check --fix tests/
+	$(ENV_PREFIX)uv run ruff check --fix bengrn/
+	$(ENV_PREFIX)uv run ruff check --fix tests/
 
 .PHONY: test
 test: lint        ## Run tests and generate coverage report.

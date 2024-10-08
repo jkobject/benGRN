@@ -25,15 +25,11 @@ install:          ## Install the project in dev mode.
 
 .PHONY: fmt
 fmt:              ## Format code using black & isort.
-	$(ENV_PREFIX)ruff check --fix bengrn/
-	$(ENV_PREFIX)ruff check --fix tests/
-	$(ENV_PREFIX)ruff format tests/
-	$(ENV_PREFIX)ruff format bengrn/
+	$(ENV_PREFIX)uv run ruff format bengrn/ tests/
 
 .PHONY: lint
 lint:             ## Run pep8, black, mypy linters.
-	$(ENV_PREFIX)uv run ruff check --fix bengrn/
-	$(ENV_PREFIX)uv run ruff check --fix tests/
+	$(ENV_PREFIX)uv run ruff check --fix bengrn/ tests/
 
 .PHONY: test
 test: lint        ## Run tests and generate coverage report.

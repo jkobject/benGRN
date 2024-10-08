@@ -4,6 +4,12 @@ Changelog
 
 (unreleased)
 ------------
+- Removing build. [jkobject]
+
+
+1.1.1 (2024-10-08)
+------------------
+- Release: version 1.1.1 🚀 [jkobject]
 - Tests. [jkobject]
 - Fmt. [jkobject]
 - Uv run. [jkobject]

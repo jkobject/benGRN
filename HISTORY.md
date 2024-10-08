@@ -2,8 +2,9 @@ Changelog
 =========
 
 
-(unreleased)
-------------
+1.2.0 (2024-10-08)
+------------------
+- Release: version 1.2.0 🚀 [jkobject]
 - Release: version 1.1.5 🚀 [jkobject]
 - Now downloading it. [jkobject]
 - Removing boolODE and dropping stone-sroy. [jkobject]

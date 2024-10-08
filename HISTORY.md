@@ -2,6 +2,16 @@ Changelog
 =========
 
 
+(unreleased)
+------------
+- Update. [jkobject]
+
+
+1.1.3 (2024-10-08)
+------------------
+- Release: version 1.1.3 🚀 [jkobject]
+
+
 1.1.2 (2024-10-08)
 ------------------
 - Release: version 1.1.2 🚀 [jkobject]

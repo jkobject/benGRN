@@ -426,21 +426,14 @@ def get_sroy_gt(
     # Download and store the ground truth data file
 
     if not os.path.exists(os.path.join(FILEDIR, "..", "data", "GroundTruth")):
-        gt_file_url = "https://drive.google.com/file/d/1DDjGGYC3uqjX1AiOHmx_e1P6zYyVDVwp/view?usp=drive_link"
+        gt_file_url = "https://drive.google.com/file/d/1-lWQIlZw81f-s1dti7rmge5sObX3S-s4/view?usp=drive_link"
         gt_file_path = os.path.join(FILEDIR, "..", "data", "GroundTruth.tar.gz")
-        if not os.path.exists(gt_file_path):
-            gdown.download(gt_file_url, gt_file_path, quiet=False)
+        gdown.download(gt_file_url, gt_file_path, quiet=False, fuzzy=True)
 
-        if os.path.exists(gt_file_path):
-            with tarfile.open(gt_file_path, "r:gz") as tar:
-                tar.extractall(path=os.path.join(FILEDIR, "..", "data"))
-            # Move extracted contents from data/data/GroundTruth to data/GroundTruth
-            source_dir = os.path.join(FILEDIR, "..", "data", "data")
-            dest_dir = os.path.join(FILEDIR, "..", "data")
-            os.rename(source_dir, dest_dir)
-            print(f"Extracted GroundTruth.tar.gz to {gt_file_path}")
-        else:
-            print(f"GroundTruth.tar.gz not found in {gt_file_path}")
+        with tarfile.open(gt_file_path, "r:gz") as tar:
+            tar.extractall(path=os.path.join(FILEDIR, ".."))
+        # Move extracted contents from data/data/GroundTruth to data/GroundTruth
+        print(f"Extracted GroundTruth.tar.gz to {gt_file_path}")
 
     if species == "human":
         if gt == "full":

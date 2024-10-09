@@ -17,7 +17,7 @@ def compute_feature_importances(estimator):
             for e in estimator.estimators_
         ]
         importances = array(importances)
-        return sum(importances, axis=0) / len(estimator)
+        return importances.sum(0) / len(estimator.estimators_)
 
 
 def get_link_list(

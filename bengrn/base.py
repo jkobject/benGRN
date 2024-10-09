@@ -4,10 +4,13 @@ bengrn base module.
 
 import json
 import logging
+import os
 import os.path
+import tarfile
 import urllib.request
 from typing import Optional, Union
 
+import gdown
 import gseapy as gp
 import matplotlib.pyplot as plt
 import numpy as np
@@ -29,9 +32,6 @@ from scipy.sparse import csc_matrix, csr_matrix
 from sklearn.linear_model import LogisticRegression, RidgeClassifier
 from sklearn.metrics import PrecisionRecallDisplay, auc, precision_recall_curve
 from sklearn.model_selection import train_test_split
-import gdown
-import os
-import tarfile
 
 from .tools import GENIE3
 
@@ -409,13 +409,13 @@ def get_scenicplus(
 
 
 def get_sroy_gt(
-    get: str = "main", join: str = "outer", species: str = "human", gt: str = "full"
+    get: str = "mine", join: str = "outer", species: str = "human", gt: str = "full"
 ) -> GRNAnnData:
     """
     This function retrieves the ground truth data from the McCall et al.'s paper.
 
     Args:
-        get (str): The specific dataset to retrieve. Options include "main", "liu", and "chen".
+        get (str): The specific dataset to retrieve. Options include "mine", "liu", and "chen".
         join (str, optional): The type of join to be performed when concatenating the data. Default is "outer".
         species (str, optional): The species of the dataset. Default is "human".
         gt (str, optional): The type of ground truth data to retrieve. Options include "full", "chip", and "ko". Default is "full".

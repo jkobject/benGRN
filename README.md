@@ -3,7 +3,6 @@
 [![codecov](https://codecov.io/gh/jkobject/benGRN/branch/main/graph/badge.svg?token=benGRN_token_here)](https://codecov.io/gh/jkobject/benGRN)
 [![CI](https://github.com/jkobject/benGRN/actions/workflows/main.yml/badge.svg)](https://github.com/jkobject/benGRN/actions/workflows/main.yml)
 [![PyPI version](https://badge.fury.io/py/benGRN.svg)](https://badge.fury.io/py/benGRN)
-[![Documentation Status](https://readthedocs.org/projects/benGRN/badge/?version=latest)](https://benGRN.readthedocs.io/en/latest/?badge=latest)
 [![Downloads](https://pepy.tech/badge/benGRN)](https://pepy.tech/project/benGRN)
 [![Downloads](https://pepy.tech/badge/benGRN/month)](https://pepy.tech/project/benGRN)
 [![Downloads](https://pepy.tech/badge/benGRN/week)](https://pepy.tech/project/benGRN)

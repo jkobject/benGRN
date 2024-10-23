@@ -29,6 +29,7 @@ from arboreto.algo import grnboost2
 from ctxcore.rnkdb import FeatherRankingDatabase as RankingDatabase
 from grnndata import GRNAnnData, from_adata_and_longform, from_scope_loomfile, utils
 from scipy.sparse import csc_matrix, csr_matrix
+from scipy.sparse import issparse
 from sklearn.linear_model import LogisticRegression, RidgeClassifier
 from sklearn.metrics import PrecisionRecallDisplay, auc, precision_recall_curve
 from sklearn.model_selection import train_test_split
@@ -203,9 +204,10 @@ class BenGRN:
                 except KeyError:
                     pass
             istrue = metrics.get("TF_enr", False)
-            istrue = istrue or (
-                res.res2d.loc[res.res2d.Term == "0__TFs", "FDR q-val"].iloc[0] < 0.1
-            )
+            if len(res.res2d.loc[res.res2d.Term == "0__TFs"]) > 0:
+                istrue = istrue or (
+                    res.res2d.loc[res.res2d.Term == "0__TFs", "FDR q-val"].iloc[0] < 0.1
+                )
             metrics.update({"TF_enr": istrue})
         if self.doplot:
             print("_________________________________________")
@@ -608,6 +610,7 @@ def get_perturb_gt(
         GRNAnnData: The Gene Regulatory Network data as a GRNAnnData object.
     """
     if not os.path.exists(filename_bh):
+        os.makedirs(os.path.dirname(filename_bh), exist_ok=True)
         urllib.request.urlretrieve(url_bh, filename_bh)
     pert = pd.read_csv(filename_bh)
     pert = pert.set_index("Unnamed: 0").T
@@ -711,7 +714,7 @@ def compute_genie3(
     Returns:
         GRNAnnData: The Gene Regulatory Network data computed using the GENIE3 algorithm.
     """
-    mat = np.asarray(adata.X.todense())
+    mat = np.asarray(adata.X.toarray() if issparse(adata.X) else adata.X)
     names = adata.var_names[mat.sum(0) > 0].tolist()
     var = adata.var[mat.sum(0) > 0]
     mat = mat[:, mat.sum(0) > 0]
@@ -759,6 +762,9 @@ def get_GT_db(
         net = dc.get_dorothea(organism=organism)
     elif name == "omnipath":
         if not os.path.exists(FILEDIR + "/../data/omnipath.parquet"):
+            os.makedirs(
+                os.path.dirname(FILEDIR + "/../data/omnipath.parquet"), exist_ok=True
+            )
             from omnipath.interactions import AllInteractions
             from omnipath.requests import Annotations
 
@@ -992,7 +998,6 @@ def load_genes(organisms: Union[str, list] = "NCBITaxon:9606"):  # "NCBITaxon:10
         genesdf = bt.Gene.filter(
             organism_id=bt.Organism.filter(ontology_id=organism).first().id
         ).df()
-        genesdf = genesdf[~genesdf["public_source_id"].isna()]
         genesdf = genesdf.drop_duplicates(subset="ensembl_gene_id")
         genesdf = genesdf.set_index("ensembl_gene_id").sort_index()
         # mitochondrial genes
@@ -1004,8 +1009,7 @@ def load_genes(organisms: Union[str, list] = "NCBITaxon:9606"):  # "NCBITaxon:10
         genesdf["organism"] = organism
         organismdf.append(genesdf)
     organismdf = pd.concat(organismdf)
-    organismdf.drop(
-        columns=["source_id", "run_id", "created_by_id", "updated_at", "stable_id"],
-        inplace=True,
-    )
+    for col in ["source_id", "run_id", "created_by_id", "updated_at", "stable_id"]:
+        if col in organismdf.columns:
+            organismdf.drop(columns=[col], inplace=True)
     return organismdf

@@ -1,6 +1,6 @@
 [project]
 name = "benGRN"
-version = "1.2.2"
+version = "1.2.4"
 description = "benchmarking gene regulatory networks"
 authors = [
     {name = "jeremie kalfon", email = "jkobject@gmail.com"}
@@ -20,13 +20,15 @@ dependencies = [
     "seaborn>=0.11.0",
     "decoupler>=1.2.0",
     "pandas>=2.0.0",
-    "grnndata>=0.1.0",
+    "grnndata>=1.1.4",
     "omnipath>=1.0.0",
     "dask-expr>=1.0.0",
     "gseapy>=0.10.0",
     "bionty>=0.49.0",
     "rich>=13.5.0",
     "gdown>=4.7.1",
+    "setuptools>=58.0.0",
+    "numba>=0.56.0",
 ]
 
 [project.optional-dependencies]
@@ -57,3 +59,9 @@ ignore = ["E501", "E203", "E266", "E265", "F401", "F403"]
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+include = [
+    "/bengrn",
+    "/data",
+]

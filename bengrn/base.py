@@ -609,10 +609,17 @@ def get_perturb_gt(
     Returns:
         GRNAnnData: The Gene Regulatory Network data as a GRNAnnData object.
     """
-    if not os.path.exists(filename_bh):
+    try:
+        if not os.path.exists(filename_bh):
+            print("Downloading BH-corrected data...")
+            os.makedirs(os.path.dirname(filename_bh), exist_ok=True)
+            urllib.request.urlretrieve(url_bh, filename_bh)
+        pert = pd.read_csv(filename_bh)
+    except EOFError:
+        print("Failed to read BH-corrected data. Downloading it again...")
         os.makedirs(os.path.dirname(filename_bh), exist_ok=True)
         urllib.request.urlretrieve(url_bh, filename_bh)
-    pert = pd.read_csv(filename_bh)
+        pert = pd.read_csv(filename_bh)
     pert = pert.set_index("Unnamed: 0").T
     pert.index = [i.split("_")[-1] for i in pert.index]
     pert = pert[~pert.index.duplicated(keep="first")].T

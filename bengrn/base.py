@@ -722,9 +722,9 @@ def compute_genie3(
         GRNAnnData: The Gene Regulatory Network data computed using the GENIE3 algorithm.
     """
     mat = np.asarray(adata.X.toarray() if issparse(adata.X) else adata.X)
-    names = adata.var_names[mat.sum(0) > 0].tolist()
-    var = adata.var[mat.sum(0) > 0]
-    mat = mat[:, mat.sum(0) > 0]
+    names = adata.var_names.tolist()  # [mat.sum(0) > 0].tolist()
+    var = adata.var  # [mat.sum(0) > 0]
+    # mat = mat[:, mat.sum(0) > 0]
     VIM = GENIE3(mat, gene_names=names, nthreads=nthreads, ntrees=ntrees, **kwargs)
     grn = GRNAnnData(grn=VIM, X=mat, var=var, obs=adata.obs)
     grn.var_names = grn.var["symbol"]

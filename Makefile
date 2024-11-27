@@ -73,6 +73,7 @@ release:          ## Create a new tag for release.
 	@read -p "Version? (provide the next x.y.z semver) : " TAG
 	@echo "$${TAG}" > bengrn/VERSION
 	@sed -i 's/^version = .*/version = "'$${TAG}'"/' pyproject.toml
+	@sed -i 's/__version__ = .*/__version__ = "'$${TAG}'"/' bengrn/__init__.py
 	@$(ENV_PREFIX)gitchangelog > HISTORY.md
 	@git add bengrn/VERSION HISTORY.md pyproject.toml
 	@git commit -m "release: version $${TAG} 🚀"

@@ -222,7 +222,6 @@ class BenGRN:
         for k, v in TFinchip.items():
             if v not in self.grn.grn.columns:
                 continue
-            # print(k)
             j += 1
             test = self.grn.grn.T.loc[[v]].sort_values(by=v, ascending=False).T
             if len(set(test.index) & set(tfchip[k])) == 0:
@@ -248,16 +247,10 @@ class BenGRN:
                 .drop(columns=["Name"])
             )
             if len(val.Term.tolist()) > 0:
-                # print("found! ", val.Term.tolist()[0])
-                # print(pre_res.res2d["NES"])
-                # print(pre_res.res2d["FDR q-val"])
-                # print("\n")
                 i += 1
             else:
                 pass
-                # print("no sig...")
             res[k] = pre_res.res2d
-            # print(val.Term.tolist()[:2])
         logging.disable(previous_level)
         j = j if j != 0 else 1
         if self.doplot:

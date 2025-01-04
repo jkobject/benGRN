@@ -410,6 +410,18 @@ def get_scenicplus(
     return from_scope_loomfile(filepath)
 
 
+def download_sroy_gt(
+    gt_file_path: str = os.path.join(FILEDIR, "..", "data", "GroundTruth.tar.gz"),
+):
+    gt_file_url = "https://drive.google.com/file/d/1-lWQIlZw81f-s1dti7rmge5sObX3S-s4/view?usp=drive_link"
+    gdown.download(gt_file_url, gt_file_path, quiet=False, fuzzy=True)
+
+    with tarfile.open(gt_file_path, "r:gz") as tar:
+        tar.extractall(path=os.path.join(FILEDIR, ".."))
+    # Move extracted contents from data/data/GroundTruth to data/GroundTruth
+    print(f"Extracted GroundTruth.tar.gz to {gt_file_path}")
+
+
 def get_sroy_gt(
     get: str = "mine", join: str = "outer", species: str = "human", gt: str = "full"
 ) -> GRNAnnData:
@@ -427,16 +439,12 @@ def get_sroy_gt(
     """
     # Download and store the ground truth data file
 
-    if not os.path.exists(os.path.join(FILEDIR, "..", "data", "GroundTruth")):
-        gt_file_url = "https://drive.google.com/file/d/1-lWQIlZw81f-s1dti7rmge5sObX3S-s4/view?usp=drive_link"
-        gt_file_path = os.path.join(FILEDIR, "..", "data", "GroundTruth.tar.gz")
-        gdown.download(gt_file_url, gt_file_path, quiet=False, fuzzy=True)
-
-        with tarfile.open(gt_file_path, "r:gz") as tar:
-            tar.extractall(path=os.path.join(FILEDIR, ".."))
-        # Move extracted contents from data/data/GroundTruth to data/GroundTruth
-        print(f"Extracted GroundTruth.tar.gz to {gt_file_path}")
-
+    if not os.path.exists(
+        os.path.join(FILEDIR, "..", "data", "GroundTruth", "stone_and_sroy")
+    ):
+        download_sroy_gt(
+            gt_file_path=os.path.join(FILEDIR, "..", "data", "GroundTruth.tar.gz")
+        )
     if species == "human":
         if gt == "full":
             df = pd.read_csv(
@@ -591,17 +599,38 @@ def get_sroy_gt(
     return from_adata_and_longform(adata, df)
 
 
-def get_perturb_gt(
+def download_perturb_gt(
+    filename_bh: str = FILEDIR + "/../data/BH-corrected.csv.gz",
+    filename_adata: str = FILEDIR + "/../data/ess_perturb_sc.h5ad",
     url_bh: str = "https://plus.figshare.com/ndownloader/files/38349308",
+    url_adata: str = "https://plus.figshare.com/ndownloader/files/35773219",
+):
+    """
+    download_perturb_gt downloads the genome wide perturb seq ground truth data.
+
+    Args:
+        filename_bh (str, optional): The local filename to save the BH-corrected data. Defaults to FILEDIR + "/../data/BH-corrected.csv.gz".
+        filename_adata (str, optional): The local filename to save the single-cell perturbation data. Defaults to FILEDIR + "/../data/ess_perturb_sc.h5ad".
+        url_bh (str, optional): The URL to download the BH-corrected data. Defaults to "https://plus.figshare.com/ndownloader/files/38349308".
+        url_adata (str, optional): The URL to download the single-cell perturbation data. Defaults to "https://plus.figshare.com/ndownloader/files/35773219".
+    """
+    os.makedirs(os.path.dirname(filename_bh), exist_ok=True)
+    urllib.request.urlretrieve(url_bh, filename_bh)
+    sc.read(
+        filename_adata,
+        backup_url=url_adata,
+    )
+
+
+def get_perturb_gt(
+    filename_adata: str = FILEDIR + "/../data/ess_perturb_sc.h5ad",
     filename_bh: str = FILEDIR + "/../data/BH-corrected.csv.gz",
     url_adata: str = "https://plus.figshare.com/ndownloader/files/35773219",
-    filename_adata: str = FILEDIR + "/../data/ess_perturb_sc.h5ad",
 ):
     """
     get_perturb_gt retrieves the genome wide perturb seq ground truth data.
 
     Args:
-        url_bh (str, optional): The URL to download the BH-corrected data. Defaults to "https://plus.figshare.com/ndownloader/files/38349308".
         filename_bh (str, optional): The local filename to save the BH-corrected data. Defaults to FILEDIR + "/../data/BH-corrected.csv.gz".
         url_adata (str, optional): The URL to download the single-cell perturbation data. Defaults to "https://plus.figshare.com/ndownloader/files/35773219".
         filename_adata (str, optional): The local filename to save the single-cell perturbation data. Defaults to FILEDIR + "/../data/ess_perturb_sc.h5ad".
@@ -609,17 +638,9 @@ def get_perturb_gt(
     Returns:
         GRNAnnData: The Gene Regulatory Network data as a GRNAnnData object.
     """
-    try:
-        if not os.path.exists(filename_bh):
-            print("Downloading BH-corrected data...")
-            os.makedirs(os.path.dirname(filename_bh), exist_ok=True)
-            urllib.request.urlretrieve(url_bh, filename_bh)
-        pert = pd.read_csv(filename_bh)
-    except EOFError:
-        print("Failed to read BH-corrected data. Downloading it again...")
-        os.makedirs(os.path.dirname(filename_bh), exist_ok=True)
-        urllib.request.urlretrieve(url_bh, filename_bh)
-        pert = pd.read_csv(filename_bh)
+    if not os.path.exists(filename_bh):
+        download_perturb_gt(filename_bh=filename_bh)
+    pert = pd.read_csv(filename_bh)
     pert = pert.set_index("Unnamed: 0").T
     pert.index = [i.split("_")[-1] for i in pert.index]
     pert = pert[~pert.index.duplicated(keep="first")].T
@@ -730,6 +751,25 @@ def compute_genie3(
     grn.var_names = grn.var["symbol"]
     grn.var["TFs"] = [True if i in utils.TF else False for i in grn.var_names]
     return grn
+
+
+def download_GT_db(omni_loc: str = FILEDIR + "/../data/omnipath.parquet"):
+    TFLINK = "https://cdn.netbiol.org/tflink/download_files/TFLink_Homo_sapiens_interactions_All_simpleFormat_v1.0.tsv.gz"
+    pd_load_cached(TFLINK)
+    HTFTARGET = "http://bioinfo.life.hust.edu.cn/static/hTFtarget/file_download/tf-target-infomation.txt"
+    pd_load_cached(HTFTARGET)
+    if not os.path.exists(omni_loc):
+        os.makedirs(os.path.dirname(omni_loc), exist_ok=True)
+        from omnipath.interactions import AllInteractions
+        from omnipath.requests import Annotations
+
+        interactions = AllInteractions()
+        net = interactions.get(exclude=["small_molecule", "lncrna_mrna"])
+        hgnc = Annotations.get(resources="HGNC")
+        rename = {v.uniprot: v.genesymbol for k, v in hgnc.iterrows()}
+        net.source = net.source.replace(rename)
+        net.target = net.target.replace(rename)
+        net.to_parquet(omni_loc)
 
 
 def get_GT_db(

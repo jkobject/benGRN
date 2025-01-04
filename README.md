@@ -57,8 +57,20 @@ see the notebooks in [docs](https://www.jkobject.com/benGRN/):
 2. [genome wide perturb seq](https://www.jkobject.com/benGRN/notebooks/bench_perturbseq_genie3_transp/)
 3. [Mc Calla](https://www.jkobject.com/benGRN/notebooks/bench_sroy_genie3_transp/)
 
+## /!\ offline mode
+
+If you want to run the notebooks offline, you need to download the data first.
+
+```python
+from bengrn import download_perturb_gt, download_GT_db, download_sroy_gt
+
+download_perturb_gt()
+
+```
+
 ## Development
 
 Read the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 Awesome Benchmark of Gene Regulatory Networks created by @jkobject
+

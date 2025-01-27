@@ -12,6 +12,9 @@
 
 Benchmark your gene regulatory networks inference algorithm (from scRNAseq or bulk RNAseq dataset) with BenGRN
 
+
+<img src="bengrn.png" width="400"/>
+
 The package is supposed to work with [GRnnData](https://cantinilab.github.io/GRnnData/) and only uses biological ground truth datasets.
 
 It can run Genie3 & pyscenic on your data as a comparison
@@ -73,4 +76,3 @@ download_perturb_gt()
 Read the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 Awesome Benchmark of Gene Regulatory Networks created by @jkobject
-

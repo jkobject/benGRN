@@ -1,57 +1,67 @@
-[build-system]
-requires = [ "poetry-core",]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry]
-name = "bengrn"
-version = "1.1.0"
-license = "MIT"
+[project]
+name = "benGRN"
+version = "1.2.4"
 description = "benchmarking gene regulatory networks"
-authors = [ "jeremie kalfon"]
+authors = [
+    {name = "jeremie kalfon", email = "jkobject@gmail.com"}
+]
 readme = "README.md"
-repository = "https://github.com/jkobject/benGRN"
-keywords = [ "scRNAseq", "GRN", "gene regulatory networks", "benchmark", "comp bio", "scPRINT",]
+license = {text = "MIT"}
+keywords = ["scRNAseq", "GRN", "gene regulatory networks", "benchmark", "comp bio", "scPRINT"]
+requires-python = ">=3.10"
+dependencies = [
+    "anndata>=0.8.0",
+    "scipy>=1.7.0",
+    "scikit-learn>=1.0.0",
+    "numpy>=1.21.0",
+    "arboreto>=0.1.6",
+    "pyscenic>=0.12.0",
+    "ctxcore>=0.1.1",
+    "seaborn>=0.11.0",
+    "decoupler>=1.2.0",
+    "pandas>=2.0.0",
+    "grnndata>=1.1.4",
+    "omnipath>=1.0.0",
+    "dask-expr>=1.0.0",
+    "gseapy>=0.10.0",
+    "bionty>=0.49.0",
+    "rich>=13.5.0",
+    "gdown>=4.7.1",
+    "setuptools>=58.0.0",
+    "numba>=0.56.0",
+]
 
-[tool.poetry.dependencies]
-python = "3.10.*"
-anndata = "*"
-scipy = "*"
-scikit-learn = "*"
-numpy = "*"
-arboreto = "*"
-pyscenic = "*"
-ctxcore = "*"
-seaborn = "*"
-decoupler = "*"
-pandas = ">=2.0.0"
-grnndata = "*"
-omnipath = "*"
-dask-expr = "*"
-pytest = { version = "^7.4.3", optional = true }
-coverage = { version = "^7.3.2", optional = true }
-flake8 = { version = "^6.1.0", optional = true }
-black = { version = "^23.10.1", optional = true }
-isort = { version = "^5.12.0", optional = true }
-pytest-cov = { version = "^4.1.0", optional = true }
-mypy = { version = "^1.6.1", optional = true }
-gitchangelog = { version = "^3.0.4", optional = true }
-mkdocs = { version = "^1.5.3", optional = true }
-
-[tool.poetry.extras]
+[project.optional-dependencies]
 dev = [
-  "pytest",
-  "coverage",
-  "flake8",
-  "black",
-  "toml",
-  "isort",
-  "pytest-cov",
-  "mypy",
-  "gitchangelog",
-  "mkdocs",
-  "mkdocs-git-revision-date-localized-plugin",
-  "mkdocstrings",
-  "mkdocs-git-authors-plugin",
-  "mkdocs-jupyter",
-  "mkdocstrings-python",
+    "pytest>=7.4.3",
+    "coverage>=7.3.2",
+    "ruff>=0.6.4",
+    "pytest-cov>=4.1.0",
+    "gitchangelog>=3.0.4",
+    "mkdocs>=1.5.3",
+    "mkdocs-git-revision-date-localized-plugin>=1.0.0",
+    "mkdocstrings>=0.22.0",
+    "mkdocs-git-authors-plugin>=0.4.0",
+    "mkdocs-jupyter>=0.2.0",
+    "mkdocstrings-python>=0.10.0"
+]
+
+[project.urls]
+repository = "https://github.com/jkobject/benGRN"
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E501", "E203", "E266", "E265", "F401", "F403"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+include = [
+    "bengrn/",
+    "data/",
 ]

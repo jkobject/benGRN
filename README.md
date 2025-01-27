@@ -3,13 +3,12 @@
 [![codecov](https://codecov.io/gh/jkobject/benGRN/branch/main/graph/badge.svg?token=benGRN_token_here)](https://codecov.io/gh/jkobject/benGRN)
 [![CI](https://github.com/jkobject/benGRN/actions/workflows/main.yml/badge.svg)](https://github.com/jkobject/benGRN/actions/workflows/main.yml)
 [![PyPI version](https://badge.fury.io/py/benGRN.svg)](https://badge.fury.io/py/benGRN)
-[![Documentation Status](https://readthedocs.org/projects/benGRN/badge/?version=latest)](https://benGRN.readthedocs.io/en/latest/?badge=latest)
 [![Downloads](https://pepy.tech/badge/benGRN)](https://pepy.tech/project/benGRN)
 [![Downloads](https://pepy.tech/badge/benGRN/month)](https://pepy.tech/project/benGRN)
 [![Downloads](https://pepy.tech/badge/benGRN/week)](https://pepy.tech/project/benGRN)
 [![GitHub issues](https://img.shields.io/github/issues/jkobject/benGRN)](https://img.shields.io/github/issues/jkobject/benGRN)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![DOI](https://img.shields.io/badge/DOI-10.1101%2F2024.07.29.605556-blue)](https://doi.org/10.1101/2024.07.29.605556)
+[![DOI](https://zenodo.org/badge/731249338.svg)](https://doi.org/10.5281/zenodo.10573209)
 
 Benchmark your gene regulatory networks inference algorithm (from scRNAseq or bulk RNAseq dataset) with BenGRN
 
@@ -60,6 +59,17 @@ see the notebooks in [docs](https://www.jkobject.com/benGRN/):
 1. [omnipath](https://www.jkobject.com/benGRN/notebooks/bench_omni_genie3)
 2. [genome wide perturb seq](https://www.jkobject.com/benGRN/notebooks/bench_perturbseq_genie3_transp/)
 3. [Mc Calla](https://www.jkobject.com/benGRN/notebooks/bench_sroy_genie3_transp/)
+
+## /!\ offline mode
+
+If you want to run the notebooks offline, you need to download the data first.
+
+```python
+from bengrn import download_perturb_gt, download_GT_db, download_sroy_gt
+
+download_perturb_gt()
+
+```
 
 ## Development
 

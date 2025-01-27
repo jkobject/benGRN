@@ -2,8 +2,59 @@ Changelog
 =========
 
 
-(unreleased)
-------------
+1.2.1 (2024-10-08)
+------------------
+- Release: version 1.2.1 🚀 [jkobject]
+- Release: version 1.2.0 🚀 [jkobject]
+
+
+1.2.0 (2024-10-08)
+------------------
+- Release: version 1.2.0 🚀 [jkobject]
+- Release: version 1.1.5 🚀 [jkobject]
+- Now downloading it. [jkobject]
+- Removing boolODE and dropping stone-sroy. [jkobject]
+
+
+1.1.5 (2024-10-08)
+------------------
+- Release: version 1.1.5 🚀 [jkobject]
+
+
+1.1.4 (2024-10-08)
+------------------
+- Release: version 1.1.4 🚀 [jkobject]
+- Update. [jkobject]
+
+
+1.1.3 (2024-10-08)
+------------------
+- Release: version 1.1.3 🚀 [jkobject]
+
+
+1.1.2 (2024-10-08)
+------------------
+- Release: version 1.1.2 🚀 [jkobject]
+- Removing build. [jkobject]
+
+
+1.1.1 (2024-10-08)
+------------------
+- Release: version 1.1.1 🚀 [jkobject]
+- Tests. [jkobject]
+- Fmt. [jkobject]
+- Uv run. [jkobject]
+- Shell bash. [jkobject]
+- Oups source. [jkobject]
+- Virtual env? [jkobject]
+- Update uv. [jkobject]
+- Added ruff and uv. [jkobject]
+- Better tests. [jkobject]
+
+
+1.1.0 (2024-09-04)
+------------------
+- Release: version 1.1.0 🚀 [jkobject]
 - Debug. [jkobject]
 - Removing dependency on fasttransformer. [jkobject]
 

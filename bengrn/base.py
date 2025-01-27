@@ -2,43 +2,39 @@
 bengrn base module.
 """
 
-import pandas as pd
-import urllib.request
-import os.path
 import json
-
-from grnndata import GRNAnnData, from_adata_and_longform, from_scope_loomfile, utils
-from anndata import AnnData, concat
+import logging
+import os
+import os.path
+import tarfile
+import urllib.request
 from typing import Optional, Union
-from .tools import GENIE3
-import numpy as np
-from anndata.utils import make_index_unique
 
+import gdown
+import gseapy as gp
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import scanpy as sc
+import scipy.stats
+import tqdm
+from anndata import AnnData, concat
+from anndata.utils import make_index_unique
 from arboreto.algo import grnboost2
 
 # issue here of using an older version of numpy calling np.object instead of np.object_
 # from pyscenic.utils import modules_from_adjacencies
 # from pyscenic.prune import prune2df, df2regulons
 # from pyscenic.aucell import aucell
-
 from ctxcore.rnkdb import FeatherRankingDatabase as RankingDatabase
-
-import scipy.stats
-from sklearn.metrics import precision_recall_curve, auc, PrecisionRecallDisplay
-from sklearn.linear_model import LogisticRegression
+from grnndata import GRNAnnData, from_adata_and_longform, from_scope_loomfile, utils
+from scipy.sparse import csc_matrix, csr_matrix
+from scipy.sparse import issparse
+from sklearn.linear_model import LogisticRegression, RidgeClassifier
+from sklearn.metrics import PrecisionRecallDisplay, auc, precision_recall_curve
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import RidgeClassifier
 
-import gseapy as gp
-
-import tqdm
-import logging
-
-import matplotlib.pyplot as plt
-
-from scipy.sparse import csr_matrix, csc_matrix
-
-import scanpy as sc
+from .tools import GENIE3
 
 # example constant variable
 NAME = "bengrn"
@@ -196,8 +192,7 @@ class BenGRN:
             ):
                 metrics.update(
                     {
-                        "enriched_terms_"
-                        + elem: res.res2d[
+                        "enriched_terms_" + elem: res.res2d[
                             (res.res2d["FDR q-val"] < 0.1) & (res.res2d["NES"] > 1)
                         ].Term.tolist()
                     }
@@ -209,9 +204,10 @@ class BenGRN:
                 except KeyError:
                     pass
             istrue = metrics.get("TF_enr", False)
-            istrue = istrue or (
-                res.res2d.loc[res.res2d.Term == "0__TFs", "FDR q-val"].iloc[0] < 0.1
-            )
+            if len(res.res2d.loc[res.res2d.Term == "0__TFs"]) > 0:
+                istrue = istrue or (
+                    res.res2d.loc[res.res2d.Term == "0__TFs", "FDR q-val"].iloc[0] < 0.1
+                )
             metrics.update({"TF_enr": istrue})
         if self.doplot:
             print("_________________________________________")
@@ -226,7 +222,6 @@ class BenGRN:
         for k, v in TFinchip.items():
             if v not in self.grn.grn.columns:
                 continue
-            # print(k)
             j += 1
             test = self.grn.grn.T.loc[[v]].sort_values(by=v, ascending=False).T
             if len(set(test.index) & set(tfchip[k])) == 0:
@@ -252,16 +247,10 @@ class BenGRN:
                 .drop(columns=["Name"])
             )
             if len(val.Term.tolist()) > 0:
-                # print("found! ", val.Term.tolist()[0])
-                # print(pre_res.res2d["NES"])
-                # print(pre_res.res2d["FDR q-val"])
-                # print("\n")
                 i += 1
             else:
                 pass
-                # print("no sig...")
             res[k] = pre_res.res2d
-            # print(val.Term.tolist()[:2])
         logging.disable(previous_level)
         j = j if j != 0 else 1
         if self.doplot:
@@ -414,14 +403,26 @@ def get_scenicplus(
     return from_scope_loomfile(filepath)
 
 
+def download_sroy_gt(
+    gt_file_path: str = os.path.join(FILEDIR, "..", "data", "GroundTruth.tar.gz"),
+):
+    gt_file_url = "https://drive.google.com/file/d/1-lWQIlZw81f-s1dti7rmge5sObX3S-s4/view?usp=drive_link"
+    gdown.download(gt_file_url, gt_file_path, quiet=False, fuzzy=True)
+
+    with tarfile.open(gt_file_path, "r:gz") as tar:
+        tar.extractall(path=os.path.join(FILEDIR, ".."))
+    # Move extracted contents from data/data/GroundTruth to data/GroundTruth
+    print(f"Extracted GroundTruth.tar.gz to {gt_file_path}")
+
+
 def get_sroy_gt(
-    get: str = "main", join: str = "outer", species: str = "human", gt: str = "full"
+    get: str = "mine", join: str = "outer", species: str = "human", gt: str = "full"
 ) -> GRNAnnData:
     """
     This function retrieves the ground truth data from the McCall et al.'s paper.
 
     Args:
-        get (str): The specific dataset to retrieve. Options include "main", "liu", and "chen".
+        get (str): The specific dataset to retrieve. Options include "mine", "liu", and "chen".
         join (str, optional): The type of join to be performed when concatenating the data. Default is "outer".
         species (str, optional): The species of the dataset. Default is "human".
         gt (str, optional): The type of ground truth data to retrieve. Options include "full", "chip", and "ko". Default is "full".
@@ -429,6 +430,14 @@ def get_sroy_gt(
     Returns:
         GrnAnnData: The ground truth data as a grnndata object
     """
+    # Download and store the ground truth data file
+
+    if not os.path.exists(
+        os.path.join(FILEDIR, "..", "data", "GroundTruth", "stone_and_sroy")
+    ):
+        download_sroy_gt(
+            gt_file_path=os.path.join(FILEDIR, "..", "data", "GroundTruth.tar.gz")
+        )
     if species == "human":
         if gt == "full":
             df = pd.read_csv(
@@ -583,17 +592,38 @@ def get_sroy_gt(
     return from_adata_and_longform(adata, df)
 
 
-def get_perturb_gt(
+def download_perturb_gt(
+    filename_bh: str = FILEDIR + "/../data/BH-corrected.csv.gz",
+    filename_adata: str = FILEDIR + "/../data/ess_perturb_sc.h5ad",
     url_bh: str = "https://plus.figshare.com/ndownloader/files/38349308",
+    url_adata: str = "https://plus.figshare.com/ndownloader/files/35773219",
+):
+    """
+    download_perturb_gt downloads the genome wide perturb seq ground truth data.
+
+    Args:
+        filename_bh (str, optional): The local filename to save the BH-corrected data. Defaults to FILEDIR + "/../data/BH-corrected.csv.gz".
+        filename_adata (str, optional): The local filename to save the single-cell perturbation data. Defaults to FILEDIR + "/../data/ess_perturb_sc.h5ad".
+        url_bh (str, optional): The URL to download the BH-corrected data. Defaults to "https://plus.figshare.com/ndownloader/files/38349308".
+        url_adata (str, optional): The URL to download the single-cell perturbation data. Defaults to "https://plus.figshare.com/ndownloader/files/35773219".
+    """
+    os.makedirs(os.path.dirname(filename_bh), exist_ok=True)
+    urllib.request.urlretrieve(url_bh, filename_bh)
+    sc.read(
+        filename_adata,
+        backup_url=url_adata,
+    )
+
+
+def get_perturb_gt(
+    filename_adata: str = FILEDIR + "/../data/ess_perturb_sc.h5ad",
     filename_bh: str = FILEDIR + "/../data/BH-corrected.csv.gz",
     url_adata: str = "https://plus.figshare.com/ndownloader/files/35773219",
-    filename_adata: str = FILEDIR + "/../data/ess_perturb_sc.h5ad",
 ):
     """
     get_perturb_gt retrieves the genome wide perturb seq ground truth data.
 
     Args:
-        url_bh (str, optional): The URL to download the BH-corrected data. Defaults to "https://plus.figshare.com/ndownloader/files/38349308".
         filename_bh (str, optional): The local filename to save the BH-corrected data. Defaults to FILEDIR + "/../data/BH-corrected.csv.gz".
         url_adata (str, optional): The URL to download the single-cell perturbation data. Defaults to "https://plus.figshare.com/ndownloader/files/35773219".
         filename_adata (str, optional): The local filename to save the single-cell perturbation data. Defaults to FILEDIR + "/../data/ess_perturb_sc.h5ad".
@@ -602,7 +632,7 @@ def get_perturb_gt(
         GRNAnnData: The Gene Regulatory Network data as a GRNAnnData object.
     """
     if not os.path.exists(filename_bh):
-        urllib.request.urlretrieve(url_bh, filename_bh)
+        download_perturb_gt(filename_bh=filename_bh)
     pert = pd.read_csv(filename_bh)
     pert = pert.set_index("Unnamed: 0").T
     pert.index = [i.split("_")[-1] for i in pert.index]
@@ -705,15 +735,34 @@ def compute_genie3(
     Returns:
         GRNAnnData: The Gene Regulatory Network data computed using the GENIE3 algorithm.
     """
-    mat = np.asarray(adata.X.todense())
-    names = adata.var_names[mat.sum(0) > 0].tolist()
-    var = adata.var[mat.sum(0) > 0]
-    mat = mat[:, mat.sum(0) > 0]
+    mat = np.asarray(adata.X.toarray() if issparse(adata.X) else adata.X)
+    names = adata.var_names.tolist()  # [mat.sum(0) > 0].tolist()
+    var = adata.var  # [mat.sum(0) > 0]
+    # mat = mat[:, mat.sum(0) > 0]
     VIM = GENIE3(mat, gene_names=names, nthreads=nthreads, ntrees=ntrees, **kwargs)
     grn = GRNAnnData(grn=VIM, X=mat, var=var, obs=adata.obs)
     grn.var_names = grn.var["symbol"]
     grn.var["TFs"] = [True if i in utils.TF else False for i in grn.var_names]
     return grn
+
+
+def download_GT_db(omni_loc: str = FILEDIR + "/../data/omnipath.parquet"):
+    TFLINK = "https://cdn.netbiol.org/tflink/download_files/TFLink_Homo_sapiens_interactions_All_simpleFormat_v1.0.tsv.gz"
+    pd_load_cached(TFLINK)
+    HTFTARGET = "http://bioinfo.life.hust.edu.cn/static/hTFtarget/file_download/tf-target-infomation.txt"
+    pd_load_cached(HTFTARGET)
+    if not os.path.exists(omni_loc):
+        os.makedirs(os.path.dirname(omni_loc), exist_ok=True)
+        from omnipath.interactions import AllInteractions
+        from omnipath.requests import Annotations
+
+        interactions = AllInteractions()
+        net = interactions.get(exclude=["small_molecule", "lncrna_mrna"])
+        hgnc = Annotations.get(resources="HGNC")
+        rename = {v.uniprot: v.genesymbol for k, v in hgnc.iterrows()}
+        net.source = net.source.replace(rename)
+        net.target = net.target.replace(rename)
+        net.to_parquet(omni_loc)
 
 
 def get_GT_db(
@@ -753,6 +802,9 @@ def get_GT_db(
         net = dc.get_dorothea(organism=organism)
     elif name == "omnipath":
         if not os.path.exists(FILEDIR + "/../data/omnipath.parquet"):
+            os.makedirs(
+                os.path.dirname(FILEDIR + "/../data/omnipath.parquet"), exist_ok=True
+            )
             from omnipath.interactions import AllInteractions
             from omnipath.requests import Annotations
 
@@ -986,7 +1038,6 @@ def load_genes(organisms: Union[str, list] = "NCBITaxon:9606"):  # "NCBITaxon:10
         genesdf = bt.Gene.filter(
             organism_id=bt.Organism.filter(ontology_id=organism).first().id
         ).df()
-        genesdf = genesdf[~genesdf["public_source_id"].isna()]
         genesdf = genesdf.drop_duplicates(subset="ensembl_gene_id")
         genesdf = genesdf.set_index("ensembl_gene_id").sort_index()
         # mitochondrial genes
@@ -998,8 +1049,7 @@ def load_genes(organisms: Union[str, list] = "NCBITaxon:9606"):  # "NCBITaxon:10
         genesdf["organism"] = organism
         organismdf.append(genesdf)
     organismdf = pd.concat(organismdf)
-    organismdf.drop(
-        columns=["source_id", "run_id", "created_by_id", "updated_at", "stable_id"],
-        inplace=True,
-    )
+    for col in ["source_id", "run_id", "created_by_id", "updated_at", "stable_id"]:
+        if col in organismdf.columns:
+            organismdf.drop(columns=[col], inplace=True)
     return organismdf

@@ -1,10 +1,12 @@
-from sklearn.tree import BaseDecisionTree
-from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
 import time
-from operator import itemgetter
 from multiprocessing import Pool
+from operator import itemgetter
 from typing import Optional, Union
-from numpy import ndarray, array, transpose, std, zeros, ndenumerate, random
+
+from numpy import array, ndarray, ndenumerate, random, std, transpose, zeros
+from sklearn.ensemble import ExtraTreesRegressor, RandomForestRegressor
+from sklearn.tree import BaseDecisionTree
+import tqdm
 
 
 def compute_feature_importances(estimator):
@@ -16,7 +18,7 @@ def compute_feature_importances(estimator):
             for e in estimator.estimators_
         ]
         importances = array(importances)
-        return sum(importances, axis=0) / len(estimator)
+        return importances.sum(0) / len(estimator.estimators_)
 
 
 def get_link_list(
@@ -254,7 +256,9 @@ def GENIE3(
             input_data.append([expr_data, i, input_idx, tree_method, K, ntrees])
 
         pool = Pool(nthreads)
-        alloutput = pool.map(wr_GENIE3_single, input_data)
+        alloutput = list(
+            tqdm.tqdm(pool.imap(wr_GENIE3_single, input_data), total=ngenes)
+        )
 
         for i, vi in alloutput:
             VIM[i, :] = vi

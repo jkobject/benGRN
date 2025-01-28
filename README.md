@@ -8,9 +8,12 @@
 [![Downloads](https://pepy.tech/badge/benGRN/week)](https://pepy.tech/project/benGRN)
 [![GitHub issues](https://img.shields.io/github/issues/jkobject/benGRN)](https://img.shields.io/github/issues/jkobject/benGRN)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![DOI](https://img.shields.io/badge/DOI-10.1101%2F2024.07.29.605556-blue)](https://doi.org/10.1101/2024.07.29.605556)
+[![DOI](https://zenodo.org/badge/731249338.svg)](https://doi.org/10.5281/zenodo.10573209)
 
 Benchmark your gene regulatory networks inference algorithm (from scRNAseq or bulk RNAseq dataset) with BenGRN
+
+
+<img src="bengrn.png" width="400"/>
 
 The package is supposed to work with [GRnnData](https://cantinilab.github.io/GRnnData/) and only uses biological ground truth datasets.
 
@@ -73,4 +76,3 @@ download_perturb_gt()
 Read the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 Awesome Benchmark of Gene Regulatory Networks created by @jkobject
-

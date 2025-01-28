@@ -747,10 +747,6 @@ def compute_genie3(
 
 
 def download_GT_db(omni_loc: str = FILEDIR + "/../data/omnipath.parquet"):
-    TFLINK = "https://cdn.netbiol.org/tflink/download_files/TFLink_Homo_sapiens_interactions_All_simpleFormat_v1.0.tsv.gz"
-    pd_load_cached(TFLINK)
-    HTFTARGET = "http://bioinfo.life.hust.edu.cn/static/hTFtarget/file_download/tf-target-infomation.txt"
-    pd_load_cached(HTFTARGET)
     if not os.path.exists(omni_loc):
         os.makedirs(os.path.dirname(omni_loc), exist_ok=True)
         from omnipath.interactions import AllInteractions
@@ -763,6 +759,10 @@ def download_GT_db(omni_loc: str = FILEDIR + "/../data/omnipath.parquet"):
         net.source = net.source.replace(rename)
         net.target = net.target.replace(rename)
         net.to_parquet(omni_loc)
+    TFLINK = "https://cdn.netbiol.org/tflink/download_files/TFLink_Homo_sapiens_interactions_All_simpleFormat_v1.0.tsv.gz"
+    pd_load_cached(TFLINK)
+    HTFTARGET = "http://bioinfo.life.hust.edu.cn/static/hTFtarget/file_download/tf-target-infomation.txt"
+    pd_load_cached(HTFTARGET)
 
 
 def get_GT_db(

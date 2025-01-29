@@ -111,6 +111,44 @@
 
 
 
+
+
+
+
+
+
+<p><span class="doc-section-title">Functions:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="bengrn.tools.genie3.GENIE3" href="#bengrn.tools.genie3.GENIE3">GENIE3</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>GENIE3 Computation of tree-based scores for all putative regulatory links.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="bengrn.tools.genie3.get_link_list" href="#bengrn.tools.genie3.get_link_list">get_link_list</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Gets the ranked list of (directed) regulatory links.</p>
+                </div>
+              </td>
+            </tr>
+      </tbody>
+    </table>
+
+
+
+
+
   <div class="doc doc-children">
 
 
@@ -242,8 +280,7 @@
 </table>
             <details class="quote">
               <summary>Source code in <code>bengrn/tools/genie3.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">154</span>
-<span class="normal">155</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">155</span>
 <span class="normal">156</span>
 <span class="normal">157</span>
 <span class="normal">158</span>
@@ -364,7 +401,10 @@
 <span class="normal">273</span>
 <span class="normal">274</span>
 <span class="normal">275</span>
-<span class="normal">276</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">GENIE3</span><span class="p">(</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">GENIE3</span><span class="p">(</span>
     <span class="n">expr_data</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span>
     <span class="n">gene_names</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">regulators</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
@@ -468,7 +508,9 @@
             <span class="n">input_data</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">expr_data</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">input_idx</span><span class="p">,</span> <span class="n">tree_method</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">ntrees</span><span class="p">])</span>
 
         <span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="n">nthreads</span><span class="p">)</span>
-        <span class="n">alloutput</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">wr_GENIE3_single</span><span class="p">,</span> <span class="n">input_data</span><span class="p">)</span>
+        <span class="n">alloutput</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+            <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">imap</span><span class="p">(</span><span class="n">wr_GENIE3_single</span><span class="p">,</span> <span class="n">input_data</span><span class="p">),</span> <span class="n">total</span><span class="o">=</span><span class="n">ngenes</span><span class="p">)</span>
+        <span class="p">)</span>
 
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">vi</span> <span class="ow">in</span> <span class="n">alloutput</span><span class="p">:</span>
             <span class="n">VIM</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">vi</span>
@@ -517,8 +559,7 @@
 
             <details class="quote">
               <summary>Source code in <code>bengrn/tools/genie3.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 23</span>
-<span class="normal"> 24</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 24</span>
 <span class="normal"> 25</span>
 <span class="normal"> 26</span>
 <span class="normal"> 27</span>
@@ -645,7 +686,8 @@
 <span class="normal">148</span>
 <span class="normal">149</span>
 <span class="normal">150</span>
-<span class="normal">151</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_link_list</span><span class="p">(</span>
+<span class="normal">151</span>
+<span class="normal">152</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_link_list</span><span class="p">(</span>
     <span class="n">VIM</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span>
     <span class="n">gene_names</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">regulators</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>

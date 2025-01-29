@@ -1,3 +1,5 @@
-__version__ = "1.2.2"
+from importlib.metadata import version
+
+__version__ = version("benGRN")
 
 from .base import *

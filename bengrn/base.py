@@ -619,6 +619,7 @@ def get_perturb_gt(
     filename_adata: str = FILEDIR + "/../data/ess_perturb_sc.h5ad",
     filename_bh: str = FILEDIR + "/../data/BH-corrected.csv.gz",
     url_adata: str = "https://plus.figshare.com/ndownloader/files/35773219",
+    url_bh: str = "https://plus.figshare.com/ndownloader/files/38349308",
 ):
     """
     get_perturb_gt retrieves the genome wide perturb seq ground truth data.
@@ -631,8 +632,13 @@ def get_perturb_gt(
     Returns:
         GRNAnnData: The Gene Regulatory Network data as a GRNAnnData object.
     """
-    if not os.path.exists(filename_bh):
-        download_perturb_gt(filename_bh=filename_bh)
+    if not os.path.exists(filename_adata) and not os.path.exists(filename_bh):
+        download_perturb_gt(
+            filename_bh=filename_bh,
+            filename_adata=filename_adata,
+            url_bh=url_bh,
+            url_adata=url_adata,
+        )
     pert = pd.read_csv(filename_bh)
     pert = pert.set_index("Unnamed: 0").T
     pert.index = [i.split("_")[-1] for i in pert.index]

@@ -138,3 +138,6 @@ data/GroundTruth/adamson_raw/
 data/BH-corrected.csv.gz
 data/ess_perturb_sc.h5ad
 data/GroundTruth/stone_and_sroy/
+data/output.tar.gz
+data/norman_sc.h5ad
+data/op_bulk.h5ad

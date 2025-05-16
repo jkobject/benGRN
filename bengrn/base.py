@@ -72,6 +72,7 @@ class BenGRN:
         full_dataset: Optional[AnnData] = None,
         doplot: bool = True,
         do_auc: bool = True,
+        only_tf: bool = False,
     ):
         """
         Initializes the BenGRN class.
@@ -81,11 +82,13 @@ class BenGRN:
             full_dataset (Optional[AnnData]): The full dataset, defaults to None.
             doplot (bool): Whether to plot the results, defaults to True.
             do_auc (bool): Whether to calculate the Area Under the Precision-Recall Curve, defaults to True.
+            only_tf (bool): Whether to only consider TFs in the GRN, defaults to False.
         """
         self.grn = grn
         self.full_dataset = full_dataset
         self.doplot = doplot
         self.do_auc = do_auc
+        self.only_tf = only_tf
 
     def get_self_metrics(self):
         print("I'm getting my own metrics")
@@ -123,6 +126,16 @@ class BenGRN:
                 print("loading GT, ", to)
             gt = get_GT_db(name=to, organism=organism)
             # gt = gt[gt.type != "post_translational"]
+            if self.only_tf:
+                gt = gt[gt.type == "transcriptional"]
+            gt = gt[
+                gt.source.isin(
+                    [i for i, n in gt.source.value_counts().items() if n > 20]
+                )
+                & gt.target.isin(
+                    [i for i, n in gt.target.value_counts().items() if n > 5]
+                )
+            ]
             varnames = set(gt.iloc[:, :2].values.flatten())
             intersection = varnames & set(self.grn.var["symbol"].tolist())
             loc = self.grn.var["symbol"].isin(intersection)
@@ -130,12 +143,18 @@ class BenGRN:
             genes = self.grn.var.loc[loc, "symbol"].tolist()
 
             da = np.zeros(adj.shape, dtype=float)
-            for i, j in gt.iloc[:, :2].values:
-                if i in genes and j in genes:
-                    da[genes.index(i), genes.index(j)] = 1
+            for source, target in gt.iloc[:, :2].values:
+                if source in genes and target in genes:
+                    da[genes.index(source), genes.index(target)] = 1
+            if self.only_tf:
+                da = da[[i in gt.source.unique() for i in genes], :]
+                adj = adj[[i in gt.source.unique() for i in genes], :]
             if self.doplot:
                 print("intersection of {} genes".format(len(intersection)))
                 print("intersection pct:", len(intersection) / len(self.grn.grn.index))
+                print("only tf: ", self.only_tf)
+                print("using only tf: ", adj.shape[0] / self.grn.shape[1])
+                print("total true edges: ", da.sum())
         else:
             elems = other.var[other.grn.sum(1) != 0].index.tolist()
             da = other.get(self.grn.var.index.tolist()).get(elems).targets
@@ -144,7 +163,6 @@ class BenGRN:
             # da = da.iloc[6:]
             adj = self.grn.grn.loc[da.index.values, da.columns.values].values
             da = da.values
-
         return compute_pr(
             adj,
             da,

@@ -1,12 +1,12 @@
 import time
 from multiprocessing import Pool
 from operator import itemgetter
-from typing import Optional, Union
+from typing import List, Optional, Union
 
+import tqdm
 from numpy import array, ndarray, ndenumerate, random, std, transpose, zeros
 from sklearn.ensemble import ExtraTreesRegressor, RandomForestRegressor
 from sklearn.tree import BaseDecisionTree
-import tqdm
 
 
 def compute_feature_importances(estimator):
@@ -23,8 +23,8 @@ def compute_feature_importances(estimator):
 
 def get_link_list(
     VIM: ndarray,
-    gene_names: Optional[list[str]] = None,
-    regulators: Union[list[str], str] = "all",
+    gene_names: Optional[List[str]] = None,
+    regulators: Union[List[str], str] = "all",
     maxcount: Union[int, str] = "all",
     file_name: Optional[str] = None,
 ):
@@ -32,8 +32,8 @@ def get_link_list(
 
     Args
         VIM (np.array): Array as returned by the function GENIE3(), in which the element (i,j) is the score of the edge directed from the i-th gene to the j-th gene.
-        gene_names (list[str] optional): List of length p, where p is the number of rows/columns in VIM, containing the names of the genes. The i-th item of gene_names must correspond to the i-th row/column of VIM. When the gene names are not provided, the i-th gene is named Gi. Default is None.
-        regulators (list[str], optional): List containing the names of the candidate regulators. When a list of regulators is provided, the names of all the genes must be provided (in gene_names), and the returned list contains only edges directed from the candidate regulators. When regulators is set to 'all', any gene can be a candidate regulator. Default is 'all'.
+        gene_names (List[str] optional): List of length p, where p is the number of rows/columns in VIM, containing the names of the genes. The i-th item of gene_names must correspond to the i-th row/column of VIM. When the gene names are not provided, the i-th gene is named Gi. Default is None.
+        regulators (List[str], optional): List containing the names of the candidate regulators. When a list of regulators is provided, the names of all the genes must be provided (in gene_names), and the returned list contains only edges directed from the candidate regulators. When regulators is set to 'all', any gene can be a candidate regulator. Default is 'all'.
         maxcount (Union[str, int], optional): Writes only the first maxcount regulatory links of the ranked list. When maxcount is set to 'all', all the regulatory links are written. Default is 'all'.
         file_name (str, optional): Writes the ranked list of regulatory links to the file file_name. Default is None.
 
@@ -154,8 +154,8 @@ def get_link_list(
 
 def GENIE3(
     expr_data: ndarray,
-    gene_names: Optional[list[str]] = None,
-    regulators: Union[list[str], str] = "all",
+    gene_names: Optional[List[str]] = None,
+    regulators: Union[List[str], str] = "all",
     tree_method: str = "RF",
     K: Union[str, int] = "sqrt",
     ntrees: int = 1000,
@@ -166,8 +166,8 @@ def GENIE3(
 
     Args:
         expr_data (numpy.ndarray): Array containing gene expression values. Each row corresponds to a condition and each column corresponds to a gene.
-        gene_names (list[str], optional): List of length p, where p is the number of columns in expr_data, containing the names of the genes. The i-th item of gene_names must correspond to the i-th column of expr_data. Defaults to None.
-        regulators (list[str], optional): List containing the names of the candidate regulators. When a list of regulators is provided, the names of all the genes must be provided (in gene_names). When regulators is set to 'all', any gene can be a candidate regulator. Defaults to 'all'.
+        gene_names (List[str], optional): List of length p, where p is the number of columns in expr_data, containing the names of the genes. The i-th item of gene_names must correspond to the i-th column of expr_data. Defaults to None.
+        regulators (List[str], optional): List containing the names of the candidate regulators. When a list of regulators is provided, the names of all the genes must be provided (in gene_names). When regulators is set to 'all', any gene can be a candidate regulator. Defaults to 'all'.
         tree_method (str, optional): Specifies which tree-based procedure is used: either Random Forest ('RF') or Extra-Trees ('ET'). Defaults to 'RF'.
         K (str or int, optional): Specifies the number of selected attributes at each node of one tree: either the square root of the number of candidate regulators ('sqrt'), the total number of candidate regulators ('all'), or any positive integer. Defaults to 'sqrt'.
         ntrees (int, optional): Specifies the number of trees grown in an ensemble. Defaults to 1000.

@@ -8,7 +8,7 @@ import os
 import os.path
 import tarfile
 import urllib.request
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 import gdown
 import gseapy as gp
@@ -20,16 +20,15 @@ import scipy.stats
 import tqdm
 from anndata import AnnData, concat
 from anndata.utils import make_index_unique
-from arboreto.algo import grnboost2
 
+# from arboreto.algo import grnboost2
 # issue here of using an older version of numpy calling np.object instead of np.object_
 # from pyscenic.utils import modules_from_adjacencies
 # from pyscenic.prune import prune2df, df2regulons
 # from pyscenic.aucell import aucell
 from ctxcore.rnkdb import FeatherRankingDatabase as RankingDatabase
 from grnndata import GRNAnnData, from_adata_and_longform, from_scope_loomfile, utils
-from scipy.sparse import csc_matrix, csr_matrix
-from scipy.sparse import issparse
+from scipy.sparse import csc_matrix, csr_matrix, issparse
 from sklearn.linear_model import LogisticRegression, RidgeClassifier
 from sklearn.metrics import PrecisionRecallDisplay, auc, precision_recall_curve
 from sklearn.model_selection import train_test_split
@@ -156,6 +155,7 @@ class BenGRN:
                 print("using only tf: ", adj.shape[0] / self.grn.shape[1])
                 print("total true edges: ", da.sum())
         else:
+            # this is a debugger line
             elems = other.var[other.grn.sum(1) != 0].index.tolist()
             da = other.get(self.grn.var.index.tolist()).get(elems).targets
             if da.shape[1] < 5:
@@ -817,13 +817,11 @@ def get_GT_db(
     elif name == "collectri":
         import decoupler as dc
 
-        net = dc.get_collectri(organism=organism, split_complexes=split_complexes).drop(
-            columns=["PMID"]
-        )
+        net = dc.op.collectri(organism=organism, remove_complexes=split_complexes)
     elif name == "dorothea":
         import decoupler as dc
 
-        net = dc.get_dorothea(organism=organism)
+        net = dc.op.dorothea(organism=organism)
     elif name == "omnipath":
         if not os.path.exists(FILEDIR + "/../data/omnipath.parquet"):
             os.makedirs(
@@ -961,7 +959,10 @@ def compute_pr(
         grn = grn.toarray()
     indices = np.argpartition(grn.flatten(), -int(true.sum()))[-int(true.sum()) :]
     # Compute the odds ratio
+    # this is a debugger line
     true_positive = true[np.unravel_index(indices, true.shape)].sum()
+    if true_positive == 0:
+        print("No true positives found. Returning EPR as 0.")
     false_positive = true.sum() - true_positive
     # this is normal as we compute on the same number of pred_pos as true_pos
     false_negative = true.sum() - true_positive
@@ -1037,12 +1038,14 @@ def unnormalize(df, is_root=False):
     return df
 
 
-def load_genes(organisms: Union[str, list] = "NCBITaxon:9606"):  # "NCBITaxon:10090",
+def load_genes(
+    organisms: Union[str, List[str]] = "NCBITaxon:9606",
+):  # "NCBITaxon:10090",
     """
     load_genes loads the genes for the given organisms.
 
     Args:
-        organisms (Union[str, list], optional): The organism(s) to load genes for. Can be a single organism string or a list of organism strings. Defaults to "NCBITaxon:9606".
+        organisms (Union[str, List[str]], optional): The organism(s) to load genes for. Can be a single organism string or a list of organism strings. Defaults to "NCBITaxon:9606".
 
     Returns:
         pd.DataFrame: A DataFrame containing gene information for the specified organisms, including columns for gene symbols, mitochondrial genes, ribosomal genes, hemoglobin genes, and organism.

@@ -354,24 +354,11 @@ def train_classifier(
         alpha=C,
         fit_intercept=False,
         class_weight=class_weight,
-        # solver="saga",
         max_iter=max_iter,
         positive=True,
     )
-    # clf = LogisticRegression(
-    #    penalty="l1",
-    #    C=C,
-    #    solver="saga",
-    #    class_weight=class_weight,
-    #    max_iter=max_iter,
-    #    n_jobs=8,
-    #    fit_intercept=False,
-    #    verbose=10,
-    #    **kwargs,
-    # )
     clf.fit(X_train, y_train)
     pred = clf.predict(X_test)
-    # epr = compute_epr(clf, X_test, y_test)
     metrics = {
         "used_heads": (clf.coef_ != 0).sum(),
         "precision": (pred[y_test == 1] == 1).sum() / (pred == 1).sum(),
@@ -379,7 +366,6 @@ def train_classifier(
         "recall": (pred[y_test == 1] == 1).sum() / y_test.sum(),
         "predicted_true": pred.sum(),
         "number_of_true": y_test.sum(),
-        # "epr": epr,
     }
     if doplot:
         print("metrics", metrics)
@@ -970,13 +956,14 @@ def compute_pr(
     # Avoid division by zero
     # this is a debugger line
     if true_negative == 0 or false_positive == 0:
-        odds_ratio = float("inf")
+        epr = float("inf")
     else:
+        epr = (true_positive / true.sum()) / ((true_positive + false_negative) / tot)
         odds_ratio = (true_positive * true_negative) / (false_positive * false_negative)
 
-    metrics.update({"epr": odds_ratio})
+    metrics.update({"epr": epr, "odd_ratio": odds_ratio})
     if doplot:
-        print("EPR:", odds_ratio)
+        print("EPR:", epr)
         plt.figure(figsize=(10, 8))
         plt.plot(
             recall_list,
@@ -1001,33 +988,6 @@ def compute_pr(
         plt.grid(True)
         plt.show()
     return metrics
-
-
-def compute_epr(clf, X_test: np.ndarray, y_test: np.ndarray) -> float:
-    """
-    compute_epr computes the Expected Precision Recall (EPR) metric for the given classifier, test data, and true labels.
-
-    Args:
-        clf (sklearn.base.ClassifierMixin): The classifier to evaluate.
-        X_test (numpy.ndarray): The test data features.
-        y_test (numpy.ndarray): The true labels for the test data.
-
-    Returns:
-        float: The computed Expected Precision Recall (EPR) metric.
-    """
-    prb = clf.predict_proba(X_test)[:, 1]
-
-    K = sum(y_test)
-    # get only the top-K elems from prb
-    pred = np.zeros(prb.shape)
-    pred[np.argsort(prb)[-int(K) :]] = 1
-
-    true_positive = np.sum(pred[y_test == 1] == 1)
-    false_positive = np.sum(pred[y_test == 0] == 1)
-    false_negative = np.sum(pred[y_test == 1] == 0)
-    true_negative = np.sum(pred[y_test == 0] == 0)
-    odds_ratio = (true_positive * true_negative) / (false_positive * false_negative)
-    return odds_ratio
 
 
 def unnormalize(df, is_root=False):

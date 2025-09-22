@@ -20,14 +20,14 @@ import scipy.stats
 import tqdm
 from anndata import AnnData, concat
 from anndata.utils import make_index_unique
-
 # from arboreto.algo import grnboost2
 # issue here of using an older version of numpy calling np.object instead of np.object_
 # from pyscenic.utils import modules_from_adjacencies
 # from pyscenic.prune import prune2df, df2regulons
 # from pyscenic.aucell import aucell
 from ctxcore.rnkdb import FeatherRankingDatabase as RankingDatabase
-from grnndata import GRNAnnData, from_adata_and_longform, from_scope_loomfile, utils
+from grnndata import (GRNAnnData, from_adata_and_longform, from_scope_loomfile,
+                      utils)
 from scipy.sparse import csc_matrix, csr_matrix, issparse
 from sklearn.linear_model import LogisticRegression, RidgeClassifier
 from sklearn.metrics import PrecisionRecallDisplay, auc, precision_recall_curve
@@ -127,14 +127,14 @@ class BenGRN:
             # gt = gt[gt.type != "post_translational"]
             if self.only_tf:
                 gt = gt[gt.type == "transcriptional"]
-            gt = gt[
-                gt.source.isin(
-                    [i for i, n in gt.source.value_counts().items() if n > 20]
-                )
-                & gt.target.isin(
-                    [i for i, n in gt.target.value_counts().items() if n > 5]
-                )
-            ]
+            #gt = gt[
+            #    gt.source.isin(
+            #        [i for i, n in gt.source.value_counts().items() if n > 20]
+            #    )
+            #    & gt.target.isin(
+            #        [i for i, n in gt.target.value_counts().items() if n > 5]
+            #    )
+            #]
             varnames = set(gt.iloc[:, :2].values.flatten())
             intersection = varnames & set(self.grn.var["symbol"].tolist())
             loc = self.grn.var["symbol"].isin(intersection)

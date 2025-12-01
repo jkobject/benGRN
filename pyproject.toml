@@ -1,6 +1,6 @@
 [project]
 name = "benGRN"
-version = "1.3.1"
+version = "1.3.2"
 description = "benchmarking gene regulatory networks"
 authors = [
     {name = "jeremie kalfon", email = "jkobject@gmail.com"}

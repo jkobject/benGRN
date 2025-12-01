@@ -552,21 +552,21 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scdataloader</span><span class="w"> </span><span class="kn">import</span> <span class="n">Preprocessor</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">from</span> <span class="nn">scdataloader</span> <span class="kn">import</span> <span class="n">Preprocessor</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">bengrn</span><span class="w"> </span><span class="kn">import</span> <span class="n">BenGRN</span><span class="p">,</span> <span class="n">get_perturb_gt</span><span class="p">,</span> <span class="n">compute_genie3</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">bengrn.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_classifier</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">grnndata</span><span class="w"> </span><span class="kn">import</span> <span class="n">utils</span> <span class="k">as</span> <span class="n">grnutils</span>
+<span class="kn">from</span> <span class="nn">bengrn</span> <span class="kn">import</span> <span class="n">BenGRN</span><span class="p">,</span> <span class="n">get_perturb_gt</span><span class="p">,</span> <span class="n">compute_genie3</span>
+<span class="kn">from</span> <span class="nn">bengrn.base</span> <span class="kn">import</span> <span class="n">train_classifier</span>
+<span class="kn">from</span> <span class="nn">grnndata</span> <span class="kn">import</span> <span class="n">utils</span> <span class="k">as</span> <span class="n">grnutils</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">anndata.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_index_unique</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">scanpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+<span class="kn">from</span> <span class="nn">anndata.utils</span> <span class="kn">import</span> <span class="n">make_index_unique</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
 
 <span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
 <span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span> 
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch</span>
 <span class="n">torch</span><span class="o">.</span><span class="n">set_float32_matmul_precision</span><span class="p">(</span><span class="s1">'medium'</span><span class="p">)</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-1">from scdataloader import Preprocessor
@@ -2410,7 +2410,7 @@ EPR: 17.297946276803675
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-11">import pandas as pd</div>
 </div>

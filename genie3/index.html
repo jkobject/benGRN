@@ -117,6 +117,9 @@
 
 
 
+
+
+
 <p><span class="doc-section-title">Functions:</span></p>
     <table>
       <thead>
@@ -127,7 +130,7 @@
       </thead>
       <tbody>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="bengrn.tools.genie3.GENIE3" href="#bengrn.tools.genie3.GENIE3">GENIE3</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="GENIE3 (bengrn.tools.genie3.GENIE3)" href="#bengrn.tools.genie3.GENIE3">GENIE3</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>GENIE3 Computation of tree-based scores for all putative regulatory links.</p>
@@ -135,7 +138,7 @@
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="bengrn.tools.genie3.get_link_list" href="#bengrn.tools.genie3.get_link_list">get_link_list</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="get_link_list (bengrn.tools.genie3.get_link_list)" href="#bengrn.tools.genie3.get_link_list">get_link_list</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Gets the ranked list of (directed) regulatory links.</p>
@@ -150,6 +153,7 @@
 
 
   <div class="doc doc-children">
+
 
 
 
@@ -193,7 +197,7 @@
             </li>
             <li>
               <b><code>gene_names</code></b>
-                  (<code>list[str]</code>, default:
+                  (<code><span title="typing.List">List</span>[<span title="str">str</span>]</code>, default:
                       <code>None</code>
 )
               –
@@ -203,7 +207,7 @@
             </li>
             <li>
               <b><code>regulators</code></b>
-                  (<code>list[str]</code>, default:
+                  (<code><span title="typing.List">List</span>[<span title="str">str</span>]</code>, default:
                       <code>&#39;all&#39;</code>
 )
               –
@@ -213,7 +217,7 @@
             </li>
             <li>
               <b><code>tree_method</code></b>
-                  (<code>str</code>, default:
+                  (<code><span title="str">str</span></code>, default:
                       <code>&#39;RF&#39;</code>
 )
               –
@@ -223,7 +227,7 @@
             </li>
             <li>
               <b><code>K</code></b>
-                  (<code>str or int</code>, default:
+                  (<code><span title="str">str</span> or <span title="int">int</span></code>, default:
                       <code>&#39;sqrt&#39;</code>
 )
               –
@@ -233,7 +237,7 @@
             </li>
             <li>
               <b><code>ntrees</code></b>
-                  (<code>int</code>, default:
+                  (<code><span title="int">int</span></code>, default:
                       <code>1000</code>
 )
               –
@@ -243,7 +247,7 @@
             </li>
             <li>
               <b><code>nthreads</code></b>
-                  (<code>int</code>, default:
+                  (<code><span title="int">int</span></code>, default:
                       <code>1</code>
 )
               –
@@ -278,7 +282,8 @@
     </tr>
   </tbody>
 </table>
-            <details class="quote">
+
+            <details class="mkdocstrings-source">
               <summary>Source code in <code>bengrn/tools/genie3.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">155</span>
 <span class="normal">156</span>
@@ -404,10 +409,10 @@
 <span class="normal">276</span>
 <span class="normal">277</span>
 <span class="normal">278</span>
-<span class="normal">279</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">GENIE3</span><span class="p">(</span>
+<span class="normal">279</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">GENIE3</span><span class="p">(</span>
     <span class="n">expr_data</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">gene_names</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">regulators</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
+    <span class="n">gene_names</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">regulators</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
     <span class="n">tree_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;RF&quot;</span><span class="p">,</span>
     <span class="n">K</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;sqrt&quot;</span><span class="p">,</span>
     <span class="n">ntrees</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
@@ -418,8 +423,8 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        expr_data (numpy.ndarray): Array containing gene expression values. Each row corresponds to a condition and each column corresponds to a gene.</span>
-<span class="sd">        gene_names (list[str], optional): List of length p, where p is the number of columns in expr_data, containing the names of the genes. The i-th item of gene_names must correspond to the i-th column of expr_data. Defaults to None.</span>
-<span class="sd">        regulators (list[str], optional): List containing the names of the candidate regulators. When a list of regulators is provided, the names of all the genes must be provided (in gene_names). When regulators is set to &#39;all&#39;, any gene can be a candidate regulator. Defaults to &#39;all&#39;.</span>
+<span class="sd">        gene_names (List[str], optional): List of length p, where p is the number of columns in expr_data, containing the names of the genes. The i-th item of gene_names must correspond to the i-th column of expr_data. Defaults to None.</span>
+<span class="sd">        regulators (List[str], optional): List containing the names of the candidate regulators. When a list of regulators is provided, the names of all the genes must be provided (in gene_names). When regulators is set to &#39;all&#39;, any gene can be a candidate regulator. Defaults to &#39;all&#39;.</span>
 <span class="sd">        tree_method (str, optional): Specifies which tree-based procedure is used: either Random Forest (&#39;RF&#39;) or Extra-Trees (&#39;ET&#39;). Defaults to &#39;RF&#39;.</span>
 <span class="sd">        K (str or int, optional): Specifies the number of selected attributes at each node of one tree: either the square root of the number of candidate regulators (&#39;sqrt&#39;), the total number of candidate regulators (&#39;all&#39;), or any positive integer. Defaults to &#39;sqrt&#39;.</span>
 <span class="sd">        ntrees (int, optional): Specifies the number of trees grown in an ensemble. Defaults to 1000.</span>
@@ -549,15 +554,16 @@
         <p>Gets the ranked list of (directed) regulatory links.</p>
 <p>Args
     VIM (np.array): Array as returned by the function GENIE3(), in which the element (i,j) is the score of the edge directed from the i-th gene to the j-th gene.
-    gene_names (list[str] optional): List of length p, where p is the number of rows/columns in VIM, containing the names of the genes. The i-th item of gene_names must correspond to the i-th row/column of VIM. When the gene names are not provided, the i-th gene is named Gi. Default is None.
-    regulators (list[str], optional): List containing the names of the candidate regulators. When a list of regulators is provided, the names of all the genes must be provided (in gene_names), and the returned list contains only edges directed from the candidate regulators. When regulators is set to 'all', any gene can be a candidate regulator. Default is 'all'.
+    gene_names (List[str] optional): List of length p, where p is the number of rows/columns in VIM, containing the names of the genes. The i-th item of gene_names must correspond to the i-th row/column of VIM. When the gene names are not provided, the i-th gene is named Gi. Default is None.
+    regulators (List[str], optional): List containing the names of the candidate regulators. When a list of regulators is provided, the names of all the genes must be provided (in gene_names), and the returned list contains only edges directed from the candidate regulators. When regulators is set to 'all', any gene can be a candidate regulator. Default is 'all'.
     maxcount (Union[str, int], optional): Writes only the first maxcount regulatory links of the ranked list. When maxcount is set to 'all', all the regulatory links are written. Default is 'all'.
     file_name (str, optional): Writes the ranked list of regulatory links to the file file_name. Default is None.</p>
 <p>Returns
     pd.Dataframe: The list of regulatory links, ordered according to the edge score. Auto-regulations do not appear in the list. Regulatory links with a score equal to zero are randomly permuted. In the ranked list of edges, each line has format:
         regulator   target gene     score of edge</p>
 
-            <details class="quote">
+
+            <details class="mkdocstrings-source">
               <summary>Source code in <code>bengrn/tools/genie3.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 24</span>
 <span class="normal"> 25</span>
@@ -687,10 +693,10 @@
 <span class="normal">149</span>
 <span class="normal">150</span>
 <span class="normal">151</span>
-<span class="normal">152</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_link_list</span><span class="p">(</span>
+<span class="normal">152</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_link_list</span><span class="p">(</span>
     <span class="n">VIM</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">gene_names</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">regulators</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
+    <span class="n">gene_names</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">regulators</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
     <span class="n">maxcount</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
     <span class="n">file_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
@@ -698,8 +704,8 @@
 
 <span class="sd">    Args</span>
 <span class="sd">        VIM (np.array): Array as returned by the function GENIE3(), in which the element (i,j) is the score of the edge directed from the i-th gene to the j-th gene.</span>
-<span class="sd">        gene_names (list[str] optional): List of length p, where p is the number of rows/columns in VIM, containing the names of the genes. The i-th item of gene_names must correspond to the i-th row/column of VIM. When the gene names are not provided, the i-th gene is named Gi. Default is None.</span>
-<span class="sd">        regulators (list[str], optional): List containing the names of the candidate regulators. When a list of regulators is provided, the names of all the genes must be provided (in gene_names), and the returned list contains only edges directed from the candidate regulators. When regulators is set to &#39;all&#39;, any gene can be a candidate regulator. Default is &#39;all&#39;.</span>
+<span class="sd">        gene_names (List[str] optional): List of length p, where p is the number of rows/columns in VIM, containing the names of the genes. The i-th item of gene_names must correspond to the i-th row/column of VIM. When the gene names are not provided, the i-th gene is named Gi. Default is None.</span>
+<span class="sd">        regulators (List[str], optional): List containing the names of the candidate regulators. When a list of regulators is provided, the names of all the genes must be provided (in gene_names), and the returned list contains only edges directed from the candidate regulators. When regulators is set to &#39;all&#39;, any gene can be a candidate regulator. Default is &#39;all&#39;.</span>
 <span class="sd">        maxcount (Union[str, int], optional): Writes only the first maxcount regulatory links of the ranked list. When maxcount is set to &#39;all&#39;, all the regulatory links are written. Default is &#39;all&#39;.</span>
 <span class="sd">        file_name (str, optional): Writes the ranked list of regulatory links to the file file_name. Default is None.</span>
 

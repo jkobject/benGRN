@@ -257,7 +257,7 @@ wheels = [
 
 [[package]]
 name = "bengrn"
-version = "1.2.2"
+version = "1.3.0"
 source = { editable = "." }
 dependencies = [
     { name = "anndata" },
@@ -266,9 +266,11 @@ dependencies = [
     { name = "ctxcore" },
     { name = "dask-expr" },
     { name = "decoupler" },
+    { name = "distributed" },
     { name = "gdown" },
     { name = "grnndata" },
     { name = "gseapy" },
+    { name = "numba" },
     { name = "numpy" },
     { name = "omnipath" },
     { name = "pandas" },
@@ -277,6 +279,7 @@ dependencies = [
     { name = "scikit-learn" },
     { name = "scipy" },
     { name = "seaborn" },
+    { name = "setuptools" },
 ]
 
 [package.optional-dependencies]
@@ -303,16 +306,18 @@ requires-dist = [
     { name = "ctxcore", specifier = ">=0.1.1" },
     { name = "dask-expr", specifier = ">=1.0.0" },
     { name = "decoupler", specifier = ">=1.2.0" },
+    { name = "distributed", specifier = ">=2024.12.0" },
     { name = "gdown", specifier = ">=4.7.1" },
     { name = "gitchangelog", marker = "extra == 'dev'", specifier = ">=3.0.4" },
-    { name = "grnndata", specifier = ">=0.1.0" },
-    { name = "gseapy", specifier = ">=0.10.0" },
+    { name = "grnndata", specifier = ">=1.1.4" },
+    { name = "gseapy", specifier = ">=0.14.0" },
     { name = "mkdocs", marker = "extra == 'dev'", specifier = ">=1.5.3" },
     { name = "mkdocs-git-authors-plugin", marker = "extra == 'dev'", specifier = ">=0.4.0" },
     { name = "mkdocs-git-revision-date-localized-plugin", marker = "extra == 'dev'", specifier = ">=1.0.0" },
     { name = "mkdocs-jupyter", marker = "extra == 'dev'", specifier = ">=0.2.0" },
     { name = "mkdocstrings", marker = "extra == 'dev'", specifier = ">=0.22.0" },
     { name = "mkdocstrings-python", marker = "extra == 'dev'", specifier = ">=0.10.0" },
+    { name = "numba", specifier = ">=0.56.0" },
     { name = "numpy", specifier = ">=1.21.0" },
     { name = "omnipath", specifier = ">=1.0.0" },
     { name = "pandas", specifier = ">=2.0.0" },
@@ -324,6 +329,7 @@ requires-dist = [
     { name = "scikit-learn", specifier = ">=1.0.0" },
     { name = "scipy", specifier = ">=1.7.0" },
     { name = "seaborn", specifier = ">=0.11.0" },
+    { name = "setuptools", specifier = ">=58.0.0" },
 ]
 
 [[package]]
@@ -533,7 +539,7 @@ name = "click"
 version = "8.1.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "platform_system == 'Windows'" },
+    { name = "colorama", marker = "sys_platform == 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/96/d3/f04c7bfcf5c1862a2a5b845c6b2b360488cf47af55dfa79c98f6a6bf98b5/click-8.1.7.tar.gz", hash = "sha256:ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de", size = 336121 }
 wheels = [
@@ -817,7 +823,7 @@ wheels = [
 
 [[package]]
 name = "dask"
-version = "2024.9.1"
+version = "2025.11.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
@@ -829,15 +835,14 @@ dependencies = [
     { name = "pyyaml" },
     { name = "toolz" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/3a/e1/d5c46352ac59016fd3b4b83edacbec0f8280994da5525d10bd90ba5a7a06/dask-2024.9.1.tar.gz", hash = "sha256:06eccc6a68d2882bcd9de24548fa96e8d0da7fbfff0baed3f3c2a526b73dfbb4", size = 10147855 }
+sdist = { url = "https://files.pythonhosted.org/packages/db/33/eacaa72731f7fc64868caaf2d35060d50049eff889bd217263e68f76472f/dask-2025.11.0.tar.gz", hash = "sha256:23d59e624b80ee05b7cc8df858682cca58262c4c3b197ccf61da0f6543c8f7c3", size = 10984781 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/73/ea/3df533d551bc673f8a295450a8e28707e980fd3b55117edb1d1aa4cc374d/dask-2024.9.1-py3-none-any.whl", hash = "sha256:3757bb6c976f0436fef6bd6ad32f8983ee5ce7d8a738a1f643e208cd390ec794", size = 1257378 },
+    { url = "https://files.pythonhosted.org/packages/1d/54/a46920229d12c3a6e9f0081d1bdaeffad23c1826353ace95714faee926e5/dask-2025.11.0-py3-none-any.whl", hash = "sha256:08c35a8146c05c93b34f83cf651009129c42ee71762da7ca452fb7308641c2b8", size = 1477108 },
 ]
 
 [package.optional-dependencies]
 complete = [
     { name = "bokeh" },
-    { name = "dask-expr" },
     { name = "distributed" },
     { name = "jinja2" },
     { name = "lz4" },
@@ -848,16 +853,14 @@ complete = [
 
 [[package]]
 name = "dask-expr"
-version = "1.1.15"
+version = "2.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "dask" },
-    { name = "pandas" },
-    { name = "pyarrow" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/6b/22/aa135fd8f5f2f07d7b39de539bddc4c6c8dd31e9032ca5ee4657bc57f4db/dask_expr-1.1.15.tar.gz", hash = "sha256:d12fd1b6cd49aa9d5b1e187b243117eb58b1f9dda555b26a3bd31be10a27e236", size = 222219 }
+sdist = { url = "https://files.pythonhosted.org/packages/c2/d5/1c3311f7e0fee2415fe61fdd0c30e88134767cb3b5da8ee653eaf4c052de/dask_expr-2.0.0.tar.gz", hash = "sha256:e6d5a7bdff927aa4a1754a76cad79c5925254c525f568038df7832fcd558fc11", size = 3781 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1b/b2/30a07efa7ced65a9c3ec598328de0107df5a5e3ada57e43f00e1a4966b9b/dask_expr-1.1.15-py3-none-any.whl", hash = "sha256:0712e8a3a2a31947fc8e37152d8654aaa303382ec0c61a8d0fc93b0349f772f9", size = 242709 },
+    { url = "https://files.pythonhosted.org/packages/d0/f5/f0ae5e6b38d3383508b7a6669c90def361a4caa7b8b3b7e673828e34ac2e/dask_expr-2.0.0-py3-none-any.whl", hash = "sha256:8840da136aadd2c4d672990744c4b82179b69ecaba991db767c62a855a31852f", size = 3244 },
 ]
 
 [[package]]
@@ -952,7 +955,7 @@ wheels = [
 
 [[package]]
 name = "distributed"
-version = "2024.9.1"
+version = "2025.11.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
@@ -971,9 +974,9 @@ dependencies = [
     { name = "urllib3" },
     { name = "zict" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/34/da/bf22bb58ddfe518a4bc2385b5ec17a0ad1b7cd6bc2fa8f4310181da802a2/distributed-2024.9.1.tar.gz", hash = "sha256:4d573d89ff4fdde0dd96ad5cfdb843ce8ecef8caf002435bc60d14414dc1e819", size = 1113189 }
+sdist = { url = "https://files.pythonhosted.org/packages/c5/be/085a60b627c1f2b795827ce41d4cc1e11e74ffdadcb5235ee5fb620f7929/distributed-2025.11.0.tar.gz", hash = "sha256:372c2f0c2faa890fc42188349969ba468161a9b356df49c4ca7d9a8d551a7ace", size = 2119140 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b7/ff/7531b2bebc84766905d6b6c636f21e465511f330957bc1632d00c75ac152/distributed-2024.9.1-py3-none-any.whl", hash = "sha256:f7acca78afcc50eb337fd46247a33efa5a1696b937083a12556ba33f11be1c74", size = 1020546 },
+    { url = "https://files.pythonhosted.org/packages/46/ec/da78855318971c2be94d0283a41de6941a6b9f16146fb00babc74903ae01/distributed-2025.11.0-py3-none-any.whl", hash = "sha256:1794ff25b19ba347ccce563fb1dd5898c3bb30f500b15f8c20ad373f6281b30f", size = 1009248 },
 ]
 
 [[package]]
@@ -1282,7 +1285,7 @@ wheels = [
 
 [[package]]
 name = "grnndata"
-version = "1.1.2"
+version = "1.1.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anndata" },
@@ -1292,16 +1295,18 @@ dependencies = [
     { name = "louvain" },
     { name = "natsort" },
     { name = "networkx" },
+    { name = "numba" },
     { name = "numpy" },
     { name = "powerlaw" },
     { name = "pyvis" },
     { name = "scanpy" },
     { name = "scikit-learn" },
     { name = "scipy" },
+    { name = "setuptools" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/5b/f6/4896892511397ca89a81fc2b984b536382a5a80c1488b468b686db97d853/grnndata-1.1.2.tar.gz", hash = "sha256:bcbd8ab78aedffadf1c89bdf01f2231fc765062d643cb890f36666d4c86ef589", size = 61960 }
+sdist = { url = "https://files.pythonhosted.org/packages/85/51/62d32a56494fadb45807cd700cde85b1ac82135605fae8d41561db9727c0/grnndata-1.1.5.tar.gz", hash = "sha256:8f73d00488820389196a9550397b4af26cb17759008629d48302b3645a219dec", size = 13124181 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/66/c6/7ce8c3eaebeeb681d74c3959247b8e4f85d957aadc9923f63e6d95cff830/grnndata-1.1.2-py3-none-any.whl", hash = "sha256:ddfcf17c22e999af0df2f6de15466fa5b903a6189709f3872cad30134266eb6c", size = 60665 },
+    { url = "https://files.pythonhosted.org/packages/54/23/0f535a399d66ea82ac96cd7df4c9cc82f0e1234fb7b8337e6cb837aa5f5c/grnndata-1.1.5-py3-none-any.whl", hash = "sha256:57750cc6e29f4f00e028fab91a2bfe7f7e4cb10424db371f6c083e63a07edb69", size = 47735 },
 ]
 
 [[package]]
@@ -1524,7 +1529,7 @@ name = "ipykernel"
 version = "6.29.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "appnope", marker = "platform_system == 'Darwin'" },
+    { name = "appnope", marker = "sys_platform == 'darwin'" },
     { name = "comm" },
     { name = "debugpy" },
     { name = "ipython" },
@@ -2121,7 +2126,7 @@ version = "1.6.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
-    { name = "colorama", marker = "platform_system == 'Windows'" },
+    { name = "colorama", marker = "sys_platform == 'win32'" },
     { name = "ghp-import" },
     { name = "jinja2" },
     { name = "markdown" },
@@ -4079,7 +4084,7 @@ name = "tqdm"
 version = "4.66.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "platform_system == 'Windows'" },
+    { name = "colorama", marker = "sys_platform == 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/58/83/6ba9844a41128c62e810fddddd72473201f3eacde02046066142a2d96cc5/tqdm-4.66.5.tar.gz", hash = "sha256:e1020aef2e5096702d8a025ac7d16b1577279c9d63f8375b63083e9a5f0fcbad", size = 169504 }
 wheels = [

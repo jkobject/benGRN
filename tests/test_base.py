@@ -32,21 +32,21 @@ def test_base():
 
     # Test get_sroy_gt function
     sroy_gt = get_sroy_gt(get="liu")
-    assert isinstance(
-        sroy_gt, GRNAnnData
-    ), "get_sroy_gt should return a GRNAnnData object"
+    assert isinstance(sroy_gt, GRNAnnData), (
+        "get_sroy_gt should return a GRNAnnData object"
+    )
 
     # Test get_perturb_gt function
     perturb_gt = get_perturb_gt()
-    assert isinstance(
-        perturb_gt, GRNAnnData
-    ), "get_perturb_gt should return a GRNAnnData object"
+    assert isinstance(perturb_gt, GRNAnnData), (
+        "get_perturb_gt should return a GRNAnnData object"
+    )
 
     # Test compute_genie3 function
     genie3_result = compute_genie3(adata[:, :100], ntrees=10, nthreads=1)
-    assert isinstance(
-        genie3_result, GRNAnnData
-    ), "compute_genie3 should return a GRNAnnData object"
+    assert isinstance(genie3_result, GRNAnnData), (
+        "compute_genie3 should return a GRNAnnData object"
+    )
 
     # Test train_classifier function
     random_matrix = np.random.rand(4, 10000).reshape(100, 100, 4)

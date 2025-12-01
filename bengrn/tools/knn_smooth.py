@@ -144,9 +144,7 @@ def knn_smoothing(
     np.random.seed(seed)
 
     if not (X.dtype == np.float64 or X.dtype == np.float32):
-        raise ValueError(
-            "X must contain floating point values! " "Try X = np.float64(X)."
-        )
+        raise ValueError("X must contain floating point values! Try X = np.float64(X).")
 
     p, n = X.shape
     num_pcs = min(p, n - 1)  # the number of principal components
@@ -217,7 +215,7 @@ if __name__ == "__main__":
         "-d",
         default=10,
         show_default=True,
-        help="The number of principal components used to identify " "neighbors.",
+        help="The number of principal components used to identify neighbors.",
     )
     @click.option(
         "--dither",

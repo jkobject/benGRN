@@ -11,9 +11,14 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![DOI](https://img.shields.io/badge/DOI-10.1101%2F2024.07.29.605556-blue)](https://doi.org/10.1101/2024.07.29.605556)
 
-Benchmark your gene regulatory networks inference algorithm (from scRNAseq or bulk RNAseq dataset) with BenGRN
+Benchmark your gene regulatory networks inference algorithm (from scRNAseq or
+bulk RNAseq dataset) with BenGRN
 
-The package is supposed to work with [GRnnData](https://cantinilab.github.io/GRnnData/) and only uses biological ground truth datasets.
+<img src="bengrn.png" width="400"/>
+
+The package is supposed to work with
+[GRnnData](https://cantinilab.github.io/GRnnData/) and only uses biological
+ground truth datasets.
 
 It can run Genie3 & pyscenic on your data as a comparison
 
@@ -21,7 +26,7 @@ It has 3 main different types of key ground truth data to compare your GRN to:
 
 - Mc Calla et al.'s ChIP+Perturb ground truth
 - omnipath's literature curated ground truth
-- genome wide perturb seq 's dataset 
+- genome wide perturb seq 's dataset
 
 You can find the documentation [here](https://www.jkobject.com/benGRN/)
 

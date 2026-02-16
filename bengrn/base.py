@@ -210,7 +210,8 @@ class BenGRN:
             ):
                 metrics.update(
                     {
-                        "enriched_terms_" + elem: res.res2d[
+                        "enriched_terms_"
+                        + elem: res.res2d[
                             (res.res2d["FDR q-val"] < 0.1) & (res.res2d["NES"] > 1)
                         ].Term.tolist()
                     }
@@ -1024,7 +1025,7 @@ def load_genes(
     for organism in organisms:
         genesdf = bt.Gene.filter(
             organism_id=bt.Organism.filter(ontology_id=organism).first().id
-        ).df()
+        ).to_dataframe(limit=None)
         genesdf = genesdf.drop_duplicates(subset="ensembl_gene_id")
         genesdf = genesdf.set_index("ensembl_gene_id").sort_index()
         # mitochondrial genes

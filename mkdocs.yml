@@ -1,6 +1,7 @@
 site_name: bengrn
 theme:
   name: readthedocs
+  logo: bengrn.png
   # analytics:
   # gtag: G-ABC123
 site_url: https://www.jkobject.com/benGRN/

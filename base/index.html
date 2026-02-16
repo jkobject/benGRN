@@ -31,7 +31,8 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
     <div class="wy-side-scroll">
       <div class="wy-side-nav-search">
-          <a href=".." class="icon icon-home"> bengrn
+          <a href="..">
+          <img src="../bengrn.png" class="logo" alt="Logo"/>
         </a><div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
       <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
@@ -857,7 +858,8 @@ It corresponds to different views of the network.</p>
 <span class="normal">276</span>
 <span class="normal">277</span>
 <span class="normal">278</span>
-<span class="normal">279</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">scprint_benchmark</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elems</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Central&quot;</span><span class="p">,</span> <span class="s2">&quot;Regulators&quot;</span><span class="p">,</span> <span class="s2">&quot;Targets&quot;</span><span class="p">]):</span>
+<span class="normal">279</span>
+<span class="normal">280</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">scprint_benchmark</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elems</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Central&quot;</span><span class="p">,</span> <span class="s2">&quot;Regulators&quot;</span><span class="p">,</span> <span class="s2">&quot;Targets&quot;</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    scprint_benchmark full benchmarks of the GRN as in the scPRINT paper.</span>
 
@@ -897,7 +899,8 @@ It corresponds to different views of the network.</p>
         <span class="p">):</span>
             <span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
                 <span class="p">{</span>
-                    <span class="s2">&quot;enriched_terms_&quot;</span> <span class="o">+</span> <span class="n">elem</span><span class="p">:</span> <span class="n">res</span><span class="o">.</span><span class="n">res2d</span><span class="p">[</span>
+                    <span class="s2">&quot;enriched_terms_&quot;</span>
+                    <span class="o">+</span> <span class="n">elem</span><span class="p">:</span> <span class="n">res</span><span class="o">.</span><span class="n">res2d</span><span class="p">[</span>
                         <span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">res2d</span><span class="p">[</span><span class="s2">&quot;FDR q-val&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">res2d</span><span class="p">[</span><span class="s2">&quot;NES&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>
                     <span class="p">]</span><span class="o">.</span><span class="n">Term</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
                 <span class="p">}</span>
@@ -1070,8 +1073,7 @@ It corresponds to different views of the network.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>bengrn/base.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">733</span>
-<span class="normal">734</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">734</span>
 <span class="normal">735</span>
 <span class="normal">736</span>
 <span class="normal">737</span>
@@ -1093,7 +1095,8 @@ It corresponds to different views of the network.</p>
 <span class="normal">753</span>
 <span class="normal">754</span>
 <span class="normal">755</span>
-<span class="normal">756</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">compute_genie3</span><span class="p">(</span>
+<span class="normal">756</span>
+<span class="normal">757</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">compute_genie3</span><span class="p">(</span>
     <span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span> <span class="n">nthreads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span> <span class="n">ntrees</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GRNAnnData</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1236,8 +1239,7 @@ It corresponds to different views of the network.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>bengrn/base.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">847</span>
-<span class="normal">848</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">848</span>
 <span class="normal">849</span>
 <span class="normal">850</span>
 <span class="normal">851</span>
@@ -1379,7 +1381,8 @@ It corresponds to different views of the network.</p>
 <span class="normal">987</span>
 <span class="normal">988</span>
 <span class="normal">989</span>
-<span class="normal">990</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">compute_pr</span><span class="p">(</span>
+<span class="normal">990</span>
+<span class="normal">991</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">compute_pr</span><span class="p">(</span>
     <span class="n">grn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
     <span class="n">true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
     <span class="n">do_auc</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -1601,8 +1604,7 @@ It corresponds to different views of the network.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>bengrn/base.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">599</span>
-<span class="normal">600</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">600</span>
 <span class="normal">601</span>
 <span class="normal">602</span>
 <span class="normal">603</span>
@@ -1621,7 +1623,8 @@ It corresponds to different views of the network.</p>
 <span class="normal">616</span>
 <span class="normal">617</span>
 <span class="normal">618</span>
-<span class="normal">619</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">download_perturb_gt</span><span class="p">(</span>
+<span class="normal">619</span>
+<span class="normal">620</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">download_perturb_gt</span><span class="p">(</span>
     <span class="n">filename_bh</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">FILEDIR</span> <span class="o">+</span> <span class="s2">&quot;/../data/BH-corrected.csv.gz&quot;</span><span class="p">,</span>
     <span class="n">filename_adata</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">FILEDIR</span> <span class="o">+</span> <span class="s2">&quot;/../data/ess_perturb_sc.h5ad&quot;</span><span class="p">,</span>
     <span class="n">url_bh</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;https://plus.figshare.com/ndownloader/files/38349308&quot;</span><span class="p">,</span>
@@ -1756,8 +1759,7 @@ It corresponds to different views of the network.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>bengrn/base.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">778</span>
-<span class="normal">779</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">779</span>
 <span class="normal">780</span>
 <span class="normal">781</span>
 <span class="normal">782</span>
@@ -1813,7 +1815,8 @@ It corresponds to different views of the network.</p>
 <span class="normal">832</span>
 <span class="normal">833</span>
 <span class="normal">834</span>
-<span class="normal">835</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_GT_db</span><span class="p">(</span>
+<span class="normal">835</span>
+<span class="normal">836</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_GT_db</span><span class="p">(</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;collectri&quot;</span><span class="p">,</span> <span class="n">organism</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;human&quot;</span><span class="p">,</span> <span class="n">split_complexes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1961,8 +1964,7 @@ It corresponds to different views of the network.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>bengrn/base.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">622</span>
-<span class="normal">623</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">623</span>
 <span class="normal">624</span>
 <span class="normal">625</span>
 <span class="normal">626</span>
@@ -2014,7 +2016,8 @@ It corresponds to different views of the network.</p>
 <span class="normal">672</span>
 <span class="normal">673</span>
 <span class="normal">674</span>
-<span class="normal">675</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_perturb_gt</span><span class="p">(</span>
+<span class="normal">675</span>
+<span class="normal">676</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_perturb_gt</span><span class="p">(</span>
     <span class="n">filename_adata</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">FILEDIR</span> <span class="o">+</span> <span class="s2">&quot;/../data/ess_perturb_sc.h5ad&quot;</span><span class="p">,</span>
     <span class="n">filename_bh</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">FILEDIR</span> <span class="o">+</span> <span class="s2">&quot;/../data/BH-corrected.csv.gz&quot;</span><span class="p">,</span>
     <span class="n">url_adata</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;https://plus.figshare.com/ndownloader/files/35773219&quot;</span><span class="p">,</span>
@@ -2160,8 +2163,7 @@ Default is FILEDIR + "/../data/10xPBMC_homo_scenicplus_genebased_scope.loom".</p
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>bengrn/base.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">384</span>
-<span class="normal">385</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">385</span>
 <span class="normal">386</span>
 <span class="normal">387</span>
 <span class="normal">388</span>
@@ -2183,7 +2185,8 @@ Default is FILEDIR + "/../data/10xPBMC_homo_scenicplus_genebased_scope.loom".</p
 <span class="normal">404</span>
 <span class="normal">405</span>
 <span class="normal">406</span>
-<span class="normal">407</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_scenicplus</span><span class="p">(</span>
+<span class="normal">407</span>
+<span class="normal">408</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_scenicplus</span><span class="p">(</span>
     <span class="n">filepath</span><span class="o">=</span><span class="n">FILEDIR</span> <span class="o">+</span> <span class="s2">&quot;/../data/10xPBMC_homo_scenicplus_genebased_scope.loom&quot;</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2308,8 +2311,7 @@ Default is FILEDIR + "/../data/10xPBMC_homo_scenicplus_genebased_scope.loom".</p
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>bengrn/base.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">422</span>
-<span class="normal">423</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">423</span>
 <span class="normal">424</span>
 <span class="normal">425</span>
 <span class="normal">426</span>
@@ -2482,7 +2484,8 @@ Default is FILEDIR + "/../data/10xPBMC_homo_scenicplus_genebased_scope.loom".</p
 <span class="normal">593</span>
 <span class="normal">594</span>
 <span class="normal">595</span>
-<span class="normal">596</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_sroy_gt</span><span class="p">(</span>
+<span class="normal">596</span>
+<span class="normal">597</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_sroy_gt</span><span class="p">(</span>
     <span class="n">get</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mine&quot;</span><span class="p">,</span> <span class="n">join</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;outer&quot;</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;human&quot;</span><span class="p">,</span> <span class="n">gt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;full&quot;</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GRNAnnData</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2727,8 +2730,7 @@ Default is FILEDIR + "/../data/10xPBMC_homo_scenicplus_genebased_scope.loom".</p
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>bengrn/base.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1001</span>
-<span class="normal">1002</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1002</span>
 <span class="normal">1003</span>
 <span class="normal">1004</span>
 <span class="normal">1005</span>
@@ -2768,7 +2770,8 @@ Default is FILEDIR + "/../data/10xPBMC_homo_scenicplus_genebased_scope.loom".</p
 <span class="normal">1039</span>
 <span class="normal">1040</span>
 <span class="normal">1041</span>
-<span class="normal">1042</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_genes</span><span class="p">(</span>
+<span class="normal">1042</span>
+<span class="normal">1043</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_genes</span><span class="p">(</span>
     <span class="n">organisms</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="s2">&quot;NCBITaxon:9606&quot;</span><span class="p">,</span>
 <span class="p">):</span>  <span class="c1"># &quot;NCBITaxon:10090&quot;,</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2794,7 +2797,7 @@ Default is FILEDIR + "/../data/10xPBMC_homo_scenicplus_genebased_scope.loom".</p
     <span class="k">for</span> <span class="n">organism</span> <span class="ow">in</span> <span class="n">organisms</span><span class="p">:</span>
         <span class="n">genesdf</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">Gene</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
             <span class="n">organism_id</span><span class="o">=</span><span class="n">bt</span><span class="o">.</span><span class="n">Organism</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ontology_id</span><span class="o">=</span><span class="n">organism</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span><span class="o">.</span><span class="n">id</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">df</span><span class="p">()</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
         <span class="n">genesdf</span> <span class="o">=</span> <span class="n">genesdf</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s2">&quot;ensembl_gene_id&quot;</span><span class="p">)</span>
         <span class="n">genesdf</span> <span class="o">=</span> <span class="n">genesdf</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;ensembl_gene_id&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
         <span class="c1"># mitochondrial genes</span>
@@ -3102,8 +3105,7 @@ It is used for the head classification part in the scPRINT paper.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>bengrn/base.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">282</span>
-<span class="normal">283</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">283</span>
 <span class="normal">284</span>
 <span class="normal">285</span>
 <span class="normal">286</span>
@@ -3201,7 +3203,8 @@ It is used for the head classification part in the scPRINT paper.</p>
 <span class="normal">378</span>
 <span class="normal">379</span>
 <span class="normal">380</span>
-<span class="normal">381</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">train_classifier</span><span class="p">(</span>
+<span class="normal">381</span>
+<span class="normal">382</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">train_classifier</span><span class="p">(</span>
     <span class="n">grn</span><span class="p">:</span> <span class="n">GRNAnnData</span><span class="p">,</span>
     <span class="n">gt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;omnipath&quot;</span><span class="p">,</span>
     <span class="n">other</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">GRNAnnData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>

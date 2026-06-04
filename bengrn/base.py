@@ -6,8 +6,11 @@ import json
 import logging
 import os
 import os.path
+import shutil
+import ssl
 import tarfile
 import urllib.request
+from contextlib import contextmanager
 from typing import List, Optional, Union
 
 import gdown
@@ -18,6 +21,11 @@ import pandas as pd
 import scanpy as sc
 import scipy.stats
 import tqdm
+
+try:
+    import certifi
+except ImportError:  # pragma: no cover - certifi is an indirect dependency in most envs
+    certifi = None
 from anndata import AnnData, concat
 from anndata.utils import make_index_unique
 
@@ -39,6 +47,51 @@ from .tools import GENIE3
 NAME = "bengrn"
 
 FILEDIR = os.path.dirname(os.path.realpath(__file__))
+
+
+def _resolve_ca_bundle() -> Optional[str]:
+    # Prefer explicit env CA paths when present, then certifi as a portable fallback.
+    for env_var in ("SSL_CERT_FILE", "REQUESTS_CA_BUNDLE"):
+        ca_path = os.environ.get(env_var)
+        if ca_path and os.path.exists(ca_path):
+            return ca_path
+    if certifi is not None:
+        return certifi.where()
+    return None
+
+
+def _download_file(url: str, filename: str):
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    ca_bundle = _resolve_ca_bundle()
+    context = (
+        ssl.create_default_context(cafile=ca_bundle)
+        if ca_bundle is not None
+        else ssl.create_default_context()
+    )
+    request = urllib.request.Request(url)
+    with (
+        urllib.request.urlopen(request, context=context) as response,
+        open(filename, "wb") as target,
+    ):
+        shutil.copyfileobj(response, target)
+
+
+@contextmanager
+def _certifi_default_https_context():
+    """Temporarily force urllib/pandas HTTPS calls to use the configured CA bundle."""
+    ca_bundle = _resolve_ca_bundle()
+    if ca_bundle is None:
+        yield
+        return
+
+    original_context_factory = ssl._create_default_https_context
+    ssl._create_default_https_context = lambda: ssl.create_default_context(
+        cafile=ca_bundle
+    )
+    try:
+        yield
+    finally:
+        ssl._create_default_https_context = original_context_factory
 
 
 # Define a function to calculate precision and recall
@@ -612,12 +665,10 @@ def download_perturb_gt(
         url_bh (str, optional): The URL to download the BH-corrected data. Defaults to "https://plus.figshare.com/ndownloader/files/38349308".
         url_adata (str, optional): The URL to download the single-cell perturbation data. Defaults to "https://plus.figshare.com/ndownloader/files/35773219".
     """
-    os.makedirs(os.path.dirname(filename_bh), exist_ok=True)
-    urllib.request.urlretrieve(url_bh, filename_bh)
-    sc.read(
-        filename_adata,
-        backup_url=url_adata,
-    )
+    if not os.path.exists(filename_bh):
+        _download_file(url_bh, filename_bh)
+    if not os.path.exists(filename_adata):
+        _download_file(url_adata, filename_adata)
 
 
 def get_perturb_gt(
@@ -637,7 +688,16 @@ def get_perturb_gt(
     Returns:
         GRNAnnData: The Gene Regulatory Network data as a GRNAnnData object.
     """
-    if not os.path.exists(filename_adata) and not os.path.exists(filename_bh):
+    package_data_dir = os.path.abspath(os.path.join(FILEDIR, os.pardir, "data"))
+    if not os.path.exists(filename_bh):
+        package_bh = os.path.join(package_data_dir, os.path.basename(filename_bh))
+        if os.path.exists(package_bh):
+            filename_bh = package_bh
+    if not os.path.exists(filename_adata):
+        package_adata = os.path.join(package_data_dir, os.path.basename(filename_adata))
+        if os.path.exists(package_adata):
+            filename_adata = package_adata
+    if not os.path.exists(filename_bh) or not os.path.exists(filename_adata):
         download_perturb_gt(
             filename_bh=filename_bh,
             filename_adata=filename_adata,
@@ -804,11 +864,13 @@ def get_GT_db(
     elif name == "collectri":
         import decoupler as dc
 
-        net = dc.op.collectri(organism=organism, remove_complexes=split_complexes)
+        with _certifi_default_https_context():
+            net = dc.get_collectri(organism=organism, split_complexes=split_complexes)
     elif name == "dorothea":
         import decoupler as dc
 
-        net = dc.op.dorothea(organism=organism)
+        with _certifi_default_https_context():
+            net = dc.get_dorothea(organism=organism)
     elif name == "omnipath":
         if not os.path.exists(FILEDIR + "/../data/omnipath.parquet"):
             os.makedirs(
@@ -840,7 +902,7 @@ def pd_load_cached(url, loc="/tmp/", cache=True, **kwargs):
     # Check if the file exists, if not, download it
     loc += url.split("/")[-1]
     if not os.path.isfile(loc) or not cache:
-        urllib.request.urlretrieve(url, loc)
+        _download_file(url, loc)
     # Load the data from the file
     return pd.read_csv(loc, **kwargs)
 
